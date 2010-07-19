@@ -1,12 +1,15 @@
 
 Bugs:
-[ ] ?? What happens with the clip rect if FBO's aren't available and
+[x] ?? What happens with the clip rect if FBO's aren't available and
     size != virtualSize...
 
 Feature requests:
 [x] Create functionality to render text on-screen
 [x] Currently, all coordinates are absoute, but things that are in fields
     should have coordinates relative to the field it's in...
+    
+[ ] Objects should be able to specify which field they want to be spawned in.
+    Require it as the first constructor argument and default to 1 if absent?
 [ ] Implement pausing in a way that's accessible from the script and the script
     must also be able to control the pause menu. Perhaps have the pause
     function take a LFunction argument??

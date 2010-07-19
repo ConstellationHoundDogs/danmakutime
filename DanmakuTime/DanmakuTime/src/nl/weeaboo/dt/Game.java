@@ -2,10 +2,14 @@ package nl.weeaboo.dt;
 
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
+import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+
+import javax.imageio.ImageIO;
 
 import nl.weeaboo.common.GraphicsUtil;
 import nl.weeaboo.dt.field.Field;
@@ -22,6 +26,7 @@ import nl.weeaboo.game.GameBase;
 import nl.weeaboo.game.ResourceManager;
 import nl.weeaboo.game.gl.GLManager;
 import nl.weeaboo.game.gl.GLVideoCapture;
+import nl.weeaboo.game.gl.Screenshot;
 import nl.weeaboo.game.input.UserInput;
 import nl.weeaboo.game.text.MutableTextStyle;
 import nl.weeaboo.game.text.ParagraphRenderer;
@@ -34,6 +39,7 @@ public class Game extends GameBase {
 
 	private boolean error;
 	private GLVideoCapture videoCapture;
+	private boolean screenshotRequest;
 	private Notifier notifier;
 	private ITextureStore texStore;
 
@@ -127,10 +133,14 @@ public class Game extends GameBase {
 		texStore = new TextureStore(rm.getImageStore());
 		
 		TinyMap<IField> fieldMap = new TinyMap<IField>();
+
+		//Full-screen field (0)
+		fieldMap.put(0, new Field(0, 0, width, height));
 		
+		//Main field (1)
 		int fw = 336;
 		int fh = 448;
-		fieldMap.put(0, new Field((width-fw)/2, (height-fh)/2, fw, fh));
+		fieldMap.put(1, new Field((width-fw)/2, (height-fh)/2, fw, fh));
 		
 		//Init Lua
 		LuaThreadPool threadPool = new LuaThreadPool();
@@ -178,8 +188,11 @@ public class Game extends GameBase {
 		vm.pushlvalue(LuajavaLib.toUserdata(ii, ii.getClass()));
 		vm.setglobal("input");
 
-		//Video capture activation key
-		if (ii.consumeKey(KeyEvent.VK_F8)) {
+		if (ii.consumeKey(KeyEvent.VK_F7)) {
+			//Screen capture activation key
+			screenshotRequest = true;
+		} else if (ii.consumeKey(KeyEvent.VK_F8)) {
+			//Video capture activation key
 			try {
 				startRecordingVideo("capture.mkv");
 				Log.message("Starting video recording");
@@ -238,9 +251,21 @@ public class Game extends GameBase {
 		pr.drawText(glm, hudText);
 		
 		//Take screen capture
+		if (screenshotRequest) {
+			Screenshot ss = Screenshot.screenshot(glm, w, h, rw, rh);
+			BufferedImage img = GraphicsUtil.createBufferedImage(ss.width, ss.height, ss.getARGB());
+			try {
+				ImageIO.write(img, "png", new File("capture-" + System.currentTimeMillis() + ".png"));
+			} catch (IOException e) {
+				Log.showError(e);
+			} finally {
+				screenshotRequest = false;
+			}
+		}
+		
 		if (videoCapture != null) {
 			try {
-				videoCapture.update(glm, getRealWidth(), getRealHeight());
+				videoCapture.update(glm, rw, rh);
 			} catch (IOException e) {
 				Log.showError(e);
 				videoCapture = null;
