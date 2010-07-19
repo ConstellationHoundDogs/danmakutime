@@ -11,9 +11,9 @@ import nl.weeaboo.common.GraphicsUtil;
 import nl.weeaboo.dt.field.Field;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.Input;
-import nl.weeaboo.dt.lua.LuaException;
 import nl.weeaboo.dt.lua.LuaFunctionLink;
 import nl.weeaboo.dt.lua.LuaRunState;
+import nl.weeaboo.dt.lua.LuaThreadPool;
 import nl.weeaboo.dt.lua.LuaUtil;
 import nl.weeaboo.dt.renderer.ITextureStore;
 import nl.weeaboo.dt.renderer.Renderer;
@@ -37,7 +37,7 @@ public class Game extends GameBase {
 	private ITextureStore texStore;
 
 	private LuaRunState luaRunState;
-	private LuaFunctionLink mainFunc;	
+	private LuaThreadPool threads;
 	private TinyMap<IField> fieldMap;
 	
 	public Game(Config c, ResourceManager rm, GameFrame gf) {
@@ -128,10 +128,14 @@ public class Game extends GameBase {
 		fieldMap = new TinyMap<IField>();
 		fieldMap.put(0, new Field());
 		
-		//Init Lua		
+		//Init Lua
+		threads = new LuaThreadPool();
+		
 		luaRunState = new LuaRunState(System.nanoTime(), fieldMap, texStore);
+		
 		LuaState vm = getLuaState();
 				
+		//Compile code
 		for (String path : rm.getFolderContents("script")) {
 			InputStream in = null;
 			try {				
@@ -148,7 +152,9 @@ public class Game extends GameBase {
 			}
 		}
 		
-		mainFunc = new LuaFunctionLink(luaRunState, vm, "main");		
+		//Start main thread
+		threads.add(new LuaFunctionLink(luaRunState, vm, "main"));
+		
 		error = false;
 	}
 	
@@ -178,15 +184,8 @@ public class Game extends GameBase {
 			}
 		}
 		
-		//Update main thread
-		try {
-			if (mainFunc != null && !mainFunc.isFinished()) {
-				mainFunc.update();
-			}
-		} catch (LuaException e) {
-			Log.error(e);
-			//mainFunc = null;
-		}
+		//Update threads
+		threads.update();
 			
 		//Update fields
 		for (IField field : fieldMap.getValues()) {

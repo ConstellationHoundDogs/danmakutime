@@ -3,7 +3,7 @@ Bugs:
 [ ] ---
 
 Feature requests:
-[ ] Instead of 1 main func, there should be a pool of N threads...
+[x] Instead of 1 main func, there should be a pool of N threads...
 [x] The buffered rendering in Renderer is awesomely fast, but it should:
     [x] Group draw calls by texture instead of hoping the draw calls are
         ordered in a way to minimize state changes
