@@ -36,6 +36,15 @@ function main()
 
 	local ghost2 = CircleGhost.new{xmul=-100, ymul=100}
 	
+	Thread.new(function()
+		while true do
+			if input:consumeKey(Keys.Z) then
+				print("pew pew")
+			end
+			yield()
+		end
+	end)
+	
 	for group=1,50 do
 		for n=1,200 do
 			local s = Sprite.new()
@@ -53,12 +62,5 @@ function main()
 			s:setAngleInc(1 + math.random() * 1)
 		end		
 		yield(10)
-	end
-	
-	while true do
-		if input:consumeKey(Keys.Z) then
-			print("pew pew")
-		end
-		yield()
-	end
+	end		
 end

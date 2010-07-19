@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 
 import nl.weeaboo.common.Log;
+import nl.weeaboo.dt.lua.link.LuaFunctionLink;
 import nl.weeaboo.dt.lua.link.LuaLink;
 import nl.weeaboo.dt.lua.link.LuaLinkedObject;
 
@@ -20,7 +21,7 @@ import org.luaj.vm.LuaState;
 
 public class LuaUtil {
 	
-	public static void installDefaultFunctions(final LuaRunState rs, LTable globals) {
+	public static void installLuaLib(final LuaRunState rs, LTable globals) {
 		fixCoroutineLib(globals);
 		FastMathLib.install(globals, rs.getRandom());		
 		
@@ -147,6 +148,34 @@ public class LuaUtil {
 		}
 		vm.pushlvalue(table);
 		vm.setglobal("Keys");
+	}
+	
+	/**
+	 * Registers the Thread.* functions
+	 * 
+	 * @param rs The LuaRunState object
+	 * @param vm The LuaState to install the new bindings in
+	 * @param pool The thread pool object that the new threads get added to
+	 */
+	public static void registerThreadLib(final LuaRunState rs, LuaState vm,
+			final LuaThreadPool pool)
+	{
+		LTable table = new LTable();
+		table.put("new", new LFunction() {
+			public int invoke(LuaState vm) {
+				if (vm.gettop() >= 1 && vm.isfunction(1)) {
+					LuaFunctionLink link = new LuaFunctionLink(rs, vm, vm.checkfunction(1));
+					pool.add(link);
+					
+					vm.pushuserdata(link);
+				} else {
+					vm.pushnil();
+				}
+				return 0;
+			}
+		});
+		vm.pushlvalue(table);
+		vm.setglobal("Thread");
 	}
 	
 }

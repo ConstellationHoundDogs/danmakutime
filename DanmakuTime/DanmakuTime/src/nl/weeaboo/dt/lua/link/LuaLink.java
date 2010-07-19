@@ -113,7 +113,7 @@ public abstract class LuaLink {
 		
 		runState.setCurrentLink(this);		
 		try {
-			thread.resumeFrom(vm, vm.gettop());
+			thread.resumeFrom(vm, 0);
 		} catch (LuaErrorException e) {
 			finished = true;
 			throw new LuaException(e.getMessage(), e.getCause());

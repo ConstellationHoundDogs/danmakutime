@@ -11,10 +11,10 @@ import nl.weeaboo.common.GraphicsUtil;
 import nl.weeaboo.dt.field.Field;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.Input;
-import nl.weeaboo.dt.lua.LuaFunctionLink;
 import nl.weeaboo.dt.lua.LuaRunState;
 import nl.weeaboo.dt.lua.LuaThreadPool;
 import nl.weeaboo.dt.lua.LuaUtil;
+import nl.weeaboo.dt.lua.link.LuaFunctionLink;
 import nl.weeaboo.dt.renderer.ITextureStore;
 import nl.weeaboo.dt.renderer.Renderer;
 import nl.weeaboo.dt.renderer.TextureStore;
@@ -37,8 +37,6 @@ public class Game extends GameBase {
 	private ITextureStore texStore;
 
 	private LuaRunState luaRunState;
-	private LuaThreadPool threads;
-	private TinyMap<IField> fieldMap;
 	
 	public Game(Config c, ResourceManager rm, GameFrame gf) {
 		super(c, rm, gf);
@@ -125,13 +123,13 @@ public class Game extends GameBase {
 						
 		texStore = new TextureStore(rm.getImageStore());
 		
-		fieldMap = new TinyMap<IField>();
+		TinyMap<IField> fieldMap = new TinyMap<IField>();
 		fieldMap.put(0, new Field());
 		
 		//Init Lua
-		threads = new LuaThreadPool();
+		LuaThreadPool threadPool = new LuaThreadPool();
 		
-		luaRunState = new LuaRunState(System.nanoTime(), fieldMap, texStore);
+		luaRunState = new LuaRunState(System.nanoTime(), threadPool, fieldMap, texStore);
 		
 		LuaState vm = getLuaState();
 				
@@ -153,7 +151,7 @@ public class Game extends GameBase {
 		}
 		
 		//Start main thread
-		threads.add(new LuaFunctionLink(luaRunState, vm, "main"));
+		threadPool.add(new LuaFunctionLink(luaRunState, vm, "main"));
 		
 		error = false;
 	}
@@ -184,13 +182,7 @@ public class Game extends GameBase {
 			}
 		}
 		
-		//Update threads
-		threads.update();
-			
-		//Update fields
-		for (IField field : fieldMap.getValues()) {
-			field.update(ii);
-		}
+		luaRunState.update(ii);
 	}
 	
 	public void draw(GLManager glm) {		
@@ -221,9 +213,7 @@ public class Game extends GameBase {
 		glm.setColorARGB(0xFFFFFFFF);
 		*/
 		
-		for (IField field : fieldMap.getValues()) {
-			field.draw(r);
-		}
+		luaRunState.draw(r);		
 		
 		r.flush();
 		
@@ -238,7 +228,7 @@ public class Game extends GameBase {
 		pr.setDefaultStyle(mts.immutableCopy());
 		
 		String hudText = String.format("%.2f FPS\n%d Objects\n",
-				getFPS(), getObjectCount());
+				getFPS(), luaRunState.getObjectCount());
 		pr.drawText(glm, hudText);
 		
 		//Take screen capture
@@ -266,13 +256,6 @@ public class Game extends GameBase {
 	}
 	public LuaState getLuaState() {
 		return luaRunState.vm;
-	}
-	public int getObjectCount() {
-		int count = 0;
-		for (IField field : fieldMap.getValues()) {
-			count += field.getObjectCount();
-		}
-		return count;		
 	}
 	public float getFPS() {
 		return getGameFrame().getCurrentFPS();
