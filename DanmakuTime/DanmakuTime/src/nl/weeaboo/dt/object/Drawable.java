@@ -55,7 +55,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	public void destroy() {
 		LValue retval = LNil.NIL;
 		try {
-			retval = luaLink.call("onDestroy");
+			retval = luaLink.call(true, "onDestroy");
 		} catch (LuaException e) {
 			Log.warning(e);
 		}
@@ -67,7 +67,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	
 	@Override
 	public LValue call(String methodName, Object... args) throws LuaException {
-		return luaLink.call(methodName, args);
+		return luaLink.call(false, methodName, args);
 	}
 	
 	@Override

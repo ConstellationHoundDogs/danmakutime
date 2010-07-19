@@ -39,6 +39,10 @@ end
 
 function CircleGhost:onDestroy()
 	print("I am already dead")
+	
+	--return false from this function to prevent the destruction of the object
+	--You can call destroy() again later to attempt another destruction
+	return false
 end
 
 --------------------------------------------------------------------------------
@@ -52,6 +56,7 @@ function main()
 	ghost:test("def", 1)
 
 	local ghost2 = CircleGhost.new{xmul=-100, ymul=100}
+	ghost2:fsdf()
 	
 	Thread.new(function()
 		while true do
