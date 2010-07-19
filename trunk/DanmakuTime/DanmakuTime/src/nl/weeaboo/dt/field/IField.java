@@ -15,15 +15,6 @@ public interface IField {
 	public void add(IDrawable d);
 
 	/**
-	 * Removes a drawable from the field
-	 * 
-	 * @param d The drawable to remove
-	 * @return <code>true</code> if the drawable successfully gets removed from
-	 *         the field
-	 */
-	public boolean remove(IDrawable d);
-
-	/**
 	 * Updates this field and all objects it contains
 	 * 
 	 * @param input The current user input

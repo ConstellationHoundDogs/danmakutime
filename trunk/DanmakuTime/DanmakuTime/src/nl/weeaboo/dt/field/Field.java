@@ -2,6 +2,7 @@ package nl.weeaboo.dt.field;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
 
 import nl.weeaboo.dt.input.IInput;
@@ -25,24 +26,28 @@ public class Field implements IField {
 	}
 
 	@Override
-	public boolean remove(IDrawable d) {
-		return standbyList.remove(d) || drawables.remove(d);
-	}
-
-	@Override
 	public void update(IInput input) {
 		drawables.addAll(standbyList);
 		standbyList.clear();
 		
-		for (IDrawable d : drawables) {
-			d.update(input);
+		Iterator<IDrawable> itr = drawables.iterator();
+		while (itr.hasNext()) {
+			IDrawable d = itr.next();
+			if (!d.isDestroyed()) {
+				d.update(input);
+			}
+			if (d.isDestroyed()) {
+				itr.remove();
+			}
 		}
 	}
 	
 	@Override
 	public void draw(IRenderer renderer) {
 		for (IDrawable d : drawables) {
-			d.draw(renderer);
+			if (!d.isDestroyed()) {
+				d.draw(renderer);
+			}
 		}
 	}
 	
