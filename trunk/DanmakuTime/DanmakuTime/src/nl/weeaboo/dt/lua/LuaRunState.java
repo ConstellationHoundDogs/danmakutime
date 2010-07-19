@@ -1,5 +1,6 @@
 package nl.weeaboo.dt.lua;
 
+import java.awt.event.KeyEvent;
 import java.util.Random;
 
 import nl.weeaboo.dt.TinyMap;
@@ -29,12 +30,16 @@ public class LuaRunState {
 		Platform.setInstance(new J2sePlatform());
 		LuaC.install();
 		
+		//Install default available objects
 		vm = Platform.newLuaState();
 		LuaUtil.installDefaultFunctions(this, vm._G);
 		LuaUtil.registerClass(this, vm, Sprite.class);
+		LuaUtil.registerKeyCodes(vm, KeyEvent.class);
 		
+		//global ITextureStore textureStore
 		vm.pushlvalue(LuajavaLib.toUserdata(ts, ts.getClass()));
 		vm.setglobal("textureStore");
+		
 	}
 	
 	//Functions

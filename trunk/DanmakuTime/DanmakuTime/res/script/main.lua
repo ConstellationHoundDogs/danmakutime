@@ -10,7 +10,7 @@ function CircleGhost:init()
 	print("CircleGhost:init")
 	
 	self:setPos(400, 300);
-	self:setTexture(textureStore:getTexture("test.png"));
+	self:setTexture(textureStore:getTexture("test.png#g1"));
 end
 
 function CircleGhost:update()
@@ -39,12 +39,26 @@ function main()
 	for group=1,50 do
 		for n=1,200 do
 			local s = Sprite.new()
-			s:setTexture(textureStore:getTexture("test.png"));
+			
+			if math.random(10) >= 10 then
+				s:setTexture(textureStore:getTexture("test.png#g0"));
+				s:setZ(-1)
+			else
+				s:setTexture(textureStore:getTexture("test.png#g1"));
+			end
+			
 			s:setPos(600, 300)
 			s:setSpeed(2 + math.random() * 2)
 			s:setAngle(256)
 			s:setAngleInc(1 + math.random() * 1)
 		end		
 		yield(10)
+	end
+	
+	while true do
+		if input:consumeKey(Keys.Z) then
+			print("pew pew")
+		end
+		yield()
 	end
 end
