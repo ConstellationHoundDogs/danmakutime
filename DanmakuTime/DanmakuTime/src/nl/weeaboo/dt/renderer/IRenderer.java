@@ -32,6 +32,28 @@ public interface IRenderer {
 	 */
 	public void drawRotatedQuad(double cx, double cy, double w, double h, short z,
 			double angle);
+
+	/**
+	 * Draws a paragraph of text
+	 * 
+	 * @param txt The text to draw
+	 * @param x The text block's top-left X-coordinate
+	 * @param y The text block's top-left Y-coordinate
+	 * @param z The text block's Z-coordinate
+	 * @param angle The text block's rotation, between <code>0.0</code> and
+	 *        <code>512.0</code>
+	 * @param wrapWidth The text block's word-wrap width, use <code>0</code> to
+	 *        disable word wrapping
+	 */
+	public void drawText(String txt, double x, double y, short z, double angle, double wrapWidth);
+	
+	/**
+	 * Translates the origin of the coordinate system
+	 * 
+	 * @param dx The change in X-coordinates
+	 * @param dy The change in Y-coordinates
+	 */
+	public void translate(double dx, double dy);
 	
 	// === Getters =============================================================
 

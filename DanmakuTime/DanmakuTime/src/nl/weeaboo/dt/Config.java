@@ -2,6 +2,7 @@ package nl.weeaboo.dt;
 
 import nl.weeaboo.common.PreferenceStore;
 import nl.weeaboo.common.PreferenceStoreView;
+import nl.weeaboo.common.collections.Typed;
 import nl.weeaboo.game.ConfigBase;
 
 public class Config extends ConfigBase {
@@ -16,6 +17,8 @@ public class Config extends ConfigBase {
 		graphics = new GraphicsView(this);
 		audio = new AudioView(this);
 		capture = new CaptureView(this);
+		
+		setProperty(new Typed("os.windows.fullscreenExclusive", Boolean.class, true));		
 	}
 	
 	//Functions

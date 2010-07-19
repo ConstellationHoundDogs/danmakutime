@@ -1,5 +1,6 @@
 package nl.weeaboo.dt.renderer;
 
+import java.awt.Dimension;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9,29 +10,37 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import nl.weeaboo.common.FastMath;
+import nl.weeaboo.common.Log;
 import nl.weeaboo.game.gl.GLImage;
 import nl.weeaboo.game.gl.GLManager;
+import nl.weeaboo.game.text.ParagraphRenderer;
+import nl.weeaboo.game.text.StyledText;
+import nl.weeaboo.game.text.layout.TextLayout;
 
 public class Renderer implements IRenderer {
 
 	private GLManager glm;
-	//private int screenW;
-	private int screenH;
+	private ParagraphRenderer pr;
+	private Dimension virtualSize;
+	private Dimension realSize;
 	
 	private Texture texture;
 	private Rectangle clipRect;
 	private boolean clipEnabled;
+	private double translationX, translationY;
 	
-	private List<DrawRotQuadCommand> drawBuffer;
+	private List<DrawCommand> drawBuffer;
 	
-	public Renderer(GLManager glm, int screenW, int screenH) {
+	public Renderer(GLManager glm, ParagraphRenderer pr, int w, int h, int rw, int rh) {
 		this.glm = glm;
-		//this.screenW = screenW;
-		this.screenH = screenH;
+		this.pr = pr;
 		
-		clipRect = new Rectangle(0, 0, screenW, screenH);
+		virtualSize = new Dimension(w, h);
+		realSize = new Dimension(rw, rh);
+		
+		clipRect = new Rectangle(0, 0, w, h);
 		clipEnabled = true;
-		drawBuffer = new ArrayList<DrawRotQuadCommand>();
+		drawBuffer = new ArrayList<DrawCommand>();
 	}
 	
 	//Functions
@@ -44,6 +53,8 @@ public class Renderer implements IRenderer {
 	public void drawRotatedQuad(double cx, double cy, double w, double h, short z,
 			double angle)
 	{
+		cx += translationX;
+		cy += translationY;
 		drawBuffer.add(new DrawRotQuadCommand(texture, clipEnabled, cx, cy, w, h, z, angle));
 		
 		/*
@@ -82,31 +93,42 @@ public class Renderer implements IRenderer {
 		*/
 	}
 	
+	@Override
+	public void drawText(String txt, double x, double y, short z, double angle, double wrapWidth) {
+		x += translationX;
+		y += translationY;
+		drawBuffer.add(new DrawTextCommand(clipEnabled, txt, x, y, z, angle, wrapWidth));
+	}
+	
 	public void flush() {
 		GL2 gl = GLManager.getGL2(glm.getGL());
 				
 		//Pop enqueued draw commands
-		DrawRotQuadCommand cmds[] = drawBuffer.toArray(new DrawRotQuadCommand[drawBuffer.size()]);
+		DrawCommand cmds[] = drawBuffer.toArray(new DrawCommand[drawBuffer.size()]);
 		drawBuffer.clear();
 
 		//Sort for efficiency
 		Arrays.sort(cmds);
 
 		//Setup clipping
-		gl.glEnable(GL.GL_SCISSOR_TEST);				
-		gl.glScissor(clipRect.x, screenH-(clipRect.y+clipRect.height),
-				clipRect.width, clipRect.height);
+		gl.glEnable(GL.GL_SCISSOR_TEST);
+		
+		float scale = Math.min(realSize.width / (float)virtualSize.width, realSize.height / (float)virtualSize.height);
+		float clipDX = (realSize.width - scale*virtualSize.width) / 2;
+		float clipDY = (realSize.height - scale*virtualSize.height) / 2;			
+		
+		gl.glScissor(Math.round(clipDX + scale * clipRect.x),
+				realSize.height - Math.round(clipDY + scale * (clipRect.y+clipRect.height)),
+				Math.round(scale * clipRect.width), Math.round(scale * clipRect.height));
+		
 		boolean clipping = true;
 		
 		//Draw buffered commands
 		Texture cur = null;
 		int buffered = 0;	
-		for (DrawRotQuadCommand cmd : cmds) {
+		for (DrawCommand cmd : cmds) {
 			if (cmd.clipEnabled != clipping) {
-				//Flush
-				if (buffered > 0) gl.glEnd();
-				buffered = 0;
-				//-----
+				buffered = quadFlush(gl, buffered);
 
 				if (cmd.clipEnabled) {
 					gl.glEnable(GL.GL_SCISSOR_TEST);
@@ -116,58 +138,88 @@ public class Renderer implements IRenderer {
 				clipping = cmd.clipEnabled;
 			}
 			
-			GLImage image = (cmd.tex != null ? cmd.tex.getImage() : null);			
-			if (image != null) {				
-				if (cur != cmd.tex) {
-					//Flush
-					if (buffered > 0) gl.glEnd();
-					buffered = 0;
-					//-----
+			if (cmd.type == DrawRotQuadCommand.type) {
+				DrawRotQuadCommand dcmd = (DrawRotQuadCommand)cmd;
+				GLImage image = (dcmd.tex != null ? dcmd.tex.getImage() : null);			
+				if (image != null) {				
+					if (cur != dcmd.tex) {
+						buffered = quadFlush(gl, buffered);
+						
+						glm.setTexture(image.getTexture());
+					}
 					
-					glm.setTexture(image.getTexture());
+					float dx = dcmd.w * .5f;
+					float dy = dcmd.h * .5f;
+					
+					float sinA = FastMath.fastSin(dcmd.angle);
+					float cosA = FastMath.fastCos(dcmd.angle);
+									
+					float cosX = cosA * dx;
+					float sinX = sinA * dx;
+					float cosY = cosA * dy;
+					float sinY = sinA * dy;
+					
+					float p0x = -cosX + sinY;
+					float p0y = -sinX - cosY;
+					float p1x = cosX + sinY;
+					float p1y = sinX - cosY;
+					
+					float uv[] = image.getUV();
+					
+					if (buffered == 0) {
+						gl.glBegin(GL2.GL_QUADS);
+					}
+					
+					gl.glTexCoord2f(uv[0], uv[2]);
+					gl.glVertex2f(dcmd.cx + p0x, dcmd.cy + p0y);
+					gl.glTexCoord2f(uv[1], uv[2]);
+					gl.glVertex2f(dcmd.cx + p1x, dcmd.cy + p1y);
+					gl.glTexCoord2f(uv[1], uv[3]);
+					gl.glVertex2f(dcmd.cx - p0x, dcmd.cy - p0y);
+					gl.glTexCoord2f(uv[0], uv[3]);
+					gl.glVertex2f(dcmd.cx - p1x, dcmd.cy - p1y);
+					
+					buffered += 4;
 				}
+			} else if (cmd.type == DrawTextCommand.type) {
+				buffered = quadFlush(gl, buffered);
 				
-				float dx = cmd.w * .5f;
-				float dy = cmd.h * .5f;
-				
-				float sinA = FastMath.fastSin(cmd.angle);
-				float cosA = FastMath.fastCos(cmd.angle);
+				DrawTextCommand dcmd = (DrawTextCommand)cmd;
+				StyledText stext = new StyledText(dcmd.text);
 								
-				float cosX = cosA * dx;
-				float sinX = sinA * dx;
-				float cosY = cosA * dy;
-				float sinY = sinA * dy;
+				pr.setBounds(0, 0, dcmd.wrapWidth, virtualSize.height - dcmd.y);
+				TextLayout tl = pr.getLayout(glm, stext);
+				float w = tl.getWidth();
+				float h = tl.getHeight();
 				
-				float p0x = -cosX + sinY;
-				float p0y = -sinX - cosY;
-				float p1x = cosX + sinY;
-				float p1y = sinX - cosY;
-				
-				float uv[] = image.getUV();
-				
-				if (buffered == 0) {
-					gl.glBegin(GL2.GL_QUADS);
-				}
-				
-				gl.glTexCoord2f(uv[0], uv[2]);
-				gl.glVertex2f(cmd.cx + p0x, cmd.cy + p0y);
-				gl.glTexCoord2f(uv[1], uv[2]);
-				gl.glVertex2f(cmd.cx + p1x, cmd.cy + p1y);
-				gl.glTexCoord2f(uv[1], uv[3]);
-				gl.glVertex2f(cmd.cx - p0x, cmd.cy - p0y);
-				gl.glTexCoord2f(uv[0], uv[3]);
-				gl.glVertex2f(cmd.cx - p1x, cmd.cy - p1y);
-				
-				buffered += 4;
+				gl.glPushMatrix();
+				gl.glTranslatef(dcmd.x + w/2, dcmd.y + h/2, 0);
+				gl.glRotated(dcmd.angle * 360.0 / 512.0, 0, 0, 1);
+				gl.glTranslatef(-w/2, -h/2, 0);
+				pr.drawLayout(glm, tl);				
+				gl.glPopMatrix();
+			} else {
+				Log.error("Invalid draw command type: " + cmd.type);
+				break;
 			}
 		}
 		
-		//Flush
-		if (buffered > 0) gl.glEnd();
-		buffered = 0;
-		//-----
+		buffered = quadFlush(gl, buffered);
 		
 		gl.glDisable(GL.GL_SCISSOR_TEST);
+	}
+	
+	private int quadFlush(GL2 gl, int buffered) {
+		if (buffered > 0) {
+			gl.glEnd();
+		}
+		buffered = 0;
+		return buffered;
+	}
+	
+	public void translate(double dx, double dy) {
+		translationX = dx;
+		translationY = dy;
 	}
 	
 	//Getters
@@ -203,9 +255,13 @@ public class Renderer implements IRenderer {
 	private static class DrawCommand implements Comparable<DrawCommand> {
 		
 		private final int sortKey;
+		public final byte type;
+		public final boolean clipEnabled;
 		
-		public DrawCommand(int sortKey) {
+		public DrawCommand(int sortKey, byte type, boolean clipEnabled) {
 			this.sortKey = sortKey;
+			this.type = type;
+			this.clipEnabled = clipEnabled;
 		}
 
 		@Override
@@ -213,12 +269,21 @@ public class Renderer implements IRenderer {
 			return (sortKey >= o.sortKey ? 1 : (sortKey < o.sortKey ? -1 : 0));
 		}
 		
+		static int mkKey(int type, Texture tex, boolean clipEnabled, int z) {
+			//Key = ZZZZZZZZ ZZZZZZZZ CYYYTTTT TTTTTTTT
+			return (~z << 16)
+				| (clipEnabled ? 1<<15 : 0)
+				| (type & 7)
+				| (tex != null ? tex.hashCode() & 0xFFF : 0);			
+		}
+		
 	}
 	
 	private static class DrawRotQuadCommand extends DrawCommand {
 		
+		static final byte type = 0;
+		
 		public final Texture tex;
-		public final boolean clipEnabled;
 		public final float cx, cy, w, h, angle;
 			
 		public DrawRotQuadCommand(Texture tex, boolean clipEnabled,
@@ -230,22 +295,40 @@ public class Renderer implements IRenderer {
 		public DrawRotQuadCommand(Texture tex, boolean clipEnabled,
 				float cx, float cy, float w, float h, short z, float angle)
 		{			
-			super(mkKey(tex, clipEnabled, z));
+			super(mkKey(type, tex, clipEnabled, z), type, clipEnabled);
 			
 			this.tex = tex;
-			this.clipEnabled = clipEnabled;
 			this.cx = cx;
 			this.cy = cy;
 			this.w = w;
 			this.h = h;
 			this.angle = angle;
 		}
+	}
+
+	private static class DrawTextCommand extends DrawCommand {
 		
-		private static final int mkKey(Texture tex, boolean clipEnabled, short z) {
-			//Key = ZZZZZZZZ ZZZZZZZZ CTTTTTTT TTTTTTTT
-			return (~z << 16)
-				| (clipEnabled ? 1<<15 : 0)
-				| (tex.hashCode() & 0x7FFF);			
+		static final byte type = 1;
+		
+		public final String text;
+		public final float x, y, angle, wrapWidth;
+			
+		public DrawTextCommand(boolean clipEnabled, String text,
+				double x, double y, short z, double angle, double wrapWidth)
+		{
+			this(clipEnabled, text, (float)x, (float)y, z, (float)angle, (float)wrapWidth);
+		}
+		
+		public DrawTextCommand(boolean clipEnabled, String text,
+				float x, float y, short z, float angle, float wrapWidth)
+		{
+			super(mkKey(type, null, clipEnabled, z), type, clipEnabled);
+			
+			this.text = text;
+			this.x = x;
+			this.y = y;
+			this.angle = angle;
+			this.wrapWidth = wrapWidth;
 		}
 	}
 	

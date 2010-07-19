@@ -39,10 +39,7 @@ end
 --------------------------------------------------------------------------------
 
 function main()
-	local levelBG = Drawable.new()
-	levelBG:setTexture(textureStore:getTexture("level-bg.png"))
-	levelBG:setPos(320, 240)
-	levelBG:setZ(32767)
+	buildLevel("level-bg.png")
 
 	local ghost = CircleGhost.new{xmul=100, ymul=100}
 	ghost:test("abc", 1)
