@@ -26,6 +26,7 @@ import nl.weeaboo.game.input.UserInput;
 import nl.weeaboo.game.text.MutableTextStyle;
 import nl.weeaboo.game.text.ParagraphRenderer;
 
+import org.luaj.lib.j2se.LuajavaLib;
 import org.luaj.vm.LuaState;
 
 public class Game extends GameBase {
@@ -159,9 +160,15 @@ public class Game extends GameBase {
 		if (error) {
 			return;
 		}
-		
+
+		LuaState vm = getLuaState();
 		Input ii = new Input(input);
-		
+
+		//global IInput input
+		vm.pushlvalue(LuajavaLib.toUserdata(ii, ii.getClass()));
+		vm.setglobal("input");
+
+		//Video capture activation key
 		if (ii.consumeKey(KeyEvent.VK_F8)) {
 			try {
 				startRecordingVideo("capture.mkv");
@@ -171,6 +178,7 @@ public class Game extends GameBase {
 			}
 		}
 		
+		//Update main thread
 		try {
 			if (mainFunc != null && !mainFunc.isFinished()) {
 				mainFunc.update();
@@ -180,6 +188,7 @@ public class Game extends GameBase {
 			//mainFunc = null;
 		}
 			
+		//Update fields
 		for (IField field : fieldMap.getValues()) {
 			field.update(ii);
 		}

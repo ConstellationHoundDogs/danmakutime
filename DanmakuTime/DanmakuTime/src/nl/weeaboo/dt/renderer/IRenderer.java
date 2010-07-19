@@ -10,8 +10,9 @@ public interface IRenderer {
 	 * @param y The top-left Y-coordinate
 	 * @param w The quad's width
 	 * @param h The quad's height
+	 * @param z The quad's Z-coordinate
 	 */
-	public void drawQuad(double x, double y, double w, double h);
+	public void drawQuad(double x, double y, double w, double h, short z);
 
 	/**
 	 * Draws a rotated quad at the specified position with the specified size
@@ -21,10 +22,12 @@ public interface IRenderer {
 	 * @param cy The quad's center Y-coordinate
 	 * @param w The quad's width
 	 * @param h The quad's height
+	 * @param z The quad's Z-coordinate
 	 * @param angle The quad's rotation, between <code>0.0</code> and
 	 *        <code>512.0</code>
 	 */
-	public void drawRotatedQuad(double cx, double cy, double w, double h, double angle);
+	public void drawRotatedQuad(double cx, double cy, double w, double h, short z,
+			double angle);
 	
 	/**
 	 * Changes the current texture

@@ -5,7 +5,9 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Field;
 
+import nl.weeaboo.common.Log;
 import nl.weeaboo.dt.lua.link.LuaLink;
 import nl.weeaboo.dt.lua.link.LuaLinkedObject;
 
@@ -79,10 +81,12 @@ public class LuaUtil {
 		int res;
 		
         res = vm.load(in, filename);
-		if (res != 0) throw new LuaException(String.format("Compile Error (%d) in \"%s\"", res, filename));
+		if (res != 0) {			
+			throw new LuaException(String.format("Compile Error (%d) in \"%s\" :: %s", res, filename, vm.tostring(-1)));
+		}
 		
 		res = vm.pcall(0, 0);
-		if (res != 0) throw new LuaException(String.format("Runtime Error (%d) in \"%s\"", res, filename));		
+		if (res != 0) throw new LuaException(String.format("Runtime Error (%d) in \"%s\" :: %s", res, filename, vm.tostring(-1)));		
 	}
 	
 	public static <T extends LuaLinkedObject> void registerClass(
@@ -115,4 +119,34 @@ public class LuaUtil {
 		return result;
 	}
 
+	/**
+	 * Creates a table "Keys" in Lua containing all the <code>VK_???</code>
+	 * static fields from <code>c</code>. The fields in Lua have the same name,
+	 * just without the <code>VK_</code> prefix.
+	 * 
+	 * @param vm The LuaState to install the new bindings in
+	 * @param c The class that contains the static fields with the key codes
+	 *        (AWT or JavaFX KeyEvents)
+	 */
+	public static void registerKeyCodes(LuaState vm, Class<?> c) {
+		LTable table = new LTable();
+		for (Field field : c.getFields()) {
+			String fname = field.getName();
+			if (fname.startsWith("VK_")) {
+				try {
+					int intval = field.getInt(null);
+					table.put(fname.substring(3), intval);
+				} catch (IllegalArgumentException e) {
+					Log.warning(e);
+					break;
+				} catch (IllegalAccessException e) {
+					Log.warning(e);
+					break;
+				}
+			}
+		}
+		vm.pushlvalue(table);
+		vm.setglobal("Keys");
+	}
+	
 }

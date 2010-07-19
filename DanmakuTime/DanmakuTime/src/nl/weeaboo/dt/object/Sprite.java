@@ -65,7 +65,7 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 
 	    if (angleInc != 0) {
 	    	angle = (angle + angleInc) % 512;
-	    	drawAngle = angle;
+	    	setDrawAngle(angle);
 	    }
 
 	    if (speedVecDirty || speedInc != 0 || angleInc != 0) {
@@ -122,5 +122,5 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 	public void setSpeedInc(double si) {
 		speedInc = si;
 	}
-	
+		
 }

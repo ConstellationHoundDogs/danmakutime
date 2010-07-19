@@ -1,3 +1,6 @@
 <images>
-
+  <image filename="test.png" width="64" height="32">
+    <subrect id="g0" rect=" 8, 8,16,16" />
+    <subrect id="g1" rect="40, 8,16,16" />
+  </image>
 </images>

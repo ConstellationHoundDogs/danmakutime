@@ -1,6 +1,7 @@
 package nl.weeaboo.dt.renderer;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.media.opengl.GL2;
@@ -24,13 +25,15 @@ public class Renderer implements IRenderer {
 	
 	//Functions
 	@Override
-	public void drawQuad(double x, double y, double w, double h) {
-		drawRotatedQuad(x+w/2, y+h/2, w, h, 0);
+	public void drawQuad(double x, double y, double w, double h, short z) {
+		drawRotatedQuad(x+w/2, y+h/2, w, h, z, 0);
 	}
 
 	@Override
-	public void drawRotatedQuad(double cx, double cy, double w, double h, double angle) {
-		drawBuffer.add(new DrawRotQuadCommand(texture, cx, cy, w, h, angle));
+	public void drawRotatedQuad(double cx, double cy, double w, double h, short z,
+			double angle)
+	{
+		drawBuffer.add(new DrawRotQuadCommand(texture, cx, cy, w, h, z, angle));
 		
 		/*
 		GL2 gl = GLManager.getGL2(glm.getGL());
@@ -70,11 +73,18 @@ public class Renderer implements IRenderer {
 	
 	public void flush() {
 		GL2 gl = GLManager.getGL2(glm.getGL());
-				
-		Texture cur = null;
-		int buffered = 0;
 		
-		for (DrawRotQuadCommand cmd : drawBuffer) {									
+		//Pop enqueued draw commands
+		DrawRotQuadCommand cmds[] = drawBuffer.toArray(new DrawRotQuadCommand[drawBuffer.size()]);
+		drawBuffer.clear();
+
+		//Sort for efficiency
+		Arrays.sort(cmds);
+		
+		//Draw buffered commands
+		Texture cur = null;
+		int buffered = 0;		
+		for (DrawRotQuadCommand cmd : cmds) {									
 			GLImage image = (cmd.tex != null ? cmd.tex.getImage() : null);
 			if (image != null) {	
 				if (cur != cmd.tex) {
@@ -124,8 +134,6 @@ public class Renderer implements IRenderer {
 		if (buffered > 0) {
 			gl.glEnd();			
 		}
-		
-		drawBuffer.clear();
 	}
 	
 	//Getters
@@ -137,20 +145,37 @@ public class Renderer implements IRenderer {
 	}
 	
 	//Inner Classes
-	private static class DrawRotQuadCommand {
+	private static class DrawCommand implements Comparable<DrawCommand> {
+		
+		private final int sortKey;
+		
+		public DrawCommand(int sortKey) {
+			this.sortKey = sortKey;
+		}
+
+		@Override
+		public int compareTo(DrawCommand o) {
+			return (sortKey >= o.sortKey ? 1 : (sortKey < o.sortKey ? -1 : 0));
+		}
+		
+	}
+	
+	private static class DrawRotQuadCommand extends DrawCommand {
 		
 		public final Texture tex;
-		public final float cx, cy, w, h, angle;		
+		public final float cx, cy, w, h, angle;
 			
 		public DrawRotQuadCommand(Texture tex, double cx, double cy, double w, double h,
-				double angle)
+				short z, double angle)
 		{
-			this(tex, (float)cx, (float)cy, (float)w, (float)h, (float)angle);
+			this(tex, (float)cx, (float)cy, (float)w, (float)h, z, (float)angle);
 		}
 		
 		public DrawRotQuadCommand(Texture tex, float cx, float cy, float w, float h,
-				float angle)
+				short z, float angle)
 		{			
+			super((~z<<16)|(tex.hashCode()&0xFFFF));
+			
 			this.tex = tex;
 			this.cx = cx;
 			this.cy = cy;

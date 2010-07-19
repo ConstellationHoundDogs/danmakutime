@@ -9,7 +9,8 @@ public abstract class Drawable implements IDrawable {
 	
 	protected ITexture texture;
 	protected double x, y;
-	protected double drawAngle;
+	private short z;
+	private double drawAngle;
 	
 	public Drawable() {		
 	}
@@ -28,7 +29,7 @@ public abstract class Drawable implements IDrawable {
 		int th = texture.getHeight();
 		
 		renderer.setTexture(texture);
-		renderer.drawRotatedQuad(x, y, tw, th, drawAngle);
+		renderer.drawRotatedQuad(x, y, tw, th, z, drawAngle);
 	}
 	
 	//Getters
@@ -57,6 +58,11 @@ public abstract class Drawable implements IDrawable {
 		return texture;
 	}
 	
+	@Override
+	public short getZ() {
+		return z;
+	}
+	
 	//Setters
 	@Override
 	public void setDrawAngle(double a) {
@@ -72,6 +78,21 @@ public abstract class Drawable implements IDrawable {
 	@Override
 	public void setTexture(ITexture tex) {
 		texture = tex;
+	}
+	
+	@Override
+	public void setZ(short z) {
+		this.z = z;
+	}
+	
+	/**
+	 * Ease-of use method for setting Z. WARNING: Z will be truncated to a
+	 * short.
+	 * 
+	 * @param z The new Z-coordinate
+	 */
+	public void setZ(int z) {
+		setZ((short) z);
 	}
 	
 }
