@@ -13,7 +13,7 @@ import org.luaj.vm.LuaState;
 public class MetaIndexFunction extends LFunction {
 
 	private static final Set<String> reserved = new HashSet<String>(Arrays.asList(
-			"init", "update", "destroy", "animate"));
+			"init", "update", "animate"));
 	
 	private LTable table;
 	private LValue superTable;

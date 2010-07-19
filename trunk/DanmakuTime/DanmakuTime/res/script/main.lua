@@ -18,13 +18,14 @@ function CircleGhost:update()
 	print("CircleGhost:update")
 	
 	local n = 0
-	while n < 1000 do	
-		self:setPos(400 + self.xmul * math.cos(n), 300 + self.ymul * math.sin(n))
+	while n < 100 do	
+		self:setPos(168 + self.xmul * math.cos(n), 224 + self.ymul * math.sin(n))
 		n = n + 1
 		
 		yield()
 	end
 	
+	self:destroy()
 end
 
 function CircleGhost:animate()
@@ -34,6 +35,10 @@ function CircleGhost:animate()
 		self:setTexture(textureStore:getTexture("test.png#g1"));
 		yield(10)
 	end
+end
+
+function CircleGhost:onDestroy()
+	print("I am already dead")
 end
 
 --------------------------------------------------------------------------------
@@ -57,6 +62,7 @@ function main()
 		end
 	end)
 	
+	--[[
 	for group=1,50 do
 		for n=1,200 do
 			local s = Sprite.new()
@@ -75,5 +81,6 @@ function main()
 			s:setAngleInc(1 + math.random() * 1)
 		end		
 		yield(10)
-	end		
+	end
+	]]--
 end

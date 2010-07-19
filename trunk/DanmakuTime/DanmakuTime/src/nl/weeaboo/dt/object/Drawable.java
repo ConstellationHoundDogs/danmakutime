@@ -1,5 +1,6 @@
 package nl.weeaboo.dt.object;
 
+import org.luaj.vm.LNil;
 import org.luaj.vm.LUserData;
 import org.luaj.vm.LValue;
 import org.luaj.vm.LuaState;
@@ -44,19 +45,24 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 			public void init() {
 				inited = true;
 
-				if (getMethod("animate") != null) {
-					int pushed = pushMethod("animate");
-					finished = (pushed <= 0);
-				} else {
-					finished = true;
-				}
+				int pushed = pushMethod("animate");
+				finished = (pushed <= 0);
 			}
 		};
 	}
 	
 	@Override
 	public void destroy() {
-		destroyed = true;
+		LValue retval = LNil.NIL;
+		try {
+			retval = luaLink.call("onDestroy");
+		} catch (LuaException e) {
+			Log.warning(e);
+		}
+		
+		if (retval.isNil() || retval.toJavaBoolean()) {		
+			destroyed = true;
+		}
 	}
 	
 	@Override

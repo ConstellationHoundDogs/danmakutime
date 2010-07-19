@@ -27,7 +27,7 @@ public class LuaObjectLink extends LuaLink {
 		return result + 1;
 	}
 	
-	protected LFunction getMethod(String methodName) {
+	public LFunction getMethod(String methodName) {
 		rootVM.pushlvalue(self);		
 		rootVM.getfield(-1, LString.valueOf(methodName));
 		if (!rootVM.isfunction(-1)) {
@@ -41,9 +41,7 @@ public class LuaObjectLink extends LuaLink {
 	}
 	
 	public void init() throws LuaException {
-		if (getMethod("init") != null) { 
-			call("init");		
-		}
+		call("init");
 		inited = true;
 		
 		int pushed = pushMethod("update");
