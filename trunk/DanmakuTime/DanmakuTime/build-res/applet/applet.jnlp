@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="utf-8"?>
+<jnlp>
+  <information>
+    <title>${project-name}</title>
+    <vendor>Anonymous</vendor>
+    <homepage href="http://www.example.com"/>
+    <description>Long Description</description>
+    <description kind="short">Short Description</description>
+    <offline-allowed />
+  </information>
+
+  <resources>
+    <j2se href="http://java.sun.com/products/autodl/j2se" version="1.6+" java-vm-args="${jvm-args}"/>
+    <extension name="jogl-all-awt" href="http://download.java.net/media/jogl/jsr-231-2.x-webstart/jogl-all-awt.jnlp" />
+    <jar href="./${project-name}.jar" main="true"/>
+  </resources>
+  
+<!--  
+  <application-desc main-class="${main-class}">
+    <argument>${program-args}</argument>
+  </application-desc>
+-->  
+  
+  <applet-desc name="${project-name}" width="${applet-width}" height="${applet-height}"
+    main-class="nl.weeaboo.vn.template.AppletLauncher"
+    archive="http://download.java.net/media/applet-launcher/applet-launcher.jar,
+             http://download.java.net/media/jogl/jsr-231-2.x-webstart/nativewindow.all.jar,
+             http://download.java.net/media/jogl/jsr-231-2.x-webstart/jogl.all.jar,
+             http://download.java.net/media/gluegen/webstart-2.x/gluegen-rt.jar,
+             ${project-name}.jar">
+             
+    <param name="codebase_lookup" value="false" />
+
+    <param name="java_arguments" value="${jvm-args} -Djnlp.packEnabled=true" />
+    <param name="gameId" value="${project-name}" />
+    <param name="args" value="${program-args}" />
+  </applet-desc>
+</jnlp>
