@@ -58,6 +58,11 @@ public interface IDrawable {
 	 */
 	public short getZ();
 
+	/**
+	 * @return <code>true</code> if clipping is enabled for this drawable
+	 */
+	public boolean isClip();
+	
 	// === Setters =============================================================
 
 	/**
@@ -89,4 +94,8 @@ public interface IDrawable {
 	 */
 	public void setZ(short z);
 
+	/**
+	 * Enable/disable clipping for this drawable 
+	 */
+	public void setClip(boolean c);
 }

@@ -120,11 +120,16 @@ public class Game extends GameBase {
 		error = false;
 
 		ResourceManager rm = getResourceManager();
-						
+		int width = getWidth();
+		int height = getHeight();
+		
 		texStore = new TextureStore(rm.getImageStore());
 		
 		TinyMap<IField> fieldMap = new TinyMap<IField>();
-		fieldMap.put(0, new Field());
+		
+		int fw = 336;
+		int fh = 448;
+		fieldMap.put(0, new Field((width-fw)/2, (height-fh)/2, fw, fh));
 		
 		//Init Lua
 		LuaThreadPool threadPool = new LuaThreadPool();
@@ -186,10 +191,10 @@ public class Game extends GameBase {
 	}
 	
 	public void draw(GLManager glm) {		
-		Renderer r = new Renderer(glm);
-
 		int w = getWidth();
 		int h = getHeight();
+
+		Renderer r = new Renderer(glm, w, h);
 		
 		/*
 		//Raw draw performance test

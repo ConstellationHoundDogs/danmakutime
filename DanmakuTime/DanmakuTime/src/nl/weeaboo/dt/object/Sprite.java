@@ -1,22 +1,10 @@
 package nl.weeaboo.dt.object;
 
 import nl.weeaboo.common.FastMath;
-import nl.weeaboo.common.Log;
-import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
-import nl.weeaboo.dt.lua.LuaException;
-import nl.weeaboo.dt.lua.LuaRunState;
 import nl.weeaboo.dt.lua.link.LuaLinkedObject;
-import nl.weeaboo.dt.lua.link.LuaObjectLink;
-
-import org.luaj.vm.LUserData;
-import org.luaj.vm.LValue;
-import org.luaj.vm.LuaState;
 
 public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
-
-	protected LuaObjectLink luaLink;
-	protected LuaObjectLink luaAnimateLink;
 	
 	private boolean speedVecDirty;
 	private double speed, speedInc;
@@ -25,41 +13,10 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 	private boolean drawAngleAuto;
 	
 	public Sprite() {
-		/*
-		angle = 256;
-		speed = speedY = 2;
-		*/
+		setClip(true);
 	}
 	
-	//Functions
-	@Override
-	public void init(LuaRunState runState, LuaState vm, LUserData udata)
-		throws LuaException
-	{
-		IField field = runState.getField(0);
-		field.add(this);
-		
-		luaLink = new LuaObjectLink(runState, vm, udata);
-		
-		luaAnimateLink = new LuaObjectLink(runState, vm, udata) {
-			public void init() {
-				inited = true;
-
-				if (getMethod("animate") != null) {
-					int pushed = pushMethod("animate");
-					finished = (pushed <= 0);
-				} else {
-					finished = true;
-				}
-			}
-		};
-	}
-	
-	@Override
-	public LValue call(String methodName, Object... args) throws LuaException {
-		return luaLink.call(methodName, args);
-	}
-		
+	//Functions		
 	public Object test(String arg0, double arg1) {
 		System.out.println(arg0 + " " + arg1);
 		return this;
@@ -67,24 +24,7 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 
 	@Override
 	public void update(IInput input) {
-		//Update Lua links
-		if (luaLink != null && !luaLink.isFinished()) {
-			try {
-				luaLink.update();
-			} catch (LuaException e) {
-				Log.warning(e);
-				luaLink = null;
-			}
-		}
-		
-		if (luaAnimateLink != null && !luaAnimateLink.isFinished()) {
-			try {
-				luaAnimateLink.update();
-			} catch (LuaException e) {
-				Log.warning(e);
-				luaAnimateLink = null;
-			}
-		}
+		super.update(input);
 		
 		//Update speed/angle/pos
 	    speed += speedInc;

@@ -1,6 +1,7 @@
 
 Bugs:
-[ ] ---
+[ ] ?? What happens with the clip rect if FBO's aren't available and
+    size != virtualSize...
 
 Feature requests:
 [ ] Make the BGM cycle-synced to the gameplay (make sure to pause it along with

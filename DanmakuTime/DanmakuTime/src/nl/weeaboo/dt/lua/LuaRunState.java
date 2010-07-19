@@ -7,6 +7,7 @@ import nl.weeaboo.dt.TinyMap;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.lua.link.LuaLink;
+import nl.weeaboo.dt.object.Drawable;
 import nl.weeaboo.dt.object.Sprite;
 import nl.weeaboo.dt.renderer.IRenderer;
 import nl.weeaboo.dt.renderer.ITextureStore;
@@ -39,6 +40,7 @@ public class LuaRunState {
 		//Install default available objects
 		vm = Platform.newLuaState();
 		LuaUtil.installLuaLib(this, vm._G);
+		LuaUtil.registerClass(this, vm, Drawable.class);
 		LuaUtil.registerClass(this, vm, Sprite.class);
 		LuaUtil.registerKeyCodes(vm, KeyEvent.class);
 		LuaUtil.registerThreadLib(this, vm, threadPool);

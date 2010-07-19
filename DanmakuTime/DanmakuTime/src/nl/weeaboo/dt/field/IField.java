@@ -6,6 +6,8 @@ import nl.weeaboo.dt.renderer.IRenderer;
 
 public interface IField {
 
+	// === Functions ===========================================================
+	
 	/**
 	 * Add a drawable to the field
 	 * 
@@ -28,8 +30,33 @@ public interface IField {
 	 */
 	public void draw(IRenderer renderer);
 	
+	// === Getters =============================================================
+	
 	/**
 	 * @return The number of active objects in this field
 	 */
 	public int getObjectCount();
+	
+	/**
+	 * @return The X-coordinate of the top-left pixel of this field
+	 */
+	public int getX();
+
+	/**
+	 * @return The Y-coordinate of the top-left pixel of this field
+	 */
+	public int getY();
+	
+	/**
+	 * @return The width of this field in pixels
+	 */
+	public int getWidth();
+	
+	/**
+	 * @return The height of this field in pixels
+	 */
+	public int getHeight();
+	
+	// === Setters =============================================================
+	
 }
