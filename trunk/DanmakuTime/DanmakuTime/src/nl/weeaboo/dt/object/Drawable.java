@@ -35,7 +35,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	public void init(LuaRunState runState, LuaState vm, LUserData udata)
 		throws LuaException
 	{
-		IField field = runState.getField(0);
+		IField field = runState.getField(1);
 		field.add(this);
 		
 		luaLink = new LuaObjectLink(runState, vm, udata);
