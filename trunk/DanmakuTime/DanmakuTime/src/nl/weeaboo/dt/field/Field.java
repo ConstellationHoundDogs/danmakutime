@@ -50,12 +50,16 @@ public class Field implements IField {
 	public void draw(IRenderer renderer) {
 		Rectangle oldClip = renderer.getClipRect();
 		renderer.setClipRect(bounds.x, bounds.y, bounds.width, bounds.height);
-		
+
+		int dx = bounds.x;
+		int dy = bounds.y;
+		renderer.translate(dx, dy);		
 		for (IDrawable d : drawables) {
 			if (!d.isDestroyed()) {
 				d.draw(renderer);
 			}
 		}
+		renderer.translate(-dx, -dy);		
 
 		renderer.setClipRect(oldClip.x, oldClip.y, oldClip.width, oldClip.height);
 	}

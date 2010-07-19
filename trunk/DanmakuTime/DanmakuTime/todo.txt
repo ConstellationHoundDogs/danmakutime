@@ -4,5 +4,11 @@ Bugs:
     size != virtualSize...
 
 Feature requests:
+[x] Create functionality to render text on-screen
+[x] Currently, all coordinates are absoute, but things that are in fields
+    should have coordinates relative to the field it's in...
+[ ] Implement pausing in a way that's accessible from the script and the script
+    must also be able to control the pause menu. Perhaps have the pause
+    function take a LFunction argument??
 [ ] Make the BGM cycle-synced to the gameplay (make sure to pause it along with
     the game)

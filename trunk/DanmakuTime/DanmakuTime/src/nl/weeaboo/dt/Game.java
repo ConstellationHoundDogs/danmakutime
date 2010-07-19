@@ -25,6 +25,7 @@ import nl.weeaboo.game.gl.GLVideoCapture;
 import nl.weeaboo.game.input.UserInput;
 import nl.weeaboo.game.text.MutableTextStyle;
 import nl.weeaboo.game.text.ParagraphRenderer;
+import nl.weeaboo.game.text.layout.ParagraphLayouter;
 
 import org.luaj.lib.j2se.LuajavaLib;
 import org.luaj.vm.LuaState;
@@ -193,8 +194,10 @@ public class Game extends GameBase {
 	public void draw(GLManager glm) {		
 		int w = getWidth();
 		int h = getHeight();
-
-		Renderer r = new Renderer(glm, w, h);
+		int rw = getRealWidth();
+		int rh = getRealHeight();
+		
+		Renderer r = new Renderer(glm, createParagraphRenderer(), w, h, rw, rh);
 		
 		/*
 		//Raw draw performance test
@@ -227,9 +230,7 @@ public class Game extends GameBase {
 		pr.setBounds(20, 20, w-40, h-40);
 		
 		MutableTextStyle mts = pr.getDefaultStyle().mutableCopy();
-		mts.setFontName("DejaVuSans");
 		mts.setAnchor(9);
-		mts.setFontSize(16);
 		pr.setDefaultStyle(mts.immutableCopy());
 		
 		String hudText = String.format("%.2f FPS\n%d Objects\n",
@@ -251,6 +252,17 @@ public class Game extends GameBase {
 		
 		super.draw(glm);
 	}
+	
+	public ParagraphRenderer createParagraphRenderer(ParagraphLayouter layouter) {	
+		ParagraphRenderer pr = super.createParagraphRenderer(layouter);
+		
+		MutableTextStyle mts = pr.getDefaultStyle().mutableCopy();
+		mts.setFontName("DejaVuSans");
+		mts.setFontSize(16);
+		pr.setDefaultStyle(mts.immutableCopy());
+		
+		return pr;
+	}	
 	
 	//Getters
 	public Config getConfig() {

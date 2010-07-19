@@ -4,6 +4,6 @@
   <property name="graphics.fps" type="int">60</property>
   <property name="graphics.width" type="int">640</property>
   <property name="graphics.height" type="int">480</property>
-  <property name="graphics.vsyncEnabled" type="boolean">false</property>
+  <property name="graphics.vsyncEnabled" type="boolean">true</property>
   
 </root>
