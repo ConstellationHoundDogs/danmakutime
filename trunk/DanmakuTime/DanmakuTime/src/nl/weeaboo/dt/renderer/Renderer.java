@@ -1,9 +1,11 @@
 package nl.weeaboo.dt.renderer;
 
+import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import nl.weeaboo.common.FastMath;
@@ -12,14 +14,23 @@ import nl.weeaboo.game.gl.GLManager;
 
 public class Renderer implements IRenderer {
 
-	private GLManager glm;	
+	private GLManager glm;
+	//private int screenW;
+	private int screenH;
+	
 	private Texture texture;
+	private Rectangle clipRect;
+	private boolean clipEnabled;
 	
 	private List<DrawRotQuadCommand> drawBuffer;
 	
-	public Renderer(GLManager glm) {
+	public Renderer(GLManager glm, int screenW, int screenH) {
 		this.glm = glm;
+		//this.screenW = screenW;
+		this.screenH = screenH;
 		
+		clipRect = new Rectangle(0, 0, screenW, screenH);
+		clipEnabled = true;
 		drawBuffer = new ArrayList<DrawRotQuadCommand>();
 	}
 	
@@ -33,7 +44,7 @@ public class Renderer implements IRenderer {
 	public void drawRotatedQuad(double cx, double cy, double w, double h, short z,
 			double angle)
 	{
-		drawBuffer.add(new DrawRotQuadCommand(texture, cx, cy, w, h, z, angle));
+		drawBuffer.add(new DrawRotQuadCommand(texture, clipEnabled, cx, cy, w, h, z, angle));
 		
 		/*
 		GL2 gl = GLManager.getGL2(glm.getGL());
@@ -73,29 +84,49 @@ public class Renderer implements IRenderer {
 	
 	public void flush() {
 		GL2 gl = GLManager.getGL2(glm.getGL());
-		
+				
 		//Pop enqueued draw commands
 		DrawRotQuadCommand cmds[] = drawBuffer.toArray(new DrawRotQuadCommand[drawBuffer.size()]);
 		drawBuffer.clear();
 
 		//Sort for efficiency
 		Arrays.sort(cmds);
+
+		//Setup clipping
+		gl.glEnable(GL.GL_SCISSOR_TEST);				
+		gl.glScissor(clipRect.x, screenH-(clipRect.y+clipRect.height),
+				clipRect.width, clipRect.height);
+		boolean clipping = true;
 		
 		//Draw buffered commands
 		Texture cur = null;
-		int buffered = 0;		
-		for (DrawRotQuadCommand cmd : cmds) {									
-			GLImage image = (cmd.tex != null ? cmd.tex.getImage() : null);
-			if (image != null) {	
+		int buffered = 0;	
+		for (DrawRotQuadCommand cmd : cmds) {
+			if (cmd.clipEnabled != clipping) {
+				//Flush
+				if (buffered > 0) gl.glEnd();
+				buffered = 0;
+				//-----
+
+				if (cmd.clipEnabled) {
+					gl.glEnable(GL.GL_SCISSOR_TEST);
+				} else {
+					gl.glDisable(GL.GL_SCISSOR_TEST);
+				}
+				clipping = cmd.clipEnabled;
+			}
+			
+			GLImage image = (cmd.tex != null ? cmd.tex.getImage() : null);			
+			if (image != null) {				
 				if (cur != cmd.tex) {
-					if (buffered > 0) {
-						gl.glEnd();
-					}
+					//Flush
+					if (buffered > 0) gl.glEnd();
 					buffered = 0;
+					//-----
 					
 					glm.setTexture(image.getTexture());
 				}
-			
+				
 				float dx = cmd.w * .5f;
 				float dy = cmd.h * .5f;
 				
@@ -131,17 +162,41 @@ public class Renderer implements IRenderer {
 			}
 		}
 		
-		if (buffered > 0) {
-			gl.glEnd();			
-		}
+		//Flush
+		if (buffered > 0) gl.glEnd();
+		buffered = 0;
+		//-----
+		
+		gl.glDisable(GL.GL_SCISSOR_TEST);
 	}
 	
 	//Getters
+	@Override
+	public Rectangle getClipRect() {
+		return new Rectangle(clipRect);
+	}
+	
+	@Override
+	public boolean isClipEnabled() {
+		return clipEnabled;
+	}
 	
 	//Setters
 	@Override
 	public void setTexture(ITexture tex) {
 		texture = (Texture)tex;
+	}
+	
+	@Override
+	public void setClipRect(int x, int y, int w, int h) {
+		flush();
+		
+		clipRect.setBounds(x, y, w, h);
+	}
+	
+	@Override
+	public void setClipEnabled(boolean ce) {
+		clipEnabled = ce;
 	}
 	
 	//Inner Classes
@@ -163,20 +218,22 @@ public class Renderer implements IRenderer {
 	private static class DrawRotQuadCommand extends DrawCommand {
 		
 		public final Texture tex;
+		public final boolean clipEnabled;
 		public final float cx, cy, w, h, angle;
 			
-		public DrawRotQuadCommand(Texture tex, double cx, double cy, double w, double h,
-				short z, double angle)
+		public DrawRotQuadCommand(Texture tex, boolean clipEnabled,
+				double cx, double cy, double w, double h, short z, double angle)
 		{
-			this(tex, (float)cx, (float)cy, (float)w, (float)h, z, (float)angle);
+			this(tex, clipEnabled, (float)cx, (float)cy, (float)w, (float)h, z, (float)angle);
 		}
 		
-		public DrawRotQuadCommand(Texture tex, float cx, float cy, float w, float h,
-				short z, float angle)
+		public DrawRotQuadCommand(Texture tex, boolean clipEnabled,
+				float cx, float cy, float w, float h, short z, float angle)
 		{			
-			super((~z<<16)|(tex.hashCode()&0xFFFF));
+			super(mkKey(tex, clipEnabled, z));
 			
 			this.tex = tex;
+			this.clipEnabled = clipEnabled;
 			this.cx = cx;
 			this.cy = cy;
 			this.w = w;
@@ -184,6 +241,12 @@ public class Renderer implements IRenderer {
 			this.angle = angle;
 		}
 		
+		private static final int mkKey(Texture tex, boolean clipEnabled, short z) {
+			//Key = ZZZZZZZZ ZZZZZZZZ CTTTTTTT TTTTTTTT
+			return (~z << 16)
+				| (clipEnabled ? 1<<15 : 0)
+				| (tex.hashCode() & 0x7FFF);			
+		}
 	}
 	
 }

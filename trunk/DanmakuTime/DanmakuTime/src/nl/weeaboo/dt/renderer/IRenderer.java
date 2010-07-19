@@ -1,6 +1,10 @@
 package nl.weeaboo.dt.renderer;
 
+import java.awt.Rectangle;
+
 public interface IRenderer {
+
+	// === Functions ===========================================================
 
 	/**
 	 * Draws a quad at the specified position with the specified size, using the
@@ -29,6 +33,20 @@ public interface IRenderer {
 	public void drawRotatedQuad(double cx, double cy, double w, double h, short z,
 			double angle);
 	
+	// === Getters =============================================================
+
+	/**
+	 * @return The current clipping rectangle
+	 */
+	public Rectangle getClipRect();
+	
+	/**
+	 * @return <code>true</code> if clipping is enabled
+	 */
+	public boolean isClipEnabled();
+	
+	// === Setters =============================================================
+	
 	/**
 	 * Changes the current texture
 	 * 
@@ -36,4 +54,18 @@ public interface IRenderer {
 	 */
 	public void setTexture(ITexture tex);
 
+	/**
+	 * Changes the current clipping rectangle
+	 * 
+	 * @param x Top-left X-coordinate
+	 * @param y Top-left Y-coordinate
+	 * @param w Clipping rectangle width
+	 * @param h Clipping rectangle height
+	 */
+	public void setClipRect(int x, int y, int w, int h);
+
+	/**
+	 * Toggles clipping on or off for future draw operations
+	 */
+	public void setClipEnabled(boolean ce);
 }

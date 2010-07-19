@@ -41,8 +41,8 @@ public class Config extends ConfigBase {
 			super(store);
 
 			setProperty("fps", 60);
-			setProperty("width", 800);
-			setProperty("height", 600);
+			setProperty("width", 640);
+			setProperty("height", 480);
 			setProperty("vsyncEnabled", true);
 		}
 	}

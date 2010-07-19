@@ -1,24 +1,90 @@
 package nl.weeaboo.dt.object;
 
+import org.luaj.vm.LUserData;
+import org.luaj.vm.LValue;
+import org.luaj.vm.LuaState;
+
+import nl.weeaboo.common.Log;
+import nl.weeaboo.dt.field.IField;
+import nl.weeaboo.dt.input.IInput;
+import nl.weeaboo.dt.lua.LuaException;
+import nl.weeaboo.dt.lua.LuaRunState;
+import nl.weeaboo.dt.lua.link.LuaLinkedObject;
+import nl.weeaboo.dt.lua.link.LuaObjectLink;
 import nl.weeaboo.dt.renderer.IRenderer;
 import nl.weeaboo.dt.renderer.ITexture;
 
-public abstract class Drawable implements IDrawable {
+public class Drawable implements IDrawable, LuaLinkedObject {
 
 	private boolean destroyed;
 	
+	protected LuaObjectLink luaLink;
+	protected LuaObjectLink luaAnimateLink;
+
 	protected ITexture texture;
 	protected double x, y;
 	private short z;
 	private double drawAngle;
+	private boolean clip;
 	
-	public Drawable() {		
+	public Drawable() {
 	}
 	
 	//Functions
 	@Override
+	public void init(LuaRunState runState, LuaState vm, LUserData udata)
+		throws LuaException
+	{
+		IField field = runState.getField(0);
+		field.add(this);
+		
+		luaLink = new LuaObjectLink(runState, vm, udata);
+		
+		luaAnimateLink = new LuaObjectLink(runState, vm, udata) {
+			public void init() {
+				inited = true;
+
+				if (getMethod("animate") != null) {
+					int pushed = pushMethod("animate");
+					finished = (pushed <= 0);
+				} else {
+					finished = true;
+				}
+			}
+		};
+	}
+	
+	@Override
 	public void destroy() {
 		destroyed = true;
+	}
+	
+	@Override
+	public LValue call(String methodName, Object... args) throws LuaException {
+		return luaLink.call(methodName, args);
+	}
+	
+	@Override
+	public void update(IInput input) {
+
+		//Update Lua links
+		if (luaLink != null && !luaLink.isFinished()) {
+			try {
+				luaLink.update();
+			} catch (LuaException e) {
+				Log.warning(e);
+				luaLink = null;
+			}
+		}
+		
+		if (luaAnimateLink != null && !luaAnimateLink.isFinished()) {
+			try {
+				luaAnimateLink.update();
+			} catch (LuaException e) {
+				Log.warning(e);
+				luaAnimateLink = null;
+			}
+		}
 	}
 	
 	@Override
@@ -27,9 +93,12 @@ public abstract class Drawable implements IDrawable {
 		
 		int tw = texture.getWidth();
 		int th = texture.getHeight();
-		
+
+		boolean oldClip = renderer.isClipEnabled();		
+		renderer.setClipEnabled(clip);
 		renderer.setTexture(texture);
-		renderer.drawRotatedQuad(x, y, tw, th, z, drawAngle);
+		renderer.drawRotatedQuad(x, y, tw, th, z, drawAngle);		
+		renderer.setClipEnabled(oldClip);
 	}
 	
 	//Getters
@@ -63,6 +132,11 @@ public abstract class Drawable implements IDrawable {
 		return z;
 	}
 	
+	@Override
+	public boolean isClip() {
+		return clip;
+	}
+	
 	//Setters
 	@Override
 	public void setDrawAngle(double a) {
@@ -93,6 +167,11 @@ public abstract class Drawable implements IDrawable {
 	 */
 	public void setZ(int z) {
 		setZ((short) z);
+	}
+
+	@Override
+	public void setClip(boolean c) {
+		clip = c;
 	}
 	
 }
