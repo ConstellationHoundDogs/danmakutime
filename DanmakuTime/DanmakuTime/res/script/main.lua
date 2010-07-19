@@ -19,7 +19,8 @@ function CircleGhost:update()
 	
 	local n = 0
 	while n < 100 do	
-		self:setPos(168 + self.xmul * math.cos(n), 224 + self.ymul * math.sin(n))
+		self:setPos(levelWidth/2 + self.xmul * math.cos(n),
+			levelHeight/2 + self.ymul * math.sin(n))
 		n = n + 1
 		
 		yield()
@@ -50,13 +51,14 @@ end
 function main()
 	buildLevel("level-bg.png")
 
+	player = Player.new()
+
 	local ghost = CircleGhost.new{xmul=100, ymul=100}
 	ghost:test("abc", 1)
     yield(10)
 	ghost:test("def", 1)
 
 	local ghost2 = CircleGhost.new{xmul=-100, ymul=100}
-	ghost2:fsdf()
 	
 	Thread.new(function()
 		while true do

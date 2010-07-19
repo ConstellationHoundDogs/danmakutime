@@ -138,7 +138,7 @@ public class Game extends GameBase {
 		fieldMap.put(0, new Field(0, 0, width, height));
 		
 		//Main field (1)
-		int fw = 336;
+		int fw = 384;
 		int fh = 448;
 		fieldMap.put(1, new Field((width-fw)/2, (height-fh)/2, fw, fh));
 		
