@@ -3,4 +3,32 @@
     <subrect id="g0" rect=" 8, 8,16,16" />
     <subrect id="g1" rect="40, 8,16,16" />
   </image>
+  <image filename="player.png" width="256" height="256">
+    <subrect id="idle0" rect="  0, 0,32,48" />
+    <subrect id="idle1" rect=" 32, 0,32,48" />
+    <subrect id="idle2" rect=" 64, 0,32,48" />
+    <subrect id="idle3" rect=" 96, 0,32,48" />
+    <subrect id="idle4" rect="128, 0,32,48" />
+    <subrect id="idle5" rect="160, 0,32,48" />
+    <subrect id="idle6" rect="192, 0,32,48" />
+    <subrect id="idle7" rect="224, 0,32,48" />
+    
+    <subrect id="left0" rect="  0,48,32,48" />
+    <subrect id="left1" rect=" 32,48,32,48" />
+    <subrect id="left2" rect=" 64,48,32,48" />
+    <subrect id="left3" rect=" 96,48,32,48" />
+    <subrect id="left4" rect="128,48,32,48" />
+    <subrect id="left5" rect="160,48,32,48" />
+    <subrect id="left6" rect="192,48,32,48" />
+    <subrect id="left7" rect="224,48,32,48" />
+
+    <subrect id="right0" rect="  0,96,32,48" />
+    <subrect id="right1" rect=" 32,96,32,48" />
+    <subrect id="right2" rect=" 64,96,32,48" />
+    <subrect id="right3" rect=" 96,96,32,48" />
+    <subrect id="right4" rect="128,96,32,48" />
+    <subrect id="right5" rect="160,96,32,48" />
+    <subrect id="right6" rect="192,96,32,48" />
+    <subrect id="right7" rect="224,96,32,48" />
+  </image>
 </images>

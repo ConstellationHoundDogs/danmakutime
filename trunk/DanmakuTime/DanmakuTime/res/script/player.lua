@@ -1,0 +1,111 @@
+
+
+Player = {
+	--stats
+	speed=3,
+	focusSpeed=1.5,
+	--state
+	lives=2,
+	focus=false,
+	dx=0
+	}
+
+function Player.new(o)
+	local o = extend(Player, o or {})
+	return Sprite.new(o)
+end
+
+function Player:init()
+	self:setPos(levelWidth/2, levelHeight - 32)
+	self:setZ(1000)
+	self:setTexture(textureStore:getTexture("player.png#idle0"));
+end
+
+function Player:update()
+	while true do
+		self:updateFocus()	
+		self:updatePos()
+		
+		yield()
+	end
+end
+
+function Player:updateFocus()
+	self.focus = input:isKeyHeld(Keys.SHIFT)
+end
+
+function Player:updatePos()
+	local x = self:getX()
+	local y = self:getY()
+		
+	local spd = self.speed
+	if self.focus then
+		spd = self.focusSpeed
+	end	
+		
+	if input:isKeyHeld(Keys.LEFT) then
+		self.dx = -spd
+		x = x - spd
+	elseif input:isKeyHeld(Keys.RIGHT) then
+		self.dx = spd
+	    x = x + spd
+	else
+		self.dx = 0
+	end
+	
+	if input:isKeyHeld(Keys.UP) then
+		y = y - spd
+	elseif input:isKeyHeld(Keys.DOWN) then
+	    y = y + spd
+	end
+	
+	x = math.max(16, math.min(levelWidth-16, x))
+	y = math.max(24, math.min(levelHeight-24, y))
+	
+	self:setPos(x, y)
+end
+
+function Player:animate()
+	local animPrefix = {"idle", "left", "right"}
+	local anim = 1
+	local frame = 0
+	local frameTime = 6
+	local lastDX = 0
+	
+	while true do
+		if signum(self.dx) ~= signum(lastDX) then
+			frame = 0
+			if self.dx < 0 then
+				anim = 2
+			elseif self.dx > 0 then
+				anim = 3
+			else
+				anim = 1
+			end
+		end
+	
+		self:setTexture(textureStore:getTexture("player.png#" .. animPrefix[anim] .. frame))
+		
+		frame = frame + 1
+		if frame >= 8 then
+			if anim == 1 then
+				frame = 0
+			else
+				frame = 4
+			end
+		end
+		
+		lastDX = self.dx
+		
+		yield(frameTime)
+	end
+end
+
+function Player:onDestroy()
+	if self.lives > 0 then
+	    self.lives = self.lives - 1
+	    return false
+	else
+		return true
+	end
+end

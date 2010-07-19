@@ -10,6 +10,8 @@ Feature requests:
 
 [ ] Support for changing BlendModes (NORMAL, ADD, ???)
 [ ] Support rendering of IStyledText with TextDrawable and Renderer.
+[ ] The main field should be created from the script, not from Game.
+[ ] Sprites should have a togglable out-of-bounds death.	
 
 [ ] Is it possible to script a player?
 [ ] Create a "Boss extends Sprite" object to help with Boss creation? Or is
