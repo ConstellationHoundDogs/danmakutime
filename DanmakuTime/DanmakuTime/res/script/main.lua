@@ -8,8 +8,9 @@ end
 
 function CircleGhost:init()
 	print("CircleGhost:init")
-	
+		
 	self:setPos(400, 300);
+	self:setZ(-100)
 	self:setTexture(textureStore:getTexture("test.png#g1"));
 end
 
@@ -24,6 +25,15 @@ function CircleGhost:update()
 		yield()
 	end
 	
+end
+
+function CircleGhost:animate()
+	while true do
+		self:setTexture(textureStore:getTexture("test.png#g0"));
+		yield(10)
+		self:setTexture(textureStore:getTexture("test.png#g1"));
+		yield(10)
+	end
 end
 
 --------------------------------------------------------------------------------

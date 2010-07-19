@@ -3,13 +3,5 @@ Bugs:
 [ ] ---
 
 Feature requests:
-[x] Instead of 1 main func, there should be a pool of N threads...
-[x] The buffered rendering in Renderer is awesomely fast, but it should:
-    [x] Group draw calls by texture instead of hoping the draw calls are
-        ordered in a way to minimize state changes
-    [x] Take z-order into account by sorting the draw commands before drawing
-[x] Add Lua bindings for thread creation    
-[x] Make a drawAngle mode similar to the one in TouhouDS: auto (drawAngle=angle)
-    or manual (drawAngle doesn't change with angle)    
 [ ] Make the BGM cycle-synced to the gameplay (make sure to pause it along with
     the game)

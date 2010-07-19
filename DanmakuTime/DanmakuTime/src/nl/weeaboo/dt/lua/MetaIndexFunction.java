@@ -13,7 +13,7 @@ import org.luaj.vm.LuaState;
 public class MetaIndexFunction extends LFunction {
 
 	private static final Set<String> reserved = new HashSet<String>(Arrays.asList(
-			"init", "update", "destroy"));
+			"init", "update", "destroy", "animate"));
 	
 	private LTable table;
 	private LValue superTable;
@@ -41,7 +41,7 @@ public class MetaIndexFunction extends LFunction {
 				if (superTable instanceof LFunction) {
 					LFunction func = (LFunction)superTable;
 					return func.luaStackCall(vm);
-				} else {
+				} else {					
 					retval = superTable.luaGetTable(vm, key);
 				}
 			}

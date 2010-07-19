@@ -16,6 +16,7 @@ import org.luaj.vm.LuaState;
 public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 
 	protected LuaObjectLink luaLink;
+	protected LuaObjectLink luaAnimateLink;
 	
 	private boolean speedVecDirty;
 	private double speed, speedInc;
@@ -39,6 +40,19 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 		field.add(this);
 		
 		luaLink = new LuaObjectLink(runState, vm, udata);
+		
+		luaAnimateLink = new LuaObjectLink(runState, vm, udata) {
+			public void init() {
+				inited = true;
+
+				if (getMethod("animate") != null) {
+					int pushed = pushMethod("animate");
+					finished = (pushed <= 0);
+				} else {
+					finished = true;
+				}
+			}
+		};
 	}
 	
 	@Override
@@ -53,6 +67,7 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 
 	@Override
 	public void update(IInput input) {
+		//Update Lua links
 		if (luaLink != null && !luaLink.isFinished()) {
 			try {
 				luaLink.update();
@@ -62,6 +77,16 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 			}
 		}
 		
+		if (luaAnimateLink != null && !luaAnimateLink.isFinished()) {
+			try {
+				luaAnimateLink.update();
+			} catch (LuaException e) {
+				Log.warning(e);
+				luaAnimateLink = null;
+			}
+		}
+		
+		//Update speed/angle/pos
 	    speed += speedInc;
 
 	    if (angleInc != 0) {
