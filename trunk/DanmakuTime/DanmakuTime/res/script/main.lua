@@ -52,6 +52,7 @@ function main()
 			if math.random(10) >= 10 then
 				s:setTexture(textureStore:getTexture("test.png#g0"));
 				s:setZ(-1)
+				s:setDrawAngleAuto(false)
 			else
 				s:setTexture(textureStore:getTexture("test.png#g1"));
 			end

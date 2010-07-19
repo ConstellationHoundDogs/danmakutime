@@ -16,4 +16,6 @@ public interface ISprite extends IDrawable {
 	public void setAngle(double a);
 	public void setAngleInc(double ai);
 	
+	public void setDrawAngleAuto(boolean a);
+	
 }
