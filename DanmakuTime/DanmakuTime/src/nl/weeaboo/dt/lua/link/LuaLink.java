@@ -43,7 +43,7 @@ public abstract class LuaLink {
 		return 1;
 	}
 	
-	protected LFunction getMethod(String methodName) {
+	public LFunction getMethod(String methodName) {
 		rootVM.getglobal(methodName);
 		if (!rootVM.isfunction(-1)) {
 			rootVM.pop(1);
@@ -58,7 +58,8 @@ public abstract class LuaLink {
 			if (vm != null) {
 				vm.pop(-pushMethod(methodName));
 			}
-			throw new LuaException(String.format("function \"%s\" not found", methodName));
+			//throw new LuaException(String.format("function \"%s\" not found", methodName));
+			return 0;
 		}
 
 		for (Object arg : args) {
@@ -74,11 +75,17 @@ public abstract class LuaLink {
 		runState.setCurrentLink(this);		
 		try {
 			int pushed = pushCall(methodName, args);
-			vm.call(pushed, 1);
-			result = vm.poplvalue();
+			if (pushed > 0) {
+				vm.call(pushed, 1);
+				result = vm.poplvalue();
+			}
 		} catch (LuaErrorException e) {
-			if (vm != null) vm.pop(1);			
-			throw new LuaException(e.getMessage(), e.getCause());
+			if (vm != null) vm.pop(1);
+			if (e.getCause() instanceof NoSuchMethodException) {
+				//Ignore methods that don't exist
+			} else {
+				throw new LuaException(e.getMessage(), e.getCause());
+			}
 		} catch (RuntimeException e) {
 			if (vm != null) vm.pop(1);
 			throw new LuaException(e);
@@ -115,8 +122,12 @@ public abstract class LuaLink {
 		try {
 			thread.resumeFrom(vm, 0);
 		} catch (LuaErrorException e) {
-			finished = true;
-			throw new LuaException(e.getMessage(), e.getCause());
+			if (e.getCause() instanceof NoSuchMethodException) {
+				//Ignore methods that don't exist
+			} else {
+				finished = true;
+				throw new LuaException(e.getMessage(), e.getCause());
+			}
 		} catch (RuntimeException e) {
 			finished = true;
 			throw new LuaException(e);
