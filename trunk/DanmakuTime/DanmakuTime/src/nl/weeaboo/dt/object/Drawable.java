@@ -12,6 +12,7 @@ import nl.weeaboo.dt.lua.LuaException;
 import nl.weeaboo.dt.lua.LuaRunState;
 import nl.weeaboo.dt.lua.link.LuaLinkedObject;
 import nl.weeaboo.dt.lua.link.LuaObjectLink;
+import nl.weeaboo.dt.renderer.BlendMode;
 import nl.weeaboo.dt.renderer.IRenderer;
 import nl.weeaboo.dt.renderer.ITexture;
 
@@ -27,8 +28,12 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	private short z;
 	private double drawAngle;
 	private boolean clip;
+	private int color;
+	private BlendMode blendMode;
 	
 	public Drawable() {
+		color = 0xFFFFFFFF;
+		blendMode = BlendMode.NORMAL;
 	}
 	
 	//Functions
@@ -94,17 +99,29 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	}
 	
 	@Override
-	public void draw(IRenderer renderer) {
+	public final void draw(IRenderer renderer) {
+		boolean oldClip = renderer.isClipEnabled();
+		int oldColor = renderer.getColor();
+		BlendMode oldBlendMode = renderer.getBlendMode();
+		renderer.setClipEnabled(clip);
+		renderer.setColor(color);
+		renderer.setBlendMode(blendMode);
+		renderer.setTexture(texture);
+
+		drawGeometry(renderer);
+		
+		renderer.setClipEnabled(oldClip);
+		renderer.setColor(oldColor);
+		renderer.setBlendMode(oldBlendMode);
+	}
+	
+	public void drawGeometry(IRenderer renderer) {
 		if (texture == null) return;
 		
 		int tw = texture.getWidth();
 		int th = texture.getHeight();
-
-		boolean oldClip = renderer.isClipEnabled();		
-		renderer.setClipEnabled(clip);
-		renderer.setTexture(texture);
+		
 		renderer.drawRotatedQuad(x, y, tw, th, z, drawAngle);		
-		renderer.setClipEnabled(oldClip);
 	}
 	
 	//Getters
@@ -143,6 +160,22 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 		return clip;
 	}
 	
+	@Override
+	public int getColor() {
+		return color;
+	}
+
+	@Override
+	public double getAlpha() {
+		int ai = (color>>24) & 0xFF;
+		return ai / 255.0;
+	}
+
+	@Override
+	public BlendMode getBlendMode() {
+		return blendMode;
+	}
+	
 	//Setters
 	@Override
 	public void setDrawAngle(double a) {
@@ -179,5 +212,21 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	public void setClip(boolean c) {
 		clip = c;
 	}
+
+	@Override
+	public void setBlendMode(BlendMode b) {
+		blendMode = b;
+	}
 	
+	@Override
+	public void setColor(int argb) {
+		color = argb;
+	}
+
+	@Override
+	public void setAlpha(double a) {
+		int ai = Math.max(0, Math.min(255, (int)Math.round(a * 255.0)));
+		setColor((ai<<24) | (color & 0xFFFFFF));
+	}
+		
 }

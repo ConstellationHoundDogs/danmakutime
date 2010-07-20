@@ -30,7 +30,7 @@ function CircleGhost:update()
 end
 
 function CircleGhost:animate()
-	while true do
+	while false do
 		self:setTexture(textureStore:getTexture("test.png#g0"));
 		yield(10)
 		self:setTexture(textureStore:getTexture("test.png#g1"));
@@ -62,14 +62,13 @@ function main()
 	
 	Thread.new(function()
 		while true do
-			if input:consumeKey(Keys.Z) then
-				print("pew pew")
+			if input:consumeKey(Keys.X) then
+				print("The global key listener thread saw your key")
 			end
 			yield()
 		end
 	end)
 	
-	--[[
 	for group=1,50 do
 		for n=1,200 do
 			local s = Sprite.new()
@@ -80,6 +79,7 @@ function main()
 				s:setDrawAngleAuto(false)
 			else
 				s:setTexture(textureStore:getTexture("test.png#g1"));
+				s:setBlendMode(BlendMode.ADD)
 			end
 			
 			s:setPos(600, 300)
@@ -89,5 +89,4 @@ function main()
 		end		
 		yield(10)
 	end
-	]]--
 end

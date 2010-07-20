@@ -1,17 +1,16 @@
 
 Bugs:
-[x] ?? What happens with the clip rect if FBO's aren't available and
-    size != virtualSize...
 
 Feature requests:
-[x] Create functionality to render text on-screen
-[x] Currently, all coordinates are absoute, but things that are in fields
-    should have coordinates relative to the field it's in...
-
+[ ] Sprites should have a togglable out-of-bounds death.
+    Fields should have a changeable amount of padding where sprites may
+    temporarily reside (some room to hide sprites just outside the screen),
+    but outside of those bounds everything with the autoKill flag dies.
+	
 [ ] Support for changing BlendModes (NORMAL, ADD, ???)
+[ ] Create a helper image for determining the values of certain angles.
 [ ] Support rendering of IStyledText with TextDrawable and Renderer.
 [ ] The main field should be created from the script, not from Game.
-[ ] Sprites should have a togglable out-of-bounds death.	
 
 [ ] Is it possible to script a player?
 [ ] Create a "Boss extends Sprite" object to help with Boss creation? Or is
