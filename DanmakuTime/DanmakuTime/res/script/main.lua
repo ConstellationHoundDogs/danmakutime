@@ -7,16 +7,12 @@ function CircleGhost.new(o)
 end
 
 function CircleGhost:init()
-	print("CircleGhost:init")
-		
 	self:setPos(400, 300);
 	self:setZ(-100)
 	self:setTexture(textureStore:getTexture("test.png#g1"));
 end
 
 function CircleGhost:update()
-	print("CircleGhost:update")
-	
 	local n = 0
 	while n < 100 do	
 		self:setPos(levelWidth/2 + self.xmul * math.cos(n),
@@ -39,8 +35,6 @@ function CircleGhost:animate()
 end
 
 function CircleGhost:onDestroy()
-	print("I am already dead")
-	
 	--return false from this function to prevent the destruction of the object
 	--You can call destroy() again later to attempt another destruction
 	return false
@@ -54,10 +48,7 @@ function main()
 	player = Player.new()
 
 	local ghost = CircleGhost.new{xmul=100, ymul=100}
-	ghost:test("abc", 1)
     yield(10)
-	ghost:test("def", 1)
-
 	local ghost2 = CircleGhost.new{xmul=-100, ymul=100}
 	
 	Thread.new(function()

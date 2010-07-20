@@ -53,7 +53,7 @@ public class LuaRunState {
 
 		//global ITextureStore textureStore
 		vm.pushlvalue(LuajavaLib.toUserdata(ts, ts.getClass()));
-		vm.setglobal("textureStore");		
+		vm.setglobal("textureStore");
 	}
 	
 	//Functions

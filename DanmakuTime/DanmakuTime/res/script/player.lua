@@ -7,7 +7,8 @@ Player = {
 	fireDelay=3,
 	deathBombTime=20,
 	--state
-	lives=2,
+	lives=3,
+	bombs=2,
 	focus=false,
 	fireCooldown=0,
 	deathTime=0,
@@ -28,9 +29,11 @@ end
 function Player:update()
 	while true do
 		self:updateDeathTime()
+		
 		if self.deathTime <= 0 then
 			self:updateFocus()	
 			self:updatePos()
+			self:updateBomb()
 			self:updateFire()
 		end
 		
@@ -43,11 +46,19 @@ function Player:updateDeathTime()
 		self:setAlpha(self.deathTime / self.deathBombTime)
 		
 		self.deathTime = self.deathTime - 1
-		if self.deathTime <= 0 then
+		
+		if self.deathTime > 0 then
+			if self:updateBomb() then
+				--Bomb used, cancel death...
+				self.deathTime = 0
+			end
+		else
 			if self.lives > 0 then
 			    self.lives = self.lives - 1			    
-			else
-				destroy()
+			end
+			
+			if self.lives <= 0 then
+				self:destroy()
 			end
 		end
 	else
@@ -88,6 +99,19 @@ function Player:updatePos()
 	y = math.max(24, math.min(levelHeight-24, y))
 	
 	self:setPos(x, y)
+end
+
+function Player:updateBomb()
+	if self.bombs > 0 and input:consumeKey(Keys.X) then
+		self.bombs = self.bombs - 1		
+		self:bomb()
+		return true
+	end
+	return false
+end
+
+function Player:bomb()
+	print("boom")
 end
 
 function Player:updateFire()	
@@ -161,5 +185,6 @@ function Player:onDestroy()
 		print("Player is out of lives")
 		return true
 	end
+	
 	return false
 end
