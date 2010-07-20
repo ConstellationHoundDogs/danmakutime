@@ -28,11 +28,16 @@ public class ConstructorFunction<T extends LuaLinkedObject> extends LFunction {
 		
 		try {
 			final T javaInstance = clazz.newInstance();
-						
-			LTable table;
-			if (vm.gettop() >= 1) {
-				table = vm.checktable(1);
-			} else {
+			
+			//Init using the first table argument
+			LTable table = null;
+			for (int n = 1; n <= vm.gettop(); n++) {
+				if (vm.istable(n)) {
+					table = vm.totable(n);
+					break;
+				}
+			}
+			if (table == null) {
 				table = new LTable();
 			}
 					

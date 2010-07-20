@@ -1,5 +1,6 @@
 package nl.weeaboo.dt.object;
 
+import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.renderer.BlendMode;
 import nl.weeaboo.dt.renderer.IRenderer;
@@ -82,6 +83,13 @@ public interface IDrawable {
 	
 	// === Setters =============================================================
 
+	/**
+	 * Sets the field for this drawable and adds the drawable to it.
+	 * 
+	 * @param field The field to add this drawable to
+	 */
+	public void setField(IField field);
+	
 	/**
 	 * Changes the drawable's position on-screen
 	 * 

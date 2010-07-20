@@ -16,7 +16,7 @@ public class Field implements IField {
 	private int padding;
 	
 	private Collection<IDrawable> drawables;
-	private Collection<IDrawable> standbyList;
+	private Collection<IDrawable> standbyList;	
 	
 	public Field(int x, int y, int w, int h, int pad) {
 		bounds = new Rectangle(x, y, w, h);
@@ -29,13 +29,19 @@ public class Field implements IField {
 	//Functions
 	@Override
 	public void add(IDrawable d) {
+		d.setField(this);
 		standbyList.add(d);
 	}
 
 	@Override
-	public void update(IInput input) {
+	public void flushStandbyList() {
 		drawables.addAll(standbyList);
-		standbyList.clear();
+		standbyList.clear();		
+	}
+	
+	@Override
+	public void update(IInput input) {
+		flushStandbyList();
 		
 		Iterator<IDrawable> itr = drawables.iterator();
 		while (itr.hasNext()) {

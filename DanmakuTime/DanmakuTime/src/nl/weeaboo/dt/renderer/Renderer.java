@@ -134,7 +134,7 @@ public class Renderer implements IRenderer {
 		int color = glm.getColor();
 		
 		//Setup blend mode
-		glm.pushBlendMode(nl.weeaboo.game.gl.BlendMode.LIGHT);		
+		glm.pushBlendMode(nl.weeaboo.game.gl.BlendMode.DEFAULT);		
 		BlendMode blendMode = BlendMode.NORMAL;
 		
 		//Draw buffered commands

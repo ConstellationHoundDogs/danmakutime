@@ -114,4 +114,5 @@ public interface IRenderer {
 	 * @param b The new blend mode
 	 */
 	public void setBlendMode(BlendMode b);
+	
 }
