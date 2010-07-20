@@ -43,6 +43,8 @@ end
 --------------------------------------------------------------------------------
 
 function main()
+	soundEngine:setBGM("bgm/bgm01.ogg");
+
 	buildLevel("level-bg.png")
 
 	local ghost = CircleGhost.new{xmul=100, ymul=100}
@@ -76,6 +78,8 @@ function main()
 			s:setSpeed(2 + math.random() * 2)
 			s:setAngle(256)
 			s:setAngleInc(2 + math.random() * 1)
+			
+			soundEngine:playSound("sfx01.ogg")
 		end		
 		yield(10)
 	end
