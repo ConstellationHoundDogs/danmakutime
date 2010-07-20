@@ -62,8 +62,9 @@ function main()
 	
 	Thread.new(function()
 		while true do
-			if input:consumeKey(Keys.X) then
-				print("The global key listener thread saw your key")
+			if input:consumeKey(Keys.Q) then
+				print("The global key listener thread saw your key. And will proceed to kill you.")
+				player:destroy()
 			end
 			yield()
 		end

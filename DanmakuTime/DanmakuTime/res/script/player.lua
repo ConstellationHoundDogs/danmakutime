@@ -5,10 +5,12 @@ Player = {
 	speed=3,
 	focusSpeed=1.5,
 	fireDelay=3,
+	deathBombTime=20,
 	--state
 	lives=2,
 	focus=false,
 	fireCooldown=0,
+	deathTime=0,
 	dx=0
 	}
 
@@ -25,12 +27,32 @@ end
 
 function Player:update()
 	while true do
-		self:updateFocus()	
-		self:updatePos()
-		self:updateFire()
+		self:updateDeathTime()
+		if self.deathTime <= 0 then
+			self:updateFocus()	
+			self:updatePos()
+			self:updateFire()
+		end
 		
 		yield()
 	end
+end
+
+function Player:updateDeathTime()
+	if self.deathTime > 0 then
+		self:setAlpha(self.deathTime / self.deathBombTime)
+		
+		self.deathTime = self.deathTime - 1
+		if self.deathTime <= 0 then
+			if self.lives > 0 then
+			    self.lives = self.lives - 1			    
+			else
+				destroy()
+			end
+		end
+	else
+		self:setAlpha(1)
+	end	
 end
 
 function Player:updateFocus()
@@ -131,10 +153,13 @@ function Player:animate()
 end
 
 function Player:onDestroy()
-	if self.lives > 0 then
-	    self.lives = self.lives - 1
-	    return false
-	else
+	if self.deathTime <= 0 then
+		self.deathTime = self.deathBombTime
+	end
+	
+	if self.lives <= 0 then
+		print("Player is out of lives")
 		return true
 	end
+	return false
 end
