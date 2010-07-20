@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.util.Random;
 
 import nl.weeaboo.dt.TinyMap;
+import nl.weeaboo.dt.audio.ISoundEngine;
 import nl.weeaboo.dt.field.Field;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
@@ -32,7 +33,7 @@ public class LuaRunState {
 	private LuaLink current;
 	
 	public LuaRunState(long seed, LuaThreadPool tp, TinyMap<IField> fm,
-			ITextureStore ts)
+			ITextureStore ts, ISoundEngine se)
 	{
 		random = new Random(seed);
 		threadPool = tp;
@@ -55,6 +56,10 @@ public class LuaRunState {
 		//global ITextureStore textureStore
 		vm.pushlvalue(LuajavaLib.toUserdata(ts, ts.getClass()));
 		vm.setglobal("textureStore");
+
+		//global ISoundEngine soundEngine
+		vm.pushlvalue(LuajavaLib.toUserdata(se, se.getClass()));
+		vm.setglobal("soundEngine");
 	}
 	
 	//Functions

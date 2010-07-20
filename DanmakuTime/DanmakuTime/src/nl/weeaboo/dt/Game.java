@@ -13,6 +13,8 @@ import java.nio.IntBuffer;
 import javax.imageio.ImageIO;
 
 import nl.weeaboo.common.GraphicsUtil;
+import nl.weeaboo.dt.audio.ISoundEngine;
+import nl.weeaboo.dt.audio.SoftSyncSoundEngine;
 import nl.weeaboo.dt.field.Field;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.Input;
@@ -49,7 +51,9 @@ public class Game extends GameBase {
 	private Drawable screenshot;
 	private boolean screenshotRequest, screenshotRequestSave;
 	private Notifier notifier;
+	
 	private ITextureStore texStore;	
+	private ISoundEngine soundEngine;
 	
 	private LuaRunState luaRunState;
 	private boolean paused;
@@ -140,8 +144,9 @@ public class Game extends GameBase {
 		int width = getWidth();
 		int height = getHeight();
 		
-		texStore = new TextureStore(rm.getImageStore());
-		
+		texStore = createTextureStore();
+		soundEngine = createSoundEngine();
+				
 		TinyMap<IField> fieldMap = new TinyMap<IField>();
 		fieldMap.put(0, new Field(0, 0, width, height, 0)); //Full-screen field (0)
 		fieldMap.put(1, new Field(0, 0, width, height, 0)); //Game field (1)
@@ -150,7 +155,8 @@ public class Game extends GameBase {
 		//Init Lua
 		LuaThreadPool threadPool = new LuaThreadPool();
 		
-		luaRunState = new LuaRunState(System.nanoTime(), threadPool, fieldMap, texStore);
+		luaRunState = new LuaRunState(System.nanoTime(), threadPool, fieldMap,
+				texStore, soundEngine);
 		
 		LuaState vm = getLuaState();
 				
@@ -173,7 +179,7 @@ public class Game extends GameBase {
 		
 		//Start main thread
 		threadPool.add(new LuaFunctionLink(luaRunState, vm, "main"));
-		
+				
 		error = false;
 	}
 	
@@ -181,6 +187,8 @@ public class Game extends GameBase {
 		super.update(input, dt);
 				
 		notifier.update(Math.round(1000f * dt));
+		
+		soundEngine.update(paused ? 0 : 1);
 		
 		if (error) {
 			return;
@@ -199,11 +207,15 @@ public class Game extends GameBase {
 			screenshotRequestSave = true;
 		} else if (ii.consumeKey(KeyEvent.VK_F8)) {
 			//Video capture activation key
-			try {
-				startRecordingVideo("capture.mkv");
-				Log.message("Starting video recording");
-			} catch (IOException e) {
-				Log.showError(e);
+			if (isRecordingVideo()) {
+				stopRecordingVideo();
+			} else {			
+				try {
+					startRecordingVideo("capture.mkv");
+					Log.message("Starting video recording");
+				} catch (IOException e) {
+					Log.showError(e);
+				}
 			}
 		}
 		
@@ -317,6 +329,14 @@ public class Game extends GameBase {
 		
 		return pr;
 	}	
+	
+	protected ITextureStore createTextureStore() {
+		return new TextureStore(getImageStore());		
+	}
+	
+	protected ISoundEngine createSoundEngine() {
+		return new SoftSyncSoundEngine(getSoundManager(), getConfig().graphics.getFPS());
+	}
 	
 	//Getters
 	public Config getConfig() {

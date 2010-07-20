@@ -5,20 +5,12 @@ Feature requests:
 [ ] Is it possible to script a player?
 [ ] Create a "Boss extends Sprite" object to help with Boss creation? Or is
     such an object better created from Lua?
-
-[x] Implement pausing in a way that's accessible from the script and the script
-    must also be able to control the pause menu. Perhaps have the pause
-    function take a LFunction argument??
-[x] Objects should be able to specify which field they want to be spawned in.
-    Require it as the first constructor argument and default to 1 if absent?
-[x] The blurred screenshot gets drawn instead of any of the rendering from
-    LuaRunState. Instead, disable all drawing except field(-1) which can then
-    be used to draw the pause menu options.    
-    Alternatively, the pause banner gets added as a Drawable and I just make
-    functions to modify virtual near and far clipping planes to disable all
-    draw calls with z > ??? <--- would be overkill.
     
-[ ] Make the BGM cycle-synced to the gameplay (make sure to pause it along with
+[x] Create the sound engine: Two implementations, one using hard audio sync
+    with an explicit vorbisreader and another using SoundManager without
+    proper audio sync.
+[x] Make the BGM cycle-synced to the gameplay (make sure to pause it along with
     the game)
+[ ] How does the user specify which SoundEngine they want?
 
 [ ] Support rendering of IStyledText with TextDrawable and Renderer.
