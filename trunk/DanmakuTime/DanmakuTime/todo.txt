@@ -6,9 +6,12 @@ Feature requests:
 [ ] Create a "Boss extends Sprite" object to help with Boss creation? Or is
     such an object better created from Lua?
 
-[ ] Implement pausing in a way that's accessible from the script and the script
+[x] Implement pausing in a way that's accessible from the script and the script
     must also be able to control the pause menu. Perhaps have the pause
     function take a LFunction argument??
+[ ] The blurred screenshot gets drawn instead of any of the rendering from
+    LuaRunState. Instead, disable all drawing except field(-1) which can then
+    be used to draw the pause menu options.    
 [ ] Make the BGM cycle-synced to the gameplay (make sure to pause it along with
     the game)
 

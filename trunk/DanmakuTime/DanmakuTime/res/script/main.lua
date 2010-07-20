@@ -45,8 +45,6 @@ end
 function main()
 	buildLevel("level-bg.png")
 
-	player = Player.new()
-
 	local ghost = CircleGhost.new{xmul=100, ymul=100}
     yield(10)
 	local ghost2 = CircleGhost.new{xmul=-100, ymul=100}

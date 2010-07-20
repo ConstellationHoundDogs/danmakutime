@@ -23,4 +23,7 @@ function buildLevel(background)
 	text:setDrawAngle(128)
 	text:setZ(-1000)
 	
+	--Create player
+	player = Player.new()
+		
 end

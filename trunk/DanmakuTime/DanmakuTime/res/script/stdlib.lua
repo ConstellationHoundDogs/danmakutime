@@ -26,3 +26,13 @@ function signum(x)
 	end
 	return 0
 end
+
+function pauseHandler()
+	while true do
+		if input:consumeKey(Keys.ESCAPE) then
+			return
+		end
+		
+		yield()
+	end
+end
