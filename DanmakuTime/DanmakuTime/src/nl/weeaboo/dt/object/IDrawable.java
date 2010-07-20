@@ -1,6 +1,7 @@
 package nl.weeaboo.dt.object;
 
 import nl.weeaboo.dt.input.IInput;
+import nl.weeaboo.dt.renderer.BlendMode;
 import nl.weeaboo.dt.renderer.IRenderer;
 import nl.weeaboo.dt.renderer.ITexture;
 
@@ -63,6 +64,22 @@ public interface IDrawable {
 	 */
 	public boolean isClip();
 	
+	/**
+	 * @return The current blending color
+	 */
+	public int getColor();
+	
+	/**
+	 * @return The alpha component of the current blending color, between
+	 *         <code>0.0</code> and <code>1.0</code>
+	 */
+	public double getAlpha();
+	
+	/**
+	 * @return The blend mode used by this object when rendering
+	 */
+	public BlendMode getBlendMode();
+	
 	// === Setters =============================================================
 
 	/**
@@ -98,4 +115,31 @@ public interface IDrawable {
 	 * Enable/disable clipping for this drawable 
 	 */
 	public void setClip(boolean c);
+	
+	/**
+	 * Changes the color this object is blended with
+	 * 
+	 * @param argb The new blending color, packed as an <code>int</code> (in
+	 *        ARGB order)
+	 */
+	public void setColor(int argb);
+	
+	/**
+	 * Convenience method for just changing the alpha part of the blending
+	 * color.
+	 * 
+	 * @param a The new alpha component, between <code>0.0</code> and
+	 *        <code>1.0</code>
+	 *        
+	 * @see #setColor(int)
+	 */
+	public void setAlpha(double a);
+	
+	/**
+	 * Changes the default blend mode with which this object gets drawn
+	 * 
+	 * @param b The new blend mode
+	 */
+	public void setBlendMode(BlendMode b);
+	
 }

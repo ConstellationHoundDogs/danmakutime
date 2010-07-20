@@ -28,6 +28,8 @@ public class Renderer implements IRenderer {
 	private Rectangle clipRect;
 	private boolean clipEnabled;
 	private double translationX, translationY;
+	private int color;
+	private BlendMode blendMode;
 	
 	private List<DrawCommand> drawBuffer;
 	
@@ -40,6 +42,8 @@ public class Renderer implements IRenderer {
 		
 		clipRect = new Rectangle(0, 0, w, h);
 		clipEnabled = true;
+		color = 0xFFFFFFFF;
+		blendMode = BlendMode.NORMAL;
 		drawBuffer = new ArrayList<DrawCommand>();
 	}
 	
@@ -55,7 +59,8 @@ public class Renderer implements IRenderer {
 	{
 		cx += translationX;
 		cy += translationY;
-		drawBuffer.add(new DrawRotQuadCommand(texture, clipEnabled, cx, cy, w, h, z, angle));
+		drawBuffer.add(new DrawRotQuadCommand(texture, clipEnabled, blendMode, color,
+				cx, cy, w, h, z, angle));
 		
 		/*
 		GL2 gl = GLManager.getGL2(glm.getGL());
@@ -97,7 +102,8 @@ public class Renderer implements IRenderer {
 	public void drawText(String txt, double x, double y, short z, double angle, double wrapWidth) {
 		x += translationX;
 		y += translationY;
-		drawBuffer.add(new DrawTextCommand(clipEnabled, txt, x, y, z, angle, wrapWidth));
+		drawBuffer.add(new DrawTextCommand(clipEnabled, blendMode, color,
+				txt, x, y, z, angle, wrapWidth));
 	}
 	
 	public void flush() {
@@ -120,13 +126,22 @@ public class Renderer implements IRenderer {
 		gl.glScissor(Math.round(clipDX + scale * clipRect.x),
 				realSize.height - Math.round(clipDY + scale * (clipRect.y+clipRect.height)),
 				Math.round(scale * clipRect.width), Math.round(scale * clipRect.height));
-		
+
 		boolean clipping = true;
+
+		//Setup color
+		glm.pushColor();
+		int color = glm.getColor();
+		
+		//Setup blend mode
+		glm.pushBlendMode(nl.weeaboo.game.gl.BlendMode.LIGHT);		
+		BlendMode blendMode = BlendMode.NORMAL;
 		
 		//Draw buffered commands
 		Texture cur = null;
 		int buffered = 0;	
 		for (DrawCommand cmd : cmds) {
+			//Clipping changed
 			if (cmd.clipEnabled != clipping) {
 				buffered = quadFlush(gl, buffered);
 
@@ -138,7 +153,24 @@ public class Renderer implements IRenderer {
 				clipping = cmd.clipEnabled;
 			}
 			
-			if (cmd.type == DrawRotQuadCommand.type) {
+			//Blend mode changed
+			if (cmd.blendMode != blendMode) {
+				buffered = quadFlush(gl, buffered);
+
+				blendMode = cmd.blendMode;
+				gl.glBlendFunc(blendMode.sfactor, blendMode.dfactor);
+			}
+			
+			//Foreground color changed
+			if (cmd.argb != color) {
+				buffered = quadFlush(gl, buffered);
+
+				color = cmd.argb;
+				glm.setColorARGB(color);
+			}
+			
+			//Draw command
+			if (cmd.type == DrawType.ROT_QUAD) {
 				DrawRotQuadCommand dcmd = (DrawRotQuadCommand)cmd;
 				GLImage image = (dcmd.tex != null ? dcmd.tex.getImage() : null);			
 				if (image != null) {				
@@ -181,7 +213,7 @@ public class Renderer implements IRenderer {
 					
 					buffered += 4;
 				}
-			} else if (cmd.type == DrawTextCommand.type) {
+			} else if (cmd.type == DrawType.TEXT) {
 				buffered = quadFlush(gl, buffered);
 				
 				DrawTextCommand dcmd = (DrawTextCommand)cmd;
@@ -205,8 +237,10 @@ public class Renderer implements IRenderer {
 		}
 		
 		buffered = quadFlush(gl, buffered);
-		
+				
 		gl.glDisable(GL.GL_SCISSOR_TEST);
+		glm.popBlendMode();
+		glm.popColor();
 	}
 	
 	private int quadFlush(GL2 gl, int buffered) {
@@ -233,7 +267,18 @@ public class Renderer implements IRenderer {
 		return clipEnabled;
 	}
 	
+	@Override
+	public BlendMode getBlendMode() {
+		return blendMode;
+	}
+
+	@Override
+	public int getColor() {
+		return color;
+	}
+	
 	//Setters
+	
 	@Override
 	public void setTexture(ITexture tex) {
 		texture = (Texture)tex;
@@ -251,51 +296,70 @@ public class Renderer implements IRenderer {
 		clipEnabled = ce;
 	}
 	
+	@Override
+	public void setBlendMode(BlendMode b) {
+		blendMode = b;
+	}
+
+	@Override
+	public void setColor(int argb) {
+		color = argb;
+	}
+	
 	//Inner Classes
+	private enum DrawType {
+		ROT_QUAD, TEXT;
+	}
+	
 	private static class DrawCommand implements Comparable<DrawCommand> {
 		
-		private final int sortKey;
-		public final byte type;
+		public final DrawType type;
 		public final boolean clipEnabled;
+		public final BlendMode blendMode;
+		public final int argb;
+
+		private final long sortKey;
 		
-		public DrawCommand(int sortKey, byte type, boolean clipEnabled) {
-			this.sortKey = sortKey;
+		public DrawCommand(int z, DrawType type, boolean clip, BlendMode blend, int argb,
+				byte privateField)
+		{
 			this.type = type;
-			this.clipEnabled = clipEnabled;
+			this.clipEnabled = clip;
+			this.blendMode = blend;
+			this.argb = argb;
+			
+			//Key = ZZZZZZZZ ZZZZZZZZ CYYYBBBB ........ ........ ........ ........ TTTTTTTT
+			sortKey = (((~z) & 0xFFFFL) << 48L)
+					| ((clipEnabled ? 1 : 0) << 47L)
+					| ((type.ordinal() & 7) << 44L)
+					| ((blend.ordinal() & 7) << 40L)
+					| ((argb & 0xFFFFFFFFL) << 8L)
+					| (privateField & 0xFFL);
 		}
 
 		@Override
 		public int compareTo(DrawCommand o) {
 			return (sortKey >= o.sortKey ? 1 : (sortKey < o.sortKey ? -1 : 0));
-		}
-		
-		static int mkKey(int type, Texture tex, boolean clipEnabled, int z) {
-			//Key = ZZZZZZZZ ZZZZZZZZ CYYYTTTT TTTTTTTT
-			return (~z << 16)
-				| (clipEnabled ? 1<<15 : 0)
-				| (type & 7)
-				| (tex != null ? tex.hashCode() & 0xFFF : 0);			
-		}
-		
+		}		
 	}
 	
 	private static class DrawRotQuadCommand extends DrawCommand {
 		
-		static final byte type = 0;
-		
 		public final Texture tex;
 		public final float cx, cy, w, h, angle;
 			
-		public DrawRotQuadCommand(Texture tex, boolean clipEnabled,
+		public DrawRotQuadCommand(Texture tex, boolean clip, BlendMode blend, int argb,
 				double cx, double cy, double w, double h, short z, double angle)
 		{
-			this(tex, clipEnabled, (float)cx, (float)cy, (float)w, (float)h, z, (float)angle);
+			this(tex, clip, blend, argb, (float)cx, (float)cy, (float)w, (float)h,
+					z, (float)angle);
 		}
 		
-		public DrawRotQuadCommand(Texture tex, boolean clipEnabled,
+		public DrawRotQuadCommand(Texture tex, boolean clip, BlendMode blend, int argb,
 				float cx, float cy, float w, float h, short z, float angle)
 		{			
-			super(mkKey(type, tex, clipEnabled, z), type, clipEnabled);
+			super(z, DrawType.ROT_QUAD, clip, blend, argb,
+					(tex != null ? (byte)(tex.hashCode()&0xFF) : 0));
 			
 			this.tex = tex;
 			this.cx = cx;
@@ -308,21 +372,19 @@ public class Renderer implements IRenderer {
 
 	private static class DrawTextCommand extends DrawCommand {
 		
-		static final byte type = 1;
-		
 		public final String text;
 		public final float x, y, angle, wrapWidth;
 			
-		public DrawTextCommand(boolean clipEnabled, String text,
+		public DrawTextCommand(boolean clip, BlendMode blend, int argb, String text,
 				double x, double y, short z, double angle, double wrapWidth)
 		{
-			this(clipEnabled, text, (float)x, (float)y, z, (float)angle, (float)wrapWidth);
+			this(clip, blend, argb, text, (float)x, (float)y, z, (float)angle, (float)wrapWidth);
 		}
 		
-		public DrawTextCommand(boolean clipEnabled, String text,
+		public DrawTextCommand(boolean clip, BlendMode blend, int argb, String text,
 				float x, float y, short z, float angle, float wrapWidth)
 		{
-			super(mkKey(type, null, clipEnabled, z), type, clipEnabled);
+			super(z, DrawType.TEXT, clip, blend, argb, (byte)0);
 			
 			this.text = text;
 			this.x = x;

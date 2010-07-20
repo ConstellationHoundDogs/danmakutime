@@ -11,12 +11,9 @@ public class TextDrawable extends Drawable implements ITextDrawable {
 	}
 	
 	//Functions
-	public void draw(IRenderer r) {
-		boolean oldClip = r.isClipEnabled();		
-		r.setClipEnabled(isClip());
-		r.setTexture(texture);
+	@Override
+	public void drawGeometry(IRenderer r) {
 		r.drawText(text, x, y, getZ(), getDrawAngle(), width);		
-		r.setClipEnabled(oldClip);
 	}
 	
 	//Getters

@@ -12,6 +12,7 @@ import nl.weeaboo.dt.lua.link.LuaFunctionLink;
 import nl.weeaboo.dt.lua.link.LuaLink;
 import nl.weeaboo.dt.lua.link.LuaLinkedObject;
 
+import org.luaj.lib.j2se.LuajavaLib;
 import org.luaj.vm.LFunction;
 import org.luaj.vm.LString;
 import org.luaj.vm.LTable;
@@ -99,6 +100,15 @@ public class LuaUtil {
 		vm.setglobal(c.getSimpleName());
 	}
 
+	public static void registerEnum(LuaState vm, Class<? extends Enum<?>> c) {
+		LTable table = new LTable();
+		for (Enum<?> e : c.getEnumConstants()) {
+			table.put(e.name(), LuajavaLib.toUserdata(e, e.getClass()));
+		}
+		vm.pushlvalue(table);
+		vm.setglobal(c.getSimpleName());
+	}
+	
 	/**
 	 * @param table The table to clone
 	 * @return A shallow copy of the input table

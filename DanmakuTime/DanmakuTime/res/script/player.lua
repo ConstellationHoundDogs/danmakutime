@@ -4,9 +4,11 @@ Player = {
 	--stats
 	speed=3,
 	focusSpeed=1.5,
+	fireDelay=3,
 	--state
 	lives=2,
 	focus=false,
+	fireCooldown=0,
 	dx=0
 	}
 
@@ -25,6 +27,7 @@ function Player:update()
 	while true do
 		self:updateFocus()	
 		self:updatePos()
+		self:updateFire()
 		
 		yield()
 	end
@@ -63,6 +66,32 @@ function Player:updatePos()
 	y = math.max(24, math.min(levelHeight-24, y))
 	
 	self:setPos(x, y)
+end
+
+function Player:updateFire()	
+	if self.fireCooldown > 0 then
+		self.fireCooldown = self.fireCooldown - 1
+	else
+		if input:isKeyHeld(Keys.Z) then
+			self.fireCooldown = self.fireDelay
+			self:fire()
+		end
+	end
+end
+
+function Player:fire()
+	local x = self:getX()
+	local y = self:getY()
+	local z = self:getZ() + 100
+
+	for n=0,4 do
+		local s = Sprite.new()
+		s:setTexture(textureStore:getTexture("test.png#g0"));
+		s:setPos(x, y)
+		s:setZ(z)
+		s:setAngle(-32 + 16 * n)
+		s:setSpeed(10)
+	end
 end
 
 function Player:animate()

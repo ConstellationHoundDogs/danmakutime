@@ -67,6 +67,16 @@ public interface IRenderer {
 	 */
 	public boolean isClipEnabled();
 	
+	/**
+	 * @return The current color
+	 */
+	public int getColor();
+	
+	/**
+	 * @return The current blend mode
+	 */
+	public BlendMode getBlendMode();
+	
 	// === Setters =============================================================
 	
 	/**
@@ -90,4 +100,18 @@ public interface IRenderer {
 	 * Toggles clipping on or off for future draw operations
 	 */
 	public void setClipEnabled(boolean ce);
+	
+	/**
+	 * Changes the color blended with future drawing operations
+	 * 
+	 * @param argb The new color packed as an <code>int</code> (in ARGB order)
+	 */
+	public void setColor(int argb);
+	
+	/**
+	 * Changes the blend mode for future drawing operations
+	 * 
+	 * @param b The new blend mode
+	 */
+	public void setBlendMode(BlendMode b);
 }
