@@ -28,6 +28,7 @@ public class LuaRunState {
 	private Random random;
 	private LuaThreadPool threadPool;
 	private TinyMap<IField> fieldMap;
+
 	private LuaLink current;
 	
 	public LuaRunState(long seed, LuaThreadPool tp, TinyMap<IField> fm,
@@ -70,15 +71,14 @@ public class LuaRunState {
 		return field;
 	}
 	
-	public void update(IInput input) {
-		
+	public void update(IInput input) {					
 		//Update threads
 		threadPool.update();
 			
 		//Update fields
 		for (IField field : fieldMap.getValues()) {
 			field.update(input);
-		}		
+		}
 	}
 	
 	public void draw(IRenderer r) {

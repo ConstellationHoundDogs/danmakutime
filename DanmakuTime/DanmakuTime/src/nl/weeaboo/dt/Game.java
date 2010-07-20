@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.IntBuffer;
 
 import javax.imageio.ImageIO;
 
@@ -15,15 +16,19 @@ import nl.weeaboo.common.GraphicsUtil;
 import nl.weeaboo.dt.field.Field;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.Input;
+import nl.weeaboo.dt.lua.LuaException;
 import nl.weeaboo.dt.lua.LuaRunState;
 import nl.weeaboo.dt.lua.LuaThreadPool;
 import nl.weeaboo.dt.lua.LuaUtil;
 import nl.weeaboo.dt.lua.link.LuaFunctionLink;
+import nl.weeaboo.dt.lua.link.LuaLink;
+import nl.weeaboo.dt.renderer.Blur;
 import nl.weeaboo.dt.renderer.ITextureStore;
 import nl.weeaboo.dt.renderer.Renderer;
 import nl.weeaboo.dt.renderer.TextureStore;
 import nl.weeaboo.game.GameBase;
 import nl.weeaboo.game.ResourceManager;
+import nl.weeaboo.game.gl.GLImage;
 import nl.weeaboo.game.gl.GLManager;
 import nl.weeaboo.game.gl.GLVideoCapture;
 import nl.weeaboo.game.gl.Screenshot;
@@ -39,11 +44,14 @@ public class Game extends GameBase {
 
 	private boolean error;
 	private GLVideoCapture videoCapture;
-	private boolean screenshotRequest;
+	private GLImage screenshot;
+	private boolean screenshotRequest, screenshotRequestSave;
 	private Notifier notifier;
-	private ITextureStore texStore;
-
+	private ITextureStore texStore;	
+	
 	private LuaRunState luaRunState;
+	private boolean paused;
+	private LuaLink pauseThread;
 	
 	public Game(Config c, ResourceManager rm, GameFrame gf) {
 		super(c, rm, gf);
@@ -184,6 +192,7 @@ public class Game extends GameBase {
 		if (ii.consumeKey(KeyEvent.VK_F7)) {
 			//Screen capture activation key
 			screenshotRequest = true;
+			screenshotRequestSave = true;
 		} else if (ii.consumeKey(KeyEvent.VK_F8)) {
 			//Video capture activation key
 			try {
@@ -194,7 +203,30 @@ public class Game extends GameBase {
 			}
 		}
 		
-		luaRunState.update(ii);
+		if (paused) {
+			if (!pauseThread.isFinished()) {
+				try {
+					pauseThread.update();
+				} catch (LuaException e) {
+					Log.warning(e);
+					paused = false;
+				}
+			} else {
+				paused = false;				
+			}
+			
+			if (!paused) {
+				screenshot = null;
+			}
+		} else {
+			luaRunState.update(ii);
+			
+			if (input.consumeKey(KeyEvent.VK_ESCAPE)) {				
+				paused = true;
+				screenshotRequest = true;
+				pauseThread = new LuaFunctionLink(luaRunState, vm, "pauseHandler");
+			}			
+		}
 	}
 	
 	public void draw(GLManager glm) {		
@@ -202,57 +234,49 @@ public class Game extends GameBase {
 		int h = getHeight();
 		int rw = getRealWidth();
 		int rh = getRealHeight();
-		
-		Renderer r = new Renderer(glm, createParagraphRenderer(), w, h, rw, rh);
-		
-		/*
-		//Raw draw performance test
-		 
-		int rows = 100;
-		int cols = 100;
-		
-		for (int y = 0; y < rows; y++) {
-			for (int x = 0; x < cols; x++) {
-				float a = x * w / cols;
-				float b = y * h / rows;
 				
-				float dx = w / cols;
-				float dy = h / rows;
-				
-				glm.setColorARGB(luaRunState.getRandom().nextInt());
-				glm.fillRect(a+dx*.1f, b+dy*.1f, dx*.8f, dy*.8f);
-			}
-		}
+		if (paused && screenshot != null) {
+			screenshot.draw(glm, 0, 0, w, h);
+		} else {		
+			Renderer r = new Renderer(glm, createParagraphRenderer(), w, h, rw, rh);
+			luaRunState.draw(r);
+			r.flush();
 
-		glm.setColorARGB(0xFFFFFFFF);
-		*/
-		
-		luaRunState.draw(r);		
-		
-		r.flush();
-		
-		//Draw HUD
-		ParagraphRenderer pr = createParagraphRenderer();
-		pr.setBounds(20, 20, w-40, h-40);
-		
-		MutableTextStyle mts = pr.getDefaultStyle().mutableCopy();
-		mts.setAnchor(9);
-		pr.setDefaultStyle(mts.immutableCopy());
-		
-		String hudText = String.format("%.2f FPS\n%d Objects\n",
-				getFPS(), luaRunState.getObjectCount());
-		pr.drawText(glm, hudText);
-		
+			//Draw HUD
+			ParagraphRenderer pr = createParagraphRenderer();
+			pr.setBounds(20, 20, w-40, h-40);
+			
+			MutableTextStyle mts = pr.getDefaultStyle().mutableCopy();
+			mts.setAnchor(9);
+			pr.setDefaultStyle(mts.immutableCopy());
+			
+			String hudText = String.format("%.2f FPS\n%d Objects\n",
+					getFPS(), luaRunState.getObjectCount());
+			pr.drawText(glm, hudText);
+		}		
+				
 		//Take screen capture
 		if (screenshotRequest) {
-			Screenshot ss = Screenshot.screenshot(glm, w, h, rw, rh);
-			BufferedImage img = GraphicsUtil.createBufferedImage(ss.width, ss.height, ss.getARGB());
-			try {
-				ImageIO.write(img, "png", new File("capture-" + System.currentTimeMillis() + ".png"));
-			} catch (IOException e) {
-				Log.showError(e);
-			} finally {
+			screenshotRequest = false;
+			
+			Screenshot ss = Screenshot.screenshot(glm, w, h, rw, rh);			
+			if (screenshotRequestSave) {
 				screenshotRequest = false;
+
+				try {
+					BufferedImage img = GraphicsUtil.createBufferedImage(ss.width, ss.height, ss.getARGB());
+					ImageIO.write(img, "png", new File("capture-" + System.currentTimeMillis() + ".png"));
+					Log.message("Screenshot saved");
+				} catch (IOException e) {
+					Log.showError(e);
+				}
+			} else {
+				int argb[] = ss.getARGB();
+				Dimension size = new Dimension(ss.width, ss.height);
+				argb = Blur.process(argb, size, 4, true, true);
+				
+				screenshot = addGeneratedImage(IntBuffer.wrap(argb),
+						size.width, size.height, true, false);
 			}
 		}
 		
