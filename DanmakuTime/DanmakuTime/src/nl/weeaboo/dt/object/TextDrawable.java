@@ -6,14 +6,16 @@ public class TextDrawable extends Drawable implements ITextDrawable {
 
 	private int width;
 	private String text;
+	private int anchor;
 	
-	public TextDrawable() {		
+	public TextDrawable() {
+		anchor = 7;
 	}
 	
 	//Functions
 	@Override
 	public void drawGeometry(IRenderer r) {
-		r.drawText(text, x, y, getZ(), getDrawAngle(), width);		
+		r.drawText(text, x, y, getZ(), getDrawAngle(), width, anchor);		
 	}
 	
 	//Getters
@@ -29,8 +31,13 @@ public class TextDrawable extends Drawable implements ITextDrawable {
 	}
 
 	@Override
-	public void setWordWrap(int width) {
+	public void setWidth(int width) {
 		this.width = (width <= 0 ? 0 : width);
+	}
+
+	@Override
+	public void setAnchor(int anchor) {
+		this.anchor = (anchor >= 1 && anchor <= 9 ? anchor : 7);
 	}
 	
 }

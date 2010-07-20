@@ -28,11 +28,21 @@ function signum(x)
 end
 
 function pauseHandler()
+	local dx = screenWidth/2
+	local dy = screenHeight/2
+
+	local pausedText = TextDrawable.new(2)
+	pausedText:setPos(dx, dy)
+	pausedText:setAnchor(5)
+	pausedText:setText("Paused")
+
 	while true do
 		if input:consumeKey(Keys.ESCAPE) then
-			return
+			break
 		end
 		
 		yield()
 	end
+	
+	pausedText:destroy()
 end

@@ -44,8 +44,13 @@ public interface IRenderer {
 	 *        <code>512.0</code>
 	 * @param wrapWidth The text block's word-wrap width, use <code>0</code> to
 	 *        disable word wrapping
+	 * @param anchor The anchor determines how the text is positioned relative
+	 *        to its position (x, y). The anchor values correspond to the
+	 *        directions of the numpad numbers, so <code>7</code> is top-left
+	 *        and <code>5</code> is center-middle.
 	 */
-	public void drawText(String txt, double x, double y, short z, double angle, double wrapWidth);
+	public void drawText(String txt, double x, double y, short z, double angle,
+			double wrapWidth, int anchor);
 	
 	/**
 	 * Translates the origin of the coordinate system

@@ -27,6 +27,14 @@ public interface ITextDrawable extends IDrawable {
 	 * 
 	 * @param width The new word-wrap width
 	 */
-	public void setWordWrap(int width);
+	public void setWidth(int width);
+	
+	/**
+	 * The anchor determines how the text is positioned relative to its position
+	 * (x, y). The anchor values correspond to the directions of the numpad
+	 * numbers, so <code>7</code> is top-left and <code>5</code> is
+	 * center-middle.
+	 */
+	public void setAnchor(int anchor);
 	
 }
