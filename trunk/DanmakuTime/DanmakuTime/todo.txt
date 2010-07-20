@@ -2,22 +2,16 @@
 Bugs:
 
 Feature requests:
-[x] Sprites should have a togglable out-of-bounds death.
-    Fields should have a changeable amount of padding where sprites may
-    temporarily reside (some room to hide sprites just outside the screen),
-    but outside of those bounds everything with the autoKill flag dies.
-	
-[x] Support for changing BlendModes (NORMAL, ADD, ???)
-[ ] Support rendering of IStyledText with TextDrawable and Renderer.
-[x] The main field should be created from the script, not from Game.
-
 [ ] Is it possible to script a player?
 [ ] Create a "Boss extends Sprite" object to help with Boss creation? Or is
     such an object better created from Lua?
-[ ] Objects should be able to specify which field they want to be spawned in.
-    Require it as the first constructor argument and default to 1 if absent?
+
 [ ] Implement pausing in a way that's accessible from the script and the script
     must also be able to control the pause menu. Perhaps have the pause
     function take a LFunction argument??
 [ ] Make the BGM cycle-synced to the gameplay (make sure to pause it along with
     the game)
+
+[ ] Support rendering of IStyledText with TextDrawable and Renderer.
+[ ] Objects should be able to specify which field they want to be spawned in.
+    Require it as the first constructor argument and default to 1 if absent?
