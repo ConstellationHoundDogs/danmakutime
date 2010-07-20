@@ -1,5 +1,7 @@
 package nl.weeaboo.dt.object;
 
+import java.awt.Rectangle;
+
 public interface ISprite extends IDrawable {
 
 	// === Functions ===========================================================
@@ -10,6 +12,8 @@ public interface ISprite extends IDrawable {
 	public double getAngle();
 	public double getAngleInc();
 	
+	public Rectangle getVisualBounds();
+	
 	// === Setters =============================================================
 	public void setSpeed(double s);
 	public void setSpeedInc(double si);
@@ -17,5 +21,6 @@ public interface ISprite extends IDrawable {
 	public void setAngleInc(double ai);
 	
 	public void setDrawAngleAuto(boolean a);
+	public void setOutOfBoundsDeath(boolean d);
 	
 }

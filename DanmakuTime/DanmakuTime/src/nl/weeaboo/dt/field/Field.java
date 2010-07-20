@@ -13,11 +13,14 @@ import nl.weeaboo.dt.renderer.IRenderer;
 public class Field implements IField {
 
 	private Rectangle bounds;
+	private int padding;
+	
 	private Collection<IDrawable> drawables;
 	private Collection<IDrawable> standbyList;
 	
-	public Field(int x, int y, int w, int h) {
+	public Field(int x, int y, int w, int h, int pad) {
 		bounds = new Rectangle(x, y, w, h);
+		padding = pad;
 		
 		drawables = new LinkedHashSet<IDrawable>();
 		standbyList = new ArrayList<IDrawable>();
@@ -88,6 +91,11 @@ public class Field implements IField {
 	@Override
 	public int getHeight() {
 		return bounds.height;
+	}
+	
+	@Override
+	public int getPadding() {
+		return padding;
 	}
 	
 	//Setters

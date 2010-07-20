@@ -4,6 +4,7 @@ import java.awt.event.KeyEvent;
 import java.util.Random;
 
 import nl.weeaboo.dt.TinyMap;
+import nl.weeaboo.dt.field.Field;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.lua.link.LuaLink;
@@ -48,6 +49,7 @@ public class LuaRunState {
 		LuaUtil.registerEnum(vm, BlendMode.class);
 		LuaUtil.registerKeyCodes(vm, KeyEvent.class);
 		LuaUtil.registerThreadLib(this, vm, threadPool);
+		LuaUtil.registerFieldLib(this, vm);
 
 		//global ITextureStore textureStore
 		vm.pushlvalue(LuajavaLib.toUserdata(ts, ts.getClass()));
@@ -55,6 +57,19 @@ public class LuaRunState {
 	}
 	
 	//Functions
+	public IField createField(int x, int y, int w, int h, int pad) {
+		int id = fieldMap.size();
+		while (fieldMap.containsKey(id)) {
+			id++;
+		}
+		return createField(id, x, y, w, h, pad);
+	}
+	public IField createField(int id, int x, int y, int w, int h, int pad) {
+		Field field = new Field(x, y, w, h, pad);
+		fieldMap.put(id, field);
+		return field;
+	}
+	
 	public void update(IInput input) {
 		
 		//Update threads

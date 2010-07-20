@@ -8,6 +8,7 @@ import java.io.InputStream;
 import java.lang.reflect.Field;
 
 import nl.weeaboo.common.Log;
+import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.lua.link.LuaFunctionLink;
 import nl.weeaboo.dt.lua.link.LuaLink;
 import nl.weeaboo.dt.lua.link.LuaLinkedObject;
@@ -176,16 +177,51 @@ public class LuaUtil {
 				if (vm.gettop() >= 1 && vm.isfunction(1)) {
 					LuaFunctionLink link = new LuaFunctionLink(rs, vm, vm.checkfunction(1));
 					pool.add(link);
-					
+										
 					vm.pushuserdata(link);
 				} else {
 					vm.pushnil();
 				}
-				return 0;
+				return 1;
 			}
 		});
 		vm.pushlvalue(table);
 		vm.setglobal("Thread");
+	}
+
+	/**
+	 * Registers the Field.* functions
+	 * 
+	 * @param rs The LuaRunState object
+	 * @param vm The LuaState to install the new bindings in
+	 */
+	public static void registerFieldLib(final LuaRunState rs, LuaState vm) {
+		LTable table = new LTable();
+		table.put("new", new LFunction() {
+			public int invoke(LuaState vm) {
+				if (vm.gettop() >= 6) {
+					vm.pushuserdata(rs.createField(vm.checkint(1), vm.checkint(2),
+							vm.checkint(3), vm.checkint(4), vm.checkint(5),
+							vm.checkint(6)));
+				} else if (vm.gettop() >= 5) {
+					vm.pushuserdata(rs.createField(vm.checkint(1), vm.checkint(2),
+							vm.checkint(3), vm.checkint(4), vm.checkint(5)));
+				} else {
+					vm.pushnil();
+				}
+				return 1;
+			}
+		});
+		vm.pushlvalue(table);
+		vm.setglobal("Field");
+		
+		//global int screenWidth
+		//global int screenHeight
+		IField field0 = rs.getField(0);
+		vm.pushinteger(field0.getWidth());
+		vm.setglobal("screenWidth");
+		vm.pushinteger(field0.getHeight());
+		vm.setglobal("screenHeight");		
 	}
 	
 }

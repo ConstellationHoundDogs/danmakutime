@@ -56,6 +56,16 @@ public interface IField {
 	 * @return The height of this field in pixels
 	 */
 	public int getHeight();
+		
+	/**
+	 * A field's padding is used by objects to determine if they're so far away
+	 * from the field that it may be a good idea to destroy themselves as it's
+	 * unlikely they'll ever return.
+	 * 
+	 * @return The field's padding (the padding gets added to the bounds in all
+	 *         directions)
+	 */
+	public int getPadding();
 	
 	// === Setters =============================================================
 	
