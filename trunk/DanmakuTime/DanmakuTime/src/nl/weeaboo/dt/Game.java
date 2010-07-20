@@ -133,14 +133,7 @@ public class Game extends GameBase {
 		texStore = new TextureStore(rm.getImageStore());
 		
 		TinyMap<IField> fieldMap = new TinyMap<IField>();
-
-		//Full-screen field (0)
-		fieldMap.put(0, new Field(0, 0, width, height));
-		
-		//Main field (1)
-		int fw = 384;
-		int fh = 448;
-		fieldMap.put(1, new Field((width-fw)/2, (height-fh)/2, fw, fh));
+		fieldMap.put(0, new Field(0, 0, width, height, 0)); //Full-screen field (0)
 		
 		//Init Lua
 		LuaThreadPool threadPool = new LuaThreadPool();

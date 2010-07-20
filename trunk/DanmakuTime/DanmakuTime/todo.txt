@@ -2,15 +2,14 @@
 Bugs:
 
 Feature requests:
-[ ] Sprites should have a togglable out-of-bounds death.
+[x] Sprites should have a togglable out-of-bounds death.
     Fields should have a changeable amount of padding where sprites may
     temporarily reside (some room to hide sprites just outside the screen),
     but outside of those bounds everything with the autoKill flag dies.
 	
-[ ] Support for changing BlendModes (NORMAL, ADD, ???)
-[ ] Create a helper image for determining the values of certain angles.
+[x] Support for changing BlendModes (NORMAL, ADD, ???)
 [ ] Support rendering of IStyledText with TextDrawable and Renderer.
-[ ] The main field should be created from the script, not from Game.
+[x] The main field should be created from the script, not from Game.
 
 [ ] Is it possible to script a player?
 [ ] Create a "Boss extends Sprite" object to help with Boss creation? Or is

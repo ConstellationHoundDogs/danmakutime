@@ -23,11 +23,12 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	protected LuaObjectLink luaLink;
 	protected LuaObjectLink luaAnimateLink;
 
+	protected IField field;
 	protected ITexture texture;
 	protected double x, y;
 	private short z;
 	private double drawAngle;
-	private boolean clip;
+	protected boolean clip;
 	private int color;
 	private BlendMode blendMode;
 	
@@ -41,7 +42,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	public void init(LuaRunState runState, LuaState vm, LUserData udata)
 		throws LuaException
 	{
-		IField field = runState.getField(1);
+		field = runState.getField(1);
 		field.add(this);
 		
 		luaLink = new LuaObjectLink(runState, vm, udata);

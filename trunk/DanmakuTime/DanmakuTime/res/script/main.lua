@@ -82,10 +82,10 @@ function main()
 				s:setBlendMode(BlendMode.ADD)
 			end
 			
-			s:setPos(600, 300)
+			s:setPos(levelWidth*.9, levelHeight*.35)
 			s:setSpeed(2 + math.random() * 2)
 			s:setAngle(256)
-			s:setAngleInc(1 + math.random() * 1)
+			s:setAngleInc(2 + math.random() * 1)
 		end		
 		yield(10)
 	end

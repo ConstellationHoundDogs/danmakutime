@@ -19,18 +19,18 @@ public class TinyMap<T> {
 	
 	//Functions
 	
-	public void put(int key, T value) {
+	public T put(int key, T value) {
 		//Replace existing value if there is one
 		for (int n = 0; n < keys.size(); n++) {
 			if (keys.get(n) == key) {
-				values.set(n, value);
-				return;
+				return values.set(n, value);
 			}
 		}
 				
 		//Add new entry
 		keys.add(key);
 		values.add(value);
+		return null;
 	}
 	
 	//Getters

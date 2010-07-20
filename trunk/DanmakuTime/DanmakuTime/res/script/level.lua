@@ -5,6 +5,11 @@ levelHeight = 448
 function buildLevel(background)
 	local z = 32000;
 
+	--Create the game area
+	Field.new(1,
+		(screenWidth-levelWidth)/2, (screenHeight-levelHeight)/2,
+		levelWidth, levelHeight, 64)
+
 	--Create background image
 	local levelBG = Drawable.new()
 	levelBG:setTexture(textureStore:getTexture(background))

@@ -1,8 +1,11 @@
 package nl.weeaboo.dt.object;
 
+import java.awt.Rectangle;
+
 import nl.weeaboo.common.FastMath;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.lua.link.LuaLinkedObject;
+import nl.weeaboo.dt.renderer.ITexture;
 
 public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 	
@@ -10,10 +13,13 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 	private double speed, speedInc;
 	private double speedX, speedY;
 	private double angle, angleInc;
-	private boolean drawAngleAuto;
+	protected boolean drawAngleAuto;
+	protected boolean hasBeenInField, outOfBoundsDeath;
+	private Rectangle visualBounds;
 	
 	public Sprite() {
-		setClip(true);
+		clip = true;
+		outOfBoundsDeath = true;
 	}
 	
 	//Functions		
@@ -42,6 +48,20 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 
 		x += speedX;
 		y += speedY;
+		
+		if (outOfBoundsDeath && field != null) {
+			Rectangle fieldBounds = new Rectangle(0, 0, field.getWidth(), field.getHeight());
+			Rectangle imageBounds = getVisualBounds();
+			
+			if (fieldBounds.intersects(imageBounds)) {
+				hasBeenInField = true;
+			} else {
+				fieldBounds.grow(field.getPadding(), field.getPadding());				
+				if (hasBeenInField || !fieldBounds.intersects(imageBounds)) {				
+					destroy();
+				}
+			}
+		}
 	}
 	
 	//Getters
@@ -63,6 +83,30 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 	@Override
 	public double getSpeedInc() {
 		return speedInc;
+	}
+	
+	@Override
+	public Rectangle getVisualBounds() {
+		if (visualBounds == null) {
+			int w, h;
+			if (texture != null) {
+				w = texture.getWidth();
+				h = texture.getHeight();
+			} else {
+				w = h = 1;
+			}
+			
+			final double scale = 1.4142135623730950488016887242097; //Math.sqrt(2)
+			w = (int)Math.ceil(scale * w);
+			h = (int)Math.ceil(scale * h);
+			
+			visualBounds = new Rectangle(0, 0, w, h);			
+		}
+		
+		visualBounds.x = (int)Math.round(x) - (visualBounds.width>>1);
+		visualBounds.y = (int)Math.round(y) - (visualBounds.height>>1);
+		
+		return visualBounds;
 	}
 	
 	//Setters
@@ -96,6 +140,18 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 	@Override
 	public void setDrawAngleAuto(boolean a) {
 		drawAngleAuto = a;
+	}
+
+	@Override
+	public void setOutOfBoundsDeath(boolean d) {
+		outOfBoundsDeath = d;
+	}
+	
+	@Override
+	public void setTexture(ITexture tex) {
+		super.setTexture(tex);
+		
+		visualBounds = null;
 	}
 		
 }
