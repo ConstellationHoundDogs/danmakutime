@@ -42,8 +42,24 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	public void init(LuaRunState runState, LuaState vm, LUserData udata)
 		throws LuaException
 	{
-		field = runState.getField(1);
-		field.add(this);
+		IField field = null;
+		if (vm.gettop() >= 1) {
+			if (vm.isnumber(1)) {
+				field = runState.getField(vm.tointeger(1));
+			} else if (vm.isuserdata(1)) {
+				Object obj = vm.touserdata(1);
+				if (obj instanceof IField) {
+					field = (IField)obj;
+				}
+			}
+		}
+		if (field == null) {
+			field = runState.getField(1);
+			if (field == null) {
+				field = runState.getField(0);
+			}
+		}		
+		setField(field);
 		
 		luaLink = new LuaObjectLink(runState, vm, udata);
 		
@@ -60,12 +76,13 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	@Override
 	public void destroy() {
 		LValue retval = LNil.NIL;
-		try {
-			retval = luaLink.call(true, "onDestroy");
-		} catch (LuaException e) {
-			Log.warning(e);
-		}
-		
+		if (luaLink != null) {
+			try {
+				retval = luaLink.call(true, "onDestroy");
+			} catch (LuaException e) {
+				Log.warning(e);
+			}
+		}		
 		if (retval.isNil() || retval.toJavaBoolean()) {		
 			destroyed = true;
 		}
@@ -178,6 +195,18 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	}
 	
 	//Setters
+	@Override
+	public void setField(IField f) {
+		if (field == f) return;
+		
+		if (field != null) {
+			throw new IllegalArgumentException("Can't set field more than once");
+		}
+		
+		field = f;
+		field.add(this);
+	}
+	
 	@Override
 	public void setDrawAngle(double a) {
 		drawAngle = a;

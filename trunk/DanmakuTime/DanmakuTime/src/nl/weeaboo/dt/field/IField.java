@@ -17,6 +17,11 @@ public interface IField {
 	public void add(IDrawable d);
 
 	/**
+	 * Adds all pending new objects to the current list of objects.
+	 */
+	public void flushStandbyList();
+	
+	/**
 	 * Updates this field and all objects it contains
 	 * 
 	 * @param input The current user input

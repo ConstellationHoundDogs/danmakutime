@@ -22,9 +22,11 @@ import nl.weeaboo.dt.lua.LuaThreadPool;
 import nl.weeaboo.dt.lua.LuaUtil;
 import nl.weeaboo.dt.lua.link.LuaFunctionLink;
 import nl.weeaboo.dt.lua.link.LuaLink;
+import nl.weeaboo.dt.object.Drawable;
 import nl.weeaboo.dt.renderer.Blur;
 import nl.weeaboo.dt.renderer.ITextureStore;
 import nl.weeaboo.dt.renderer.Renderer;
+import nl.weeaboo.dt.renderer.Texture;
 import nl.weeaboo.dt.renderer.TextureStore;
 import nl.weeaboo.game.GameBase;
 import nl.weeaboo.game.ResourceManager;
@@ -44,7 +46,7 @@ public class Game extends GameBase {
 
 	private boolean error;
 	private GLVideoCapture videoCapture;
-	private GLImage screenshot;
+	private Drawable screenshot;
 	private boolean screenshotRequest, screenshotRequestSave;
 	private Notifier notifier;
 	private ITextureStore texStore;	
@@ -142,6 +144,8 @@ public class Game extends GameBase {
 		
 		TinyMap<IField> fieldMap = new TinyMap<IField>();
 		fieldMap.put(0, new Field(0, 0, width, height, 0)); //Full-screen field (0)
+		fieldMap.put(1, new Field(0, 0, width, height, 0)); //Game field (1)
+		fieldMap.put(2, new Field(0, 0, width, height, 0)); //Overlay field (2)
 		
 		//Init Lua
 		LuaThreadPool threadPool = new LuaThreadPool();
@@ -215,7 +219,8 @@ public class Game extends GameBase {
 				paused = false;				
 			}
 			
-			if (!paused) {
+			if (!paused && screenshot != null) {
+				screenshot.destroy();
 				screenshot = null;
 			}
 		} else {
@@ -235,25 +240,9 @@ public class Game extends GameBase {
 		int rw = getRealWidth();
 		int rh = getRealHeight();
 				
-		if (paused && screenshot != null) {
-			screenshot.draw(glm, 0, 0, w, h);
-		} else {		
-			Renderer r = new Renderer(glm, createParagraphRenderer(), w, h, rw, rh);
-			luaRunState.draw(r);
-			r.flush();
-
-			//Draw HUD
-			ParagraphRenderer pr = createParagraphRenderer();
-			pr.setBounds(20, 20, w-40, h-40);
-			
-			MutableTextStyle mts = pr.getDefaultStyle().mutableCopy();
-			mts.setAnchor(9);
-			pr.setDefaultStyle(mts.immutableCopy());
-			
-			String hudText = String.format("%.2f FPS\n%d Objects\n",
-					getFPS(), luaRunState.getObjectCount());
-			pr.drawText(glm, hudText);
-		}		
+		Renderer r = new Renderer(glm, createParagraphRenderer(), w, h, rw, rh);
+		luaRunState.draw(r);
+		r.flush();
 				
 		//Take screen capture
 		if (screenshotRequest) {
@@ -275,8 +264,18 @@ public class Game extends GameBase {
 				Dimension size = new Dimension(ss.width, ss.height);
 				argb = Blur.process(argb, size, 4, true, true);
 				
-				screenshot = addGeneratedImage(IntBuffer.wrap(argb),
+				GLImage gli = addGeneratedImage(IntBuffer.wrap(argb),
 						size.width, size.height, true, false);
+				
+				IField overlayField = luaRunState.getField(2);
+				
+				screenshot = new Drawable();
+				screenshot.setField(overlayField);
+				screenshot.setPos(overlayField.getWidth()/2, overlayField.getHeight()/2);
+				screenshot.setZ(1000);
+				screenshot.setTexture(new Texture(gli));
+				
+				overlayField.flushStandbyList();
 			}
 		}
 		
@@ -288,6 +287,18 @@ public class Game extends GameBase {
 				videoCapture = null;
 			}
 		}
+		
+		//Draw HUD
+		ParagraphRenderer pr = createParagraphRenderer();
+		pr.setBounds(20, 20, w-40, h-40);
+		
+		MutableTextStyle mts = pr.getDefaultStyle().mutableCopy();
+		mts.setAnchor(9);
+		pr.setDefaultStyle(mts.immutableCopy());
+		
+		String hudText = String.format("%.2f FPS\n%d Objects\n",
+				getFPS(), luaRunState.getObjectCount());
+		pr.drawText(glm, hudText);
 		
 		//Draw notifier
 		notifier.draw(glm, w, h);

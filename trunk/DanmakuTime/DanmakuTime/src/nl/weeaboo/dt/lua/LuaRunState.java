@@ -12,8 +12,8 @@ import nl.weeaboo.dt.object.Drawable;
 import nl.weeaboo.dt.object.Sprite;
 import nl.weeaboo.dt.object.TextDrawable;
 import nl.weeaboo.dt.renderer.BlendMode;
-import nl.weeaboo.dt.renderer.IRenderer;
 import nl.weeaboo.dt.renderer.ITextureStore;
+import nl.weeaboo.dt.renderer.Renderer;
 
 import org.luaj.compiler.LuaC;
 import org.luaj.lib.j2se.LuajavaLib;
@@ -81,10 +81,10 @@ public class LuaRunState {
 		}
 	}
 	
-	public void draw(IRenderer r) {
+	public void draw(Renderer r) {
 		for (IField field : fieldMap.getValues()) {
 			field.draw(r);
-		}		
+		}
 	}
 	
 	//Getters
