@@ -13,6 +13,7 @@ import nl.weeaboo.common.FastMath;
 import nl.weeaboo.common.Log;
 import nl.weeaboo.game.gl.GLImage;
 import nl.weeaboo.game.gl.GLManager;
+import nl.weeaboo.game.text.MutableTextStyle;
 import nl.weeaboo.game.text.ParagraphRenderer;
 import nl.weeaboo.game.text.StyledText;
 import nl.weeaboo.game.text.layout.TextLayout;
@@ -99,11 +100,13 @@ public class Renderer implements IRenderer {
 	}
 	
 	@Override
-	public void drawText(String txt, double x, double y, short z, double angle, double wrapWidth) {
+	public void drawText(String txt, double x, double y, short z, double angle,
+			double wrapWidth, int anchor)
+	{
 		x += translationX;
 		y += translationY;
 		drawBuffer.add(new DrawTextCommand(clipEnabled, blendMode, color,
-				txt, x, y, z, angle, wrapWidth));
+				txt, x, y, z, angle, wrapWidth, anchor));
 	}
 	
 	public void flush() {
@@ -218,16 +221,39 @@ public class Renderer implements IRenderer {
 				
 				DrawTextCommand dcmd = (DrawTextCommand)cmd;
 				StyledText stext = new StyledText(dcmd.text);
-								
+				MutableTextStyle mts = pr.getDefaultStyle().mutableCopy();
+				int hanchor = 8;
+				if (dcmd.anchor == 7 || dcmd.anchor == 4 || dcmd.anchor == 1) {
+					hanchor = 7;
+				} else if (dcmd.anchor == 9 || dcmd.anchor == 6 || dcmd.anchor == 3) {
+					hanchor = 9;
+				}
+				mts.setAnchor(hanchor);
+				stext.setStyle(mts.immutableCopy());
+				
 				pr.setBounds(0, 0, dcmd.wrapWidth, virtualSize.height - dcmd.y);
 				TextLayout tl = pr.getLayout(glm, stext);
 				float w = tl.getWidth();
 				float h = tl.getHeight();
 				
+				float tx = 0;
+				if (hanchor == 8) {
+					tx = -w/2;
+				} else if (hanchor == 9) {
+					tx = -w;
+				}
+				
+				float ty = 0;
+				if (dcmd.anchor >= 4 && dcmd.anchor <= 6) {
+					ty = -h / 2;
+				} else if (dcmd.anchor <= 3) {
+					ty = -h;
+				}
+				
 				gl.glPushMatrix();
 				gl.glTranslatef(dcmd.x + w/2, dcmd.y + h/2, 0);
 				gl.glRotated(dcmd.angle * 360.0 / 512.0, 0, 0, 1);
-				gl.glTranslatef(-w/2, -h/2, 0);
+				gl.glTranslatef(-w/2 + tx, -h/2 + ty, 0);
 				pr.drawLayout(glm, tl);				
 				gl.glPopMatrix();
 			} else {
@@ -374,15 +400,19 @@ public class Renderer implements IRenderer {
 		
 		public final String text;
 		public final float x, y, angle, wrapWidth;
+		public final int anchor;
 			
 		public DrawTextCommand(boolean clip, BlendMode blend, int argb, String text,
-				double x, double y, short z, double angle, double wrapWidth)
+				double x, double y, short z, double angle, double wrapWidth,
+				int anchor)
 		{
-			this(clip, blend, argb, text, (float)x, (float)y, z, (float)angle, (float)wrapWidth);
+			this(clip, blend, argb, text, (float)x, (float)y, z, (float)angle,
+					(float)wrapWidth, anchor);
 		}
 		
 		public DrawTextCommand(boolean clip, BlendMode blend, int argb, String text,
-				float x, float y, short z, float angle, float wrapWidth)
+				float x, float y, short z, float angle, float wrapWidth,
+				int anchor)
 		{
 			super(z, DrawType.TEXT, clip, blend, argb, (byte)0);
 			
@@ -391,6 +421,7 @@ public class Renderer implements IRenderer {
 			this.y = y;
 			this.angle = angle;
 			this.wrapWidth = wrapWidth;
+			this.anchor = anchor;
 		}
 	}
 	

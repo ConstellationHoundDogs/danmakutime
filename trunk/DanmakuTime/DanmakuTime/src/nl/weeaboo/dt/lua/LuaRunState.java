@@ -71,6 +71,12 @@ public class LuaRunState {
 		return field;
 	}
 	
+	public void updatePaused() {
+		for (IField field : fieldMap.getValues()) {
+			field.flushStandbyList();
+		}
+	}
+	
 	public void update(IInput input) {					
 		//Update threads
 		threadPool.update();

@@ -208,6 +208,8 @@ public class Game extends GameBase {
 		}
 		
 		if (paused) {
+			luaRunState.updatePaused();
+			
 			if (!pauseThread.isFinished()) {
 				try {
 					pauseThread.update();
@@ -272,10 +274,9 @@ public class Game extends GameBase {
 				screenshot = new Drawable();
 				screenshot.setField(overlayField);
 				screenshot.setPos(overlayField.getWidth()/2, overlayField.getHeight()/2);
+				screenshot.setColor(0xFFAAAAAA);
 				screenshot.setZ(1000);
-				screenshot.setTexture(new Texture(gli));
-				
-				overlayField.flushStandbyList();
+				screenshot.setTexture(new Texture(gli));				
 			}
 		}
 		
