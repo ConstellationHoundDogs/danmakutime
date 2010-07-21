@@ -82,15 +82,16 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject,
 			return;
 		}
 
+		/*
 		System.out.printf("COLLISION :: %s(%d) [#%d] hit by %s(%d)\n",
 				child.getClass().getSimpleName(), child.getType(), childIndex,
 				other.getClass().getSimpleName(), other.getType());
+		*/
 		
 		if (luaLink != null) {
 			try {
-				luaLink.call(true, "onCollision", getLuaObject(),
-						other.getHost().getOwner().getLuaObject(),
-						child, other);
+				luaLink.call(true, "onCollision",
+						other.getHost().getOwner().getLuaObject(), child, other);
 			} catch (LuaException e) {
 				DTLog.warning(e);
 			}

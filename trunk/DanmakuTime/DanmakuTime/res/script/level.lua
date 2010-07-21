@@ -20,7 +20,7 @@ function buildLevel(background)
 	--Create the game area (id=1)
 	gameField = Field.new(1,
 		(screenWidth-levelWidth)/2, (screenHeight-levelHeight)/2,
-		levelWidth, levelHeight, 64)
+		levelWidth, levelHeight, 32)
 	
 	gameColField = gameField:getColField()	
 	gameColField:setColMatrix(colMatrix)

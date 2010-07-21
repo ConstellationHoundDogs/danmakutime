@@ -1,5 +1,7 @@
 package nl.weeaboo.dt.collision;
 
+import nl.weeaboo.dt.object.IDrawable;
+
 public final class ColUtil {
 
 	public static boolean intersectCircleCircle(CircleColNode c0, CircleColNode c1) {
@@ -14,6 +16,27 @@ public final class ColUtil {
 		throw new IllegalArgumentException(String.format(
 				"Undefined combination of collision node types: %s <-> %s",
 				c0.getClass().getSimpleName(), c1.getClass().getSimpleName()));
+	}
+
+	public static void collide(IColNode a, IColNode b, boolean atob, boolean btoa) {
+		if (a == b) {
+			return;
+		}
+		
+		IDrawable ao = a.getHost().getOwner();
+		IDrawable bo = b.getHost().getOwner();
+		if (ao == null || ao.isDestroyed() || bo == null || bo.isDestroyed()) {
+			return;
+		}
+		
+		if (a.intersects(b)) {
+			if (atob) {
+				a.onCollide(b);
+			}
+			if (btoa) {
+				b.onCollide(a);
+			}			
+		}
 	}
 	
 }
