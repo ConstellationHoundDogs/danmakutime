@@ -25,7 +25,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 
 	protected IField field;
 	protected ITexture texture;
-	protected double x, y;
+	private double x, y;
 	private short z;
 	private double drawAngle;
 	protected boolean clip;
@@ -86,11 +86,6 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 		if (retval.isNil() || retval.toJavaBoolean()) {		
 			destroyed = true;
 		}
-	}
-	
-	@Override
-	public LValue call(String methodName, Object... args) throws LuaException {
-		return luaLink.call(false, methodName, args);
 	}
 	
 	@Override

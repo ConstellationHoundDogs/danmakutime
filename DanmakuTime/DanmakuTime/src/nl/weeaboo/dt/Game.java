@@ -292,15 +292,6 @@ public class Game extends GameBase {
 			}
 		}
 		
-		if (videoCapture != null) {
-			try {
-				videoCapture.update(glm, rw, rh);
-			} catch (IOException e) {
-				Log.showError(e);
-				videoCapture = null;
-			}
-		}
-		
 		//Draw HUD
 		ParagraphRenderer pr = createParagraphRenderer();
 		pr.setBounds(20, 20, w-40, h-40);
@@ -312,7 +303,17 @@ public class Game extends GameBase {
 		String hudText = String.format("%.2f FPS\n%d Objects\n",
 				getFPS(), luaRunState.getObjectCount());
 		pr.drawText(glm, hudText);
-		
+
+		//Video capture
+		if (videoCapture != null) {
+			try {
+				videoCapture.update(glm, rw, rh);
+			} catch (IOException e) {
+				Log.showError(e);
+				videoCapture = null;
+			}
+		}
+				
 		//Draw notifier
 		notifier.draw(glm, w, h);
 		

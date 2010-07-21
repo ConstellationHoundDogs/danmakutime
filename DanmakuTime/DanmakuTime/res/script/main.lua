@@ -10,6 +10,7 @@ function CircleGhost:init()
 	self:setPos(400, 300);
 	self:setZ(-100)
 	self:setTexture(textureStore:getTexture("test.png#g1"));
+	self:addColNode(enemyColType, CircleColNode.new(7))
 end
 
 function CircleGhost:update()
@@ -43,11 +44,11 @@ end
 --------------------------------------------------------------------------------
 
 function main()
-	soundEngine:setBGM("bgm/bgm01.ogg");
+	--soundEngine:setBGM("bgm/bgm01.ogg");
 
 	buildLevel("level-bg.png")
 
-	local ghost = CircleGhost.new{xmul=100, ymul=100}
+	local ghost = CircleGhost.new{xmul=100, ymul=100}	
     yield(10)
 	local ghost2 = CircleGhost.new{xmul=-100, ymul=100}
 	
@@ -64,6 +65,7 @@ function main()
 	for group=1,50 do
 		for n=1,200 do
 			local s = Sprite.new()
+			s:addColNode(enemyColType, CircleColNode.new(7))
 			
 			if math.random(10) >= 10 then
 				s:setTexture(textureStore:getTexture("test.png#g0"));
@@ -79,7 +81,7 @@ function main()
 			s:setAngle(256)
 			s:setAngleInc(2 + math.random() * 1)
 			
-			soundEngine:playSound("sfx01.ogg")
+			--soundEngine:playSound("sfx01.ogg")
 		end		
 		yield(10)
 	end

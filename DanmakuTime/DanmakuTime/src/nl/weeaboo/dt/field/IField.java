@@ -1,5 +1,6 @@
 package nl.weeaboo.dt.field;
 
+import nl.weeaboo.dt.collision.IColField;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.object.IDrawable;
 import nl.weeaboo.dt.renderer.IRenderer;
@@ -71,6 +72,11 @@ public interface IField {
 	 *         directions)
 	 */
 	public int getPadding();
+	
+	/**
+	 * @return The collision field associated with this field
+	 */
+	public IColField getColField();
 	
 	// === Setters =============================================================
 	
