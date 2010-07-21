@@ -10,7 +10,7 @@ function CircleGhost:init()
 	self:setPos(400, 300);
 	self:setZ(-100)
 	self:setTexture(textureStore:getTexture("test.png#g1"));
-	self:addColNode(enemyColType, CircleColNode.new(7))
+	self:setColNode(0, enemyColType, CircleColNode.new(7))
 end
 
 function CircleGhost:update()
@@ -65,7 +65,7 @@ function main()
 	for group=1,50 do
 		for n=1,200 do
 			local s = Sprite.new()
-			s:addColNode(enemyColType, CircleColNode.new(7))
+			s:setColNode(0, enemyColType, CircleColNode.new(7))
 			
 			if math.random(10) >= 10 then
 				s:setTexture(textureStore:getTexture("test.png#g0"));

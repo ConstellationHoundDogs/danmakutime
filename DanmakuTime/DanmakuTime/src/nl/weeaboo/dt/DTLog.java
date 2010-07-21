@@ -9,25 +9,25 @@ import nl.weeaboo.common.io.SplitOutputStream;
 /**
  * Application-wide logger.
  */
-public class Log extends nl.weeaboo.game.Log {
+public class DTLog extends nl.weeaboo.game.Log {
 
-	private static Log instance;
+	private static DTLog instance;
 	
 	private boolean debug;
 	private Notifier notifier;
 	private OutputStream errFileOut;
 	private Color messageColor;
 		
-	public Log() {
+	public DTLog() {
 		messageColor = new Color(0xFFFFFF);
 	}
 	
 	//Functions
-	public static synchronized Log getInstance() {
-		if (instance == null) instance = new Log();
+	public static synchronized DTLog getInstance() {
+		if (instance == null) instance = new DTLog();
 		return instance;
 	}
-	public static synchronized void setInstance(Log log) {
+	public static synchronized void setInstance(DTLog log) {
 		if (log == null) {
 			throw new IllegalArgumentException("log == null");
 		}
@@ -45,7 +45,7 @@ public class Log extends nl.weeaboo.game.Log {
 			err = System.err;
 		}
 		
-		Log.setInstance(this);
+		DTLog.setInstance(this);
 	}
 	
 	protected void finalize() throws Throwable {

@@ -1,11 +1,6 @@
 package nl.weeaboo.dt.object;
 
-import org.luaj.vm.LNil;
-import org.luaj.vm.LUserData;
-import org.luaj.vm.LValue;
-import org.luaj.vm.LuaState;
-
-import nl.weeaboo.common.Log;
+import nl.weeaboo.dt.DTLog;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.lua.LuaException;
@@ -15,6 +10,11 @@ import nl.weeaboo.dt.lua.link.LuaObjectLink;
 import nl.weeaboo.dt.renderer.BlendMode;
 import nl.weeaboo.dt.renderer.IRenderer;
 import nl.weeaboo.dt.renderer.ITexture;
+
+import org.luaj.vm.LNil;
+import org.luaj.vm.LUserData;
+import org.luaj.vm.LValue;
+import org.luaj.vm.LuaState;
 
 public class Drawable implements IDrawable, LuaLinkedObject {
 
@@ -59,7 +59,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 				field = runState.getField(0);
 			}
 		}		
-		setField(field);
+		field.add(this);
 		
 		luaLink = new LuaObjectLink(runState, vm, udata);
 		
@@ -80,7 +80,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 			try {
 				retval = luaLink.call(true, "onDestroy");
 			} catch (LuaException e) {
-				Log.warning(e);
+				DTLog.warning(e);
 			}
 		}		
 		if (retval.isNil() || retval.toJavaBoolean()) {		
@@ -96,7 +96,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 			try {
 				luaLink.update();
 			} catch (LuaException e) {
-				Log.warning(e);
+				DTLog.warning(e);
 				luaLink = null;
 			}
 		}
@@ -105,7 +105,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 			try {
 				luaAnimateLink.update();
 			} catch (LuaException e) {
-				Log.warning(e);
+				DTLog.warning(e);
 				luaAnimateLink = null;
 			}
 		}
@@ -192,14 +192,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	//Setters
 	@Override
 	public void setField(IField f) {
-		if (field == f) return;
-		
-		if (field != null) {
-			throw new IllegalArgumentException("Can't set field more than once");
-		}
-		
 		field = f;
-		field.add(this);
 	}
 	
 	@Override

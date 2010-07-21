@@ -21,9 +21,12 @@ function Player.new(o)
 end
 
 function Player:init()
-	self:setPos(levelWidth/2, levelHeight - 32)
-	self:setZ(1000)
 	self:setTexture(textureStore:getTexture("player.png#idle0"));
+	self:setColNode(0, playerColType, CircleColNode.new(2.0))
+	self:setColNode(1, playerGrazeType, CircleColNode.new(10.0))
+
+	self:setPos(levelWidth/2, levelHeight - 32)
+	self:setZ(1000)	
 end
 
 function Player:update()
@@ -133,7 +136,7 @@ function Player:fire()
 	for n=0,4 do
 		local s = Sprite.new()
 		s:setTexture(textureStore:getTexture("test.png#g0"));
-		s:addColNode(playerShotColType, CircleColNode.new(7))
+		s:setColNode(0, playerShotColType, CircleColNode.new(7))
 		s:setPos(x, y)
 		s:setZ(z)
 		s:setAngle(-32 + 16 * n)

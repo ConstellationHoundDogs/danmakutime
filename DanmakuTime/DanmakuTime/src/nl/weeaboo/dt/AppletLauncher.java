@@ -28,7 +28,7 @@ public class AppletLauncher extends JApplet {
 	public void start() {		
 		String gameId = getParameter("gameId");
 		if (gameId == null) {			
-			Log.showError("No gameId param passed to the applet -- using default Game ID.");
+			DTLog.showError("No gameId param passed to the applet -- using default Game ID.");
 			gameId = "APPLET";
 		}
 		
@@ -53,7 +53,7 @@ public class AppletLauncher extends JApplet {
 					JnlpUtil.deleteFile(ps, getCodeBase(), "padding");
 				}
 			} catch (IOException e) {
-				Log.warning("Error reserving JNLP persistent storage :: " + e);				
+				DTLog.warning("Error reserving JNLP persistent storage :: " + e);				
 			}
 		}
 		
@@ -72,7 +72,7 @@ public class AppletLauncher extends JApplet {
 			Thread t = new Thread(r);
 			t.start();
 		} catch (URISyntaxException e) {
-			Log.showError(e);
+			DTLog.showError(e);
 		}
 		
 	}

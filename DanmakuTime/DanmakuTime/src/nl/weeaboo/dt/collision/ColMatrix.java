@@ -1,6 +1,6 @@
 package nl.weeaboo.dt.collision;
 
-import nl.weeaboo.common.Log;
+import nl.weeaboo.dt.DTLog;
 
 public class ColMatrix implements IColMatrix {
 
@@ -26,7 +26,7 @@ public class ColMatrix implements IColMatrix {
 			c.size = size;
 			return c;
 		} catch (CloneNotSupportedException e) {
-			Log.error(e);
+			DTLog.error(e);
 		}
 		return null;
 	}

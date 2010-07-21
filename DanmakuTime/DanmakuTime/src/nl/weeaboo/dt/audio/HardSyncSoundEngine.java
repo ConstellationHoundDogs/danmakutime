@@ -2,7 +2,7 @@ package nl.weeaboo.dt.audio;
 
 import java.io.IOException;
 
-import nl.weeaboo.common.Log;
+import nl.weeaboo.dt.DTLog;
 import nl.weeaboo.game.sound.SoundManager;
 import nl.weeaboo.ogg.OggInput;
 import nl.weeaboo.ogg.OggReader;
@@ -50,7 +50,7 @@ public class HardSyncSoundEngine extends AbstractSoundEngine {
 					setBGMOggReaderInput(getBGMFilename());
 				}
 			} catch (IOException ioe) {
-				Log.warning(ioe);
+				DTLog.warning(ioe);
 				stopBGM();
 			}
 		}		
@@ -76,7 +76,7 @@ public class HardSyncSoundEngine extends AbstractSoundEngine {
 			try {
 				asink.stop();
 			} catch (InterruptedException e) {
-				Log.warning(e);
+				DTLog.warning(e);
 			}
 			asink = null;
 		}
@@ -108,7 +108,7 @@ public class HardSyncSoundEngine extends AbstractSoundEngine {
 				ok = true;
 			}
 		} catch (Exception e) {
-			Log.warning(e);
+			DTLog.warning(e);
 		} finally {
 			if (!ok) {
 				stopBGM();

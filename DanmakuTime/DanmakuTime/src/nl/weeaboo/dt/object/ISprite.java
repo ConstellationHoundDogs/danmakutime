@@ -8,7 +8,7 @@ import nl.weeaboo.dt.collision.IColNode;
 public interface ISprite extends IDrawable {
 
 	// === Functions ===========================================================
-	public int addColNode(int type, IColNode c);
+	public void setColNode(int index, int type, IColNode c);
 	
 	// === Getters =============================================================
 	public IColHost getColHost();

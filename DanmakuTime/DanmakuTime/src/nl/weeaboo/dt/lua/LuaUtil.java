@@ -9,7 +9,7 @@ import java.io.InputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
-import nl.weeaboo.common.Log;
+import nl.weeaboo.dt.DTLog;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.lua.link.LuaFunctionLink;
 import nl.weeaboo.dt.lua.link.LuaLink;
@@ -94,20 +94,7 @@ public class LuaUtil {
 		if (res != 0) throw new LuaException(String.format("Runtime Error (%d) in \"%s\" :: %s", res, filename, vm.tostring(-1)));		
 	}
 
-	public static void registerClass(LuaRunState rs, LuaState vm, Class<?> c) throws LuaException {
-		Constructor<?> constr = null;
-		try {
-			constr = c.getConstructor();
-		} catch (NoSuchMethodException nsme) {
-			//Just pretend getConstructor() returned null
-		} catch (Exception e) {
-			throw new LuaException(e);
-		}
-		
-		if (constr == null) {
-			throw new LuaException(String.format("No default constructor for class \"%s\" -- unable to register", c.getName()));
-		}
-		
+	public static void registerClass(LuaRunState rs, LuaState vm, Class<?> c) throws LuaException {		
 		String code = String.format(
 				  "luajava.bindClass(\"%s\")\n"
 				+ "%s = {}\n"
@@ -132,8 +119,21 @@ public class LuaUtil {
 	}
 	
 	public static <T extends LuaLinkedObject> void registerClass2(
-			LuaRunState rs, LuaState vm, Class<T> c)
+			LuaRunState rs, LuaState vm, Class<T> c) throws LuaException
 	{
+		Constructor<?> constr = null;
+		try {
+			constr = c.getConstructor();
+		} catch (NoSuchMethodException nsme) {
+			//Just pretend getConstructor() returned null
+		} catch (Exception e) {
+			throw new LuaException(e);
+		}
+		
+		if (constr == null) {
+			throw new LuaException(String.format("No default constructor for class \"%s\" -- unable to register", c.getName()));
+		}
+		
 		LTable table = new LTable();
 		table.put("new", new ConstructorFunction<T>(rs, c));		
 		vm.pushlvalue(table);
@@ -188,10 +188,10 @@ public class LuaUtil {
 					int intval = field.getInt(null);
 					table.put(fname.substring(3), intval);
 				} catch (IllegalArgumentException e) {
-					Log.warning(e);
+					DTLog.warning(e);
 					break;
 				} catch (IllegalAccessException e) {
-					Log.warning(e);
+					DTLog.warning(e);
 					break;
 				}
 			}

@@ -11,8 +11,10 @@ function buildLevel(background)
 	enemyColType = colMatrix:newColType()	
 	enemyShotColType = colMatrix:newColType()	
 	colMatrix:setColliding(playerColType, enemyColType)
+	colMatrix:setColliding(playerColType, enemyShotColType)
 	colMatrix:setColliding(playerGrazeType, enemyColType)
 	colMatrix:setColliding(playerGrazeType, enemyShotColType)
+	colMatrix:setColliding(playerShotColType, enemyColType)
 	colMatrix:setColliding(enemyColType, playerShotColType)
 
 	--Create the game area (id=1)
@@ -34,13 +36,10 @@ function buildLevel(background)
 	
 	--Create some text
 	local text = TextDrawable.new(overlayField)
-	text:setText("Testing, 1, 2, 3")
-	text:setPos(100, 100)
-	text:setDrawAngle(128)
+	text:setText("Danmaku Time\nDay 3")
+	text:setPos(0, -2)
 	
 	--Create player
 	player = Player.new()
-	player:addColNode(playerColType, CircleColNode.new(2.0))
-	player:addColNode(playerGrazeType, CircleColNode.new(10.0))
 		
 end
