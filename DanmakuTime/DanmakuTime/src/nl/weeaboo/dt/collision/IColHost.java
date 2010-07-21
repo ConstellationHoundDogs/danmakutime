@@ -1,5 +1,7 @@
 package nl.weeaboo.dt.collision;
 
+import nl.weeaboo.dt.object.IDrawable;
+
 public interface IColHost {
 
 	// === Functions ===========================================================
@@ -7,6 +9,7 @@ public interface IColHost {
 	public void onCollide(IColNode child, int childIndex, IColNode other);
 			
 	// === Getters =============================================================
+	public IDrawable getOwner();
 	public IColField getColField();
 	public double getX();
 	public double getY();

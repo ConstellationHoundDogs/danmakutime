@@ -12,6 +12,7 @@ public interface IColNode {
 	public boolean intersects(IColNode c);
 	
 	// === Getters =============================================================
+	public IColHost getHost();
 	public int getType();
 	
 	public double getBoundingRectangleRadius();

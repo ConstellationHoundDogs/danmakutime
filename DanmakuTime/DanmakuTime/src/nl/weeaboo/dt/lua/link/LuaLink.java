@@ -63,7 +63,11 @@ public abstract class LuaLink {
 		}
 
 		for (Object arg : args) {
-			vm.pushlvalue(CoerceJavaToLua.coerce(arg));
+			if (arg instanceof LValue) {
+				vm.pushlvalue((LValue)arg);
+			} else {
+				vm.pushlvalue(CoerceJavaToLua.coerce(arg));
+			}
 		}
 		
 		return (methodPushed-1) + args.length;

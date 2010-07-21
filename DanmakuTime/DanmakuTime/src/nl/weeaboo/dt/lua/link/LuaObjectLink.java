@@ -10,7 +10,7 @@ import org.luaj.vm.LuaState;
 
 public class LuaObjectLink extends LuaLink {
 
-	protected final LUserData self;
+	public final LUserData self;
 	
 	public LuaObjectLink(LuaRunState runState, LuaState vm, LUserData self) {
 		super(runState, vm);
