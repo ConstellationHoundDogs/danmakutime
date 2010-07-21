@@ -4,7 +4,7 @@ Bugs:
 Feature requests:
 [ ] Collision detection doesn't scale well. Try to use some kind of space
     subdivision (uniform grid)?
-[ ] Implement scriptable collision handling
+[x] Implement scriptable collision handling
     
 [ ] Is it possible to script a player?
 [ ] Create a "Boss extends Sprite" object to help with Boss creation? Or is

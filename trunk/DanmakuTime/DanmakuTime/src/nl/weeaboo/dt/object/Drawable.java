@@ -139,6 +139,11 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	
 	//Getters
 	@Override
+	public LUserData getLuaObject() {
+		return (luaLink != null ? luaLink.self : null);
+	}
+	
+	@Override
 	public boolean isDestroyed() {
 		return destroyed;
 	}

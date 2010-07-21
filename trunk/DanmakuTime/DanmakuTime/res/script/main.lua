@@ -64,8 +64,14 @@ function main()
 	
 	for group=1,50 do
 		for n=1,200 do
-			local s = Sprite.new()
+			local s = Sprite.new{hp=10, power=1}
 			s:setColNode(0, enemyColType, CircleColNode.new(7))
+			s.onCollision = function(self, other, myNode, otherNode)
+				self.hp = self.hp - other.power
+				if self.hp <= 0 then
+					self:destroy()
+				end
+			end
 			
 			if math.random(10) >= 10 then
 				s:setTexture(textureStore:getTexture("test.png#g0"));

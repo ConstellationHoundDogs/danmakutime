@@ -1,15 +1,18 @@
 package nl.weeaboo.dt.collision;
 
 import nl.weeaboo.dt.TinyMap;
+import nl.weeaboo.dt.object.IDrawable;
 
 public class ColHost implements IColHost {
 
+	private IDrawable owner;
 	private IColField field;
 	private IColHostCollisionHandler colHandler;
 	private TinyMap<IColNode> nodes;
 	private double x, y;
 	
-	public ColHost(IColField f, IColHostCollisionHandler h) {
+	public ColHost(IDrawable o, IColField f, IColHostCollisionHandler h) {
+		owner = o;
 		field = f;
 		colHandler = h;
 		nodes = new TinyMap<IColNode>();
@@ -34,6 +37,11 @@ public class ColHost implements IColHost {
 	@Override
 	public IColField getColField() {
 		return field;
+	}
+	
+	@Override
+	public IDrawable getOwner() {
+		return owner;
 	}
 	
 	@Override

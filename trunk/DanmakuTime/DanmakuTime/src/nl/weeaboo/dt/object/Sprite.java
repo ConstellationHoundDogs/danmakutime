@@ -3,12 +3,14 @@ package nl.weeaboo.dt.object;
 import java.awt.Rectangle;
 
 import nl.weeaboo.common.FastMath;
+import nl.weeaboo.dt.DTLog;
 import nl.weeaboo.dt.collision.ColHost;
 import nl.weeaboo.dt.collision.IColHost;
 import nl.weeaboo.dt.collision.IColHostCollisionHandler;
 import nl.weeaboo.dt.collision.IColNode;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
+import nl.weeaboo.dt.lua.LuaException;
 import nl.weeaboo.dt.lua.link.LuaLinkedObject;
 import nl.weeaboo.dt.renderer.ITexture;
 
@@ -25,7 +27,7 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject,
 	protected boolean hasBeenInField, outOfBoundsDeath;
 	private Rectangle visualBounds;
 	
-	public Sprite() {		
+	public Sprite() {
 		clip = true;
 		drawAngleAuto = true;
 		outOfBoundsDeath = true;
@@ -79,12 +81,20 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject,
 		if (isDestroyed()) {
 			return;
 		}
-		
+
 		System.out.printf("COLLISION :: %s(%d) [#%d] hit by %s(%d)\n",
 				child.getClass().getSimpleName(), child.getType(), childIndex,
 				other.getClass().getSimpleName(), other.getType());
 		
-		destroy();
+		if (luaLink != null) {
+			try {
+				luaLink.call(true, "onCollision", getLuaObject(),
+						other.getHost().getOwner().getLuaObject(),
+						child, other);
+			} catch (LuaException e) {
+				DTLog.warning(e);
+			}
+		}		
 	}
 	
 	//Getters
@@ -200,7 +210,7 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject,
 		super.setField(f);
 		
 		if (f != null) {
-			colHost = new ColHost(f.getColField(), this);
+			colHost = new ColHost(this, f.getColField(), this);
 		}
 	}
 

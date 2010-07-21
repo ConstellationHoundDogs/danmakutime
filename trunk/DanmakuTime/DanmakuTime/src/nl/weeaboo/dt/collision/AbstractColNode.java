@@ -31,6 +31,11 @@ public abstract class AbstractColNode implements IColNode {
 
 	//Getters
 	@Override
+	public IColHost getHost() {
+		return host;
+	}
+	
+	@Override
 	public int getType() {
 		return type;
 	}

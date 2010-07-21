@@ -9,6 +9,8 @@ Player = {
 	--state
 	lives=3,
 	bombs=2,
+	hp=1,
+	power=0,
 	focus=false,
 	fireCooldown=0,
 	deathTime=0,
@@ -134,9 +136,12 @@ function Player:fire()
 	local z = self:getZ() + 100
 
 	for n=0,4 do
-		local s = Sprite.new()
+		local s = Sprite.new{hp=1, power=1}
 		s:setTexture(textureStore:getTexture("test.png#g0"));
 		s:setColNode(0, playerShotColType, CircleColNode.new(7))
+		s.onCollision = function(self, other, myColNode, otherColNode)
+			self:destroy()
+		end
 		s:setPos(x, y)
 		s:setZ(z)
 		s:setAngle(-32 + 16 * n)

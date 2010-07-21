@@ -1,5 +1,7 @@
 package nl.weeaboo.dt.object;
 
+import org.luaj.vm.LUserData;
+
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.renderer.BlendMode;
@@ -28,6 +30,11 @@ public interface IDrawable {
 
 	// === Getters =============================================================
 
+	/**
+	 * @return The lua object associated with this drawable.
+	 */
+	public LUserData getLuaObject();
+	
 	/**
 	 * @return <code>true</code> if the object is scheduled to be removed next
 	 *         frame.
