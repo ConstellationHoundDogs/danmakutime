@@ -4,10 +4,8 @@ public interface IColHost {
 
 	// === Functions ===========================================================
 	public void destroy();
-	
-	public int add(int type, IColNode n);	
-	//public IColNode remove(int id);
-	
+	public void onCollide(IColNode child, int childIndex, IColNode other);
+			
 	// === Getters =============================================================
 	public IColField getColField();
 	public double getX();
@@ -15,5 +13,6 @@ public interface IColHost {
 	
 	// === Setters =============================================================
 	public void setPos(double x, double y);
+	public void setColNode(int index, int type, IColNode n);	
 	
 }

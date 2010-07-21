@@ -10,7 +10,7 @@ import javax.media.opengl.GL;
 import javax.media.opengl.GL2;
 
 import nl.weeaboo.common.FastMath;
-import nl.weeaboo.common.Log;
+import nl.weeaboo.dt.DTLog;
 import nl.weeaboo.game.gl.GLImage;
 import nl.weeaboo.game.gl.GLManager;
 import nl.weeaboo.game.text.MutableTextStyle;
@@ -257,7 +257,7 @@ public class Renderer implements IRenderer {
 				pr.drawLayout(glm, tl);				
 				gl.glPopMatrix();
 			} else {
-				Log.error("Invalid draw command type: " + cmd.type);
+				DTLog.error("Invalid draw command type: " + cmd.type);
 				break;
 			}
 		}

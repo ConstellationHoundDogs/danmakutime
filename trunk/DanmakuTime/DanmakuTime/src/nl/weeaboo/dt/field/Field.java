@@ -20,6 +20,7 @@ public class Field implements IField {
 	
 	private Collection<IDrawable> drawables;
 	private Collection<IDrawable> standbyList;	
+	private Collection<IDrawable> garbage;
 	
 	public Field(int x, int y, int w, int h, int pad) {
 		colField = new ColField(x, y, w, h);
@@ -28,6 +29,7 @@ public class Field implements IField {
 		
 		drawables = new LinkedHashSet<IDrawable>();
 		standbyList = new ArrayList<IDrawable>();
+		garbage = new ArrayList<IDrawable>();
 	}
 	
 	//Functions
@@ -40,7 +42,7 @@ public class Field implements IField {
 	@Override
 	public void flushStandbyList() {
 		drawables.addAll(standbyList);
-		standbyList.clear();		
+		standbyList.clear();
 	}
 	
 	@Override
@@ -55,10 +57,22 @@ public class Field implements IField {
 			}
 			if (d.isDestroyed()) {
 				itr.remove();
+				garbage.add(d);
 			}
 		}
 		
+		garbageCollect();
+		
 		colField.processCollisions();
+	}
+	
+	protected void garbageCollect() {
+		IDrawable arr[] = garbage.toArray(new IDrawable[garbage.size()]);
+		garbage.clear();
+		
+		for (IDrawable d : arr) {
+			d.setField(null);
+		}
 	}
 	
 	@Override

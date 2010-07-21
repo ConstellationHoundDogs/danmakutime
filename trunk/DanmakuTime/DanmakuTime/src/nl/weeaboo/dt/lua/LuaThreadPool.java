@@ -5,7 +5,7 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
-import nl.weeaboo.common.Log;
+import nl.weeaboo.dt.DTLog;
 import nl.weeaboo.dt.lua.link.LuaLink;
 
 public class LuaThreadPool {
@@ -34,7 +34,7 @@ public class LuaThreadPool {
 				try {
 					link.update();
 				} catch (LuaException e) {
-					Log.warning(e);
+					DTLog.warning(e);
 				}
 			}
 			if (link.isFinished()) {

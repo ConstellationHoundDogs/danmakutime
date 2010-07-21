@@ -3,7 +3,7 @@ package nl.weeaboo.dt.lua;
 import java.awt.event.KeyEvent;
 import java.util.Random;
 
-import nl.weeaboo.common.Log;
+import nl.weeaboo.dt.DTLog;
 import nl.weeaboo.dt.TinyMap;
 import nl.weeaboo.dt.audio.ISoundEngine;
 import nl.weeaboo.dt.collision.CircleColNode;
@@ -48,16 +48,16 @@ public class LuaRunState {
 		//Install default available objects
 		vm = Platform.newLuaState();
 		LuaUtil.installLuaLib(this, vm._G);
-		
-		LuaUtil.registerClass2(this, vm, Drawable.class);
-		LuaUtil.registerClass2(this, vm, TextDrawable.class);
-		LuaUtil.registerClass2(this, vm, Sprite.class);
-		
+				
 		try {
+			LuaUtil.registerClass2(this, vm, Drawable.class);
+			LuaUtil.registerClass2(this, vm, TextDrawable.class);
+			LuaUtil.registerClass2(this, vm, Sprite.class);
+			
 			LuaUtil.registerClass(this, vm, ColMatrix.class);
 			LuaUtil.registerClass(this, vm, CircleColNode.class);
 		} catch (LuaException e) {
-			Log.showError(e);
+			DTLog.showError(e);
 		}
 		
 		LuaUtil.registerEnum(vm, BlendMode.class);

@@ -29,12 +29,12 @@ public class GameFrame extends GameFrameBase {
 			BufferedImage icon = ImageIO.read(in);
 			if (icon != null) setIcon(icon, true);
 		} catch (IOException ioe) {
-			Log.warning(ioe);
+			DTLog.warning(ioe);
 		} finally {
 			try {
 				if (in != null) in.close();
 			} catch (IOException e) {
-				Log.warning(e);
+				DTLog.warning(e);
 			}
 		}		
 

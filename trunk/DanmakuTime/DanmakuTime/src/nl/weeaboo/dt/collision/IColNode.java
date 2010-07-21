@@ -4,11 +4,12 @@ package nl.weeaboo.dt.collision;
 public interface IColNode {
 
 	// === Functions ===========================================================
-	public void init(IColHost host, int type);
+	public void onAttached(IColHost host, int index, int type);
+	public void onDetached();
+		
+	public void onCollide(IColNode c);
 	
 	public boolean intersects(IColNode c);
-	
-	public void onCollide(IColNode c);
 	
 	// === Getters =============================================================
 	public int getType();

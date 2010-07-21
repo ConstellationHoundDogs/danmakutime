@@ -28,10 +28,10 @@ public class Launcher {
 				try {
 					rootURI = url.toURI();
 				} catch (URISyntaxException e) {
-					Log.error(e);
+					DTLog.error(e);
 				}
 			} else {
-				Log.error("No codebase");
+				DTLog.error("No codebase");
 			}
 		}
 		
@@ -96,7 +96,7 @@ public class Launcher {
 		try {
 			GuiUtil.setSkin(Skin.NATIVE);
 		} catch (Exception e) {
-			Log.warning(e);
+			DTLog.warning(e);
 		}
 		
 		boolean inited = false;
@@ -119,10 +119,10 @@ public class Launcher {
 			inited = true;
 			return game;
 		} catch (Throwable t) {
-			Log.showError(t);
+			DTLog.showError(t);
 		} finally {
 			if (!inited) {
-				Log.showError("Fatal error during init");
+				DTLog.showError("Fatal error during init");
 			}
 		}
 		

@@ -1,10 +1,9 @@
 package nl.weeaboo.dt.collision;
 
-import nl.weeaboo.dt.lua.link.LuaLinkedObject;
-
-public abstract class AbstractColNode implements IColNode, LuaLinkedObject {
+public abstract class AbstractColNode implements IColNode {
 
 	private IColHost host;
+	private int index;
 	private int type;
 	
 	protected AbstractColNode() {		
@@ -12,18 +11,22 @@ public abstract class AbstractColNode implements IColNode, LuaLinkedObject {
 	
 	//Functions	
 	@Override
-	public void init(IColHost host, int ty) {
+	public void onAttached(IColHost host, int index, int ty) {
 		this.host = host;
+		this.index = index;
 		this.type = ty;
 	}
 	
 	@Override
+	public void onDetached() {
+		host = null;
+		index = 0;
+		type = 0;
+	}
+	
+	@Override
 	public void onCollide(IColNode c) {
-		
-		System.out.printf("COLLISION :: %s(%d) hit by %s(%d)\n",
-				getClass().getSimpleName(), getType(),
-				c.getClass().getSimpleName(), c.getType());
-		
+		host.onCollide(this, index, c);				
 	}
 
 	//Getters

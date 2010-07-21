@@ -5,13 +5,16 @@ import java.awt.Rectangle;
 import nl.weeaboo.common.FastMath;
 import nl.weeaboo.dt.collision.ColHost;
 import nl.weeaboo.dt.collision.IColHost;
+import nl.weeaboo.dt.collision.IColHostCollisionHandler;
 import nl.weeaboo.dt.collision.IColNode;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.lua.link.LuaLinkedObject;
 import nl.weeaboo.dt.renderer.ITexture;
 
-public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
+public class Sprite extends Drawable implements ISprite, LuaLinkedObject,
+	IColHostCollisionHandler
+{
 
 	private IColHost colHost;
 	private boolean speedVecDirty;
@@ -28,21 +31,10 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 		outOfBoundsDeath = true;
 	}
 	
-	//Functions
+	//Functions	
 	@Override
-	public void destroy() {
-		super.destroy();
-		
-		if (isDestroyed()) {
-			if (colHost != null) {
-				colHost.destroy();
-			}
-		}
-	}
-	
-	@Override
-	public int addColNode(int type, IColNode c) {
-		return colHost.add(type, c);
+	public void setColNode(int index, int type, IColNode c) {
+		colHost.setColNode(index, type, c);
 	}
 	
 	@Override
@@ -80,6 +72,19 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 				}
 			}
 		}
+	}
+	
+	@Override
+	public void onCollide(IColNode child, int childIndex, IColNode other) {
+		if (isDestroyed()) {
+			return;
+		}
+		
+		System.out.printf("COLLISION :: %s(%d) [#%d] hit by %s(%d)\n",
+				child.getClass().getSimpleName(), child.getType(), childIndex,
+				other.getClass().getSimpleName(), other.getType());
+		
+		destroy();
 	}
 	
 	//Getters
@@ -187,8 +192,16 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 	
 	@Override
 	public void setField(IField f) {
+		if (colHost != null) {
+			colHost.destroy();
+			colHost = null;
+		}
+		
 		super.setField(f);
 		
-		colHost = new ColHost(f.getColField());		
+		if (f != null) {
+			colHost = new ColHost(f.getColField(), this);
+		}
 	}
+
 }

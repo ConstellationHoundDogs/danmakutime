@@ -123,11 +123,11 @@ public class Game extends GameBase {
 		try {
 			rm.getOutputStream("err.txt");
 		} catch (IOException e) {
-			Log.warning(e);
+			DTLog.warning(e);
 		}
 		
-		Log.getInstance().start(isDebug(), notifier, err);
-
+		DTLog.getInstance().start(isDebug(), notifier, err);
+			
 		restart();
 	}
 	
@@ -167,7 +167,7 @@ public class Game extends GameBase {
 				in = rm.getInputStream(path);
 				LuaUtil.load(vm, path, in);
 			} catch (Exception e) {
-				Log.showError(e);
+				DTLog.showError(e);
 				error = true;
 				return;
 			} finally {
@@ -212,9 +212,9 @@ public class Game extends GameBase {
 			} else {			
 				try {
 					startRecordingVideo("capture.mkv");
-					Log.message("Starting video recording");
+					DTLog.message("Starting video recording");
 				} catch (IOException e) {
-					Log.showError(e);
+					DTLog.showError(e);
 				}
 			}
 		}
@@ -226,7 +226,7 @@ public class Game extends GameBase {
 				try {
 					pauseThread.update();
 				} catch (LuaException e) {
-					Log.warning(e);
+					DTLog.warning(e);
 					paused = false;
 				}
 			} else {
@@ -269,9 +269,9 @@ public class Game extends GameBase {
 				try {
 					BufferedImage img = GraphicsUtil.createBufferedImage(ss.width, ss.height, ss.getARGB());
 					ImageIO.write(img, "png", new File("capture-" + System.currentTimeMillis() + ".png"));
-					Log.message("Screenshot saved");
+					DTLog.message("Screenshot saved");
 				} catch (IOException e) {
-					Log.showError(e);
+					DTLog.showError(e);
 				}
 			} else {
 				int argb[] = ss.getARGB();
@@ -284,7 +284,7 @@ public class Game extends GameBase {
 				IField overlayField = luaRunState.getField(2);
 				
 				screenshot = new Drawable();
-				screenshot.setField(overlayField);
+				overlayField.add(screenshot);
 				screenshot.setPos(overlayField.getWidth()/2, overlayField.getHeight()/2);
 				screenshot.setColor(0xFFAAAAAA);
 				screenshot.setZ(1000);
@@ -294,7 +294,7 @@ public class Game extends GameBase {
 		
 		//Draw HUD
 		ParagraphRenderer pr = createParagraphRenderer();
-		pr.setBounds(20, 20, w-40, h-40);
+		pr.setBounds(2, -2, w-6, h-4);
 		
 		MutableTextStyle mts = pr.getDefaultStyle().mutableCopy();
 		mts.setAnchor(9);
@@ -309,7 +309,7 @@ public class Game extends GameBase {
 			try {
 				videoCapture.update(glm, rw, rh);
 			} catch (IOException e) {
-				Log.showError(e);
+				DTLog.showError(e);
 				videoCapture = null;
 			}
 		}
