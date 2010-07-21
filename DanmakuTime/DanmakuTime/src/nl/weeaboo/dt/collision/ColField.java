@@ -4,13 +4,29 @@ import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
+
+import nl.weeaboo.common.Benchmark;
+import nl.weeaboo.common.StringUtil;
 
 public class ColField implements IColField {
 
+	public enum ColAlgorithm {
+		NAIVE, UNIFORM_GRID
+	}
+	
 	protected IColMatrix colMatrix;
 	protected Rectangle bounds;
 	protected List<List<IColNode>> nodes;
+	protected ColAlgorithm colAlgorithm = ColAlgorithm.UNIFORM_GRID;
 	
+	private ColGrid grid;
+
+	//Benchmark stuff
+	private boolean benchmark = false;
+	private long time = 0;
+	private int count = 0;
+
 	public ColField(int x, int y, int w, int h) {
 		bounds = new Rectangle(x, y, w, h);
 	}
@@ -33,42 +49,56 @@ public class ColField implements IColField {
 		if (colMatrix == null || colMatrix.getSize() == 0) {
 			return;
 		}
-		
-		IColNode arr[][] = getNodesAsArray();
-		
-		for (int t0 = 0; t0 < arr.length; t0++) {
-			for (int a = 0; a < arr[t0].length; a++) {
-				for (int t1 = t0; t1 < arr.length; t1++) {
-					if (!colMatrix.isColliding(t0, t1) && !colMatrix.isColliding(t1, t0)) {
-						continue;
-					}
 				
-					//System.out.println(arr[t0].length + " " + arr[t1].length);
+		if (benchmark) {
+			Benchmark.tick();
+		}
+		
+		if (colAlgorithm == ColAlgorithm.NAIVE) {
+			//Straightforward comparison of all col nodes
+			IColNode arr[][] = getNodesAsArray();		
+			for (int t0 = 0; t0 < arr.length; t0++) {
+				for (int a = 0; a < arr[t0].length; a++) {
+					for (int t1 = t0; t1 < arr.length; t1++) {
+						boolean atob = colMatrix.isColliding(t0, t1);
+						boolean btoa = colMatrix.isColliding(t1, t0);
+						if (!atob && !btoa) {
+							continue;
+						}
 					
-					for (int b = 0; b < arr[t1].length; b++) {
-						collide(arr[t0][a], arr[t1][b]);
-					}
-				}
-			}			
-		}		
-	}
-		
-	protected void collide(IColNode a, IColNode b) {
-		if (a == b) return;
-		
-		if (a.intersects(b)) {
-			int t0 = a.getType();
-			int t1 = b.getType();
+						//System.out.println(arr[t0].length + " " + arr[t1].length);
 						
-			if (colMatrix.isColliding(t0, t1)) {
-				a.onCollide(b);
+						for (int b = 0; b < arr[t1].length; b++) {
+							ColUtil.collide(arr[t0][a], arr[t1][b], atob, btoa);
+						}
+					}
+				}			
 			}
-			if (colMatrix.isColliding(t1, t0)) {
-				b.onCollide(a);
-			}			
+		} else if (colAlgorithm == ColAlgorithm.UNIFORM_GRID) {
+			//Cleverer collision detection scheme using a uniform grid
+			grid.setNodes(nodes);
+			
+			for (Collection<IColNode> list : nodes) {
+				for (IColNode node : list) {
+					grid.processCollisions(node);
+				}
+			}		
+		} else {
+			//No valid algorithm set, don't do any collision detection
+		}
+		
+		if (benchmark) {
+			time += Benchmark.tock(false);
+			count++;
+			
+			if (count >= 60) {
+				System.out.println(StringUtil.formatTime(time, TimeUnit.NANOSECONDS));
+				time = 0;
+				count = 0;
+			}
 		}
 	}
-	
+		
 	//Getters
 	protected IColNode[][] getNodesAsArray() {
 		if (nodes == null) return new IColNode[0][0];
@@ -98,7 +128,9 @@ public class ColField implements IColField {
 		}
 		for (int n = arr.length; n < colMatrix.getSize(); n++) {
 			nodes.add(new ArrayList<IColNode>());
-		}
+		}	
+		
+		grid = new ColGrid(colMatrix, bounds.x, bounds.y, bounds.width, bounds.height);
 	}
 
 }

@@ -23,7 +23,7 @@ public class Field implements IField {
 	private Collection<IDrawable> garbage;
 	
 	public Field(int x, int y, int w, int h, int pad) {
-		colField = new ColField(x, y, w, h);
+		colField = new ColField(x-pad, y-pad, w+pad*2, h+pad*2);
 		bounds = new Rectangle(x, y, w, h);
 		padding = pad;
 		

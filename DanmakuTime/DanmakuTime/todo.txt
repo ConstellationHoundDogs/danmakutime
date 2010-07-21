@@ -1,8 +1,13 @@
 
 Bugs:
+[ ] The javalualib returns an LMethod without checking if any method with
+    that name actually exists. This is probably because overloading must be
+    resolved at call time (we don't know which function exactly will be needed)
+    It should return null if no method with that name exists.
+    I SHOULD IMPLEMENT MY OWN VERSION OF LuajavaLib.java    
 
 Feature requests:
-[ ] Collision detection doesn't scale well. Try to use some kind of space
+[x] Collision detection doesn't scale well. Try to use some kind of space
     subdivision (uniform grid)?
 [x] Implement scriptable collision handling
     

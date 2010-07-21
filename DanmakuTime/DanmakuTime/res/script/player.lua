@@ -31,6 +31,10 @@ function Player:init()
 	self:setZ(1000)	
 end
 
+function Player:onCollision(other, myColNode, otherColNode)
+	self:destroy()
+end
+
 function Player:update()
 	while true do
 		self:updateDeathTime()
