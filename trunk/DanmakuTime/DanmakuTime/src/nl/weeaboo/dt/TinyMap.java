@@ -18,6 +18,10 @@ public class TinyMap<T> {
 	}
 	
 	//Functions
+	public void clear() {
+		keys.clear();
+		values.clear();
+	}
 	
 	public T put(int key, T value) {
 		//Replace existing value if there is one
@@ -30,6 +34,16 @@ public class TinyMap<T> {
 		//Add new entry
 		keys.add(key);
 		values.add(value);
+		return null;
+	}
+	
+	public T remove(int key) {
+		for (int n = 0; n < keys.size(); n++) {
+			if (keys.get(n) == key) {
+				keys.remove(n);
+				return values.remove(n);
+			}
+		}
 		return null;
 	}
 	
@@ -59,7 +73,7 @@ public class TinyMap<T> {
 		return values;
 	}
 	
-	public int size() {
+	public int getSize() {
 		return keys.size();
 	}
 	

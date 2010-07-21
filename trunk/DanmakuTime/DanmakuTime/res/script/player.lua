@@ -133,6 +133,7 @@ function Player:fire()
 	for n=0,4 do
 		local s = Sprite.new()
 		s:setTexture(textureStore:getTexture("test.png#g0"));
+		s:addColNode(playerShotColType, CircleColNode.new(7))
 		s:setPos(x, y)
 		s:setZ(z)
 		s:setAngle(-32 + 16 * n)

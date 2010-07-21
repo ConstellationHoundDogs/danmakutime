@@ -1,10 +1,12 @@
 package nl.weeaboo.dt.lua;
 
 import java.io.BufferedInputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 
 import nl.weeaboo.common.Log;
@@ -91,8 +93,45 @@ public class LuaUtil {
 		res = vm.pcall(0, 0);
 		if (res != 0) throw new LuaException(String.format("Runtime Error (%d) in \"%s\" :: %s", res, filename, vm.tostring(-1)));		
 	}
+
+	public static void registerClass(LuaRunState rs, LuaState vm, Class<?> c) throws LuaException {
+		Constructor<?> constr = null;
+		try {
+			constr = c.getConstructor();
+		} catch (NoSuchMethodException nsme) {
+			//Just pretend getConstructor() returned null
+		} catch (Exception e) {
+			throw new LuaException(e);
+		}
+		
+		if (constr == null) {
+			throw new LuaException(String.format("No default constructor for class \"%s\" -- unable to register", c.getName()));
+		}
+		
+		String code = String.format(
+				  "luajava.bindClass(\"%s\")\n"
+				+ "%s = {}\n"
+				+ "%s.new = function(...)\n"
+				+ "    return luajava.newInstance(\"%s\", unpack(arg))\n"
+				+ "end\n",
+				c.getName(), c.getSimpleName(), c.getSimpleName(), c.getName());
+		
+		ByteArrayInputStream bin = null;
+		try {
+			bin = new ByteArrayInputStream(code.getBytes("UTF-8"));
+			LuaUtil.load(vm, "ClassBinding-" + c.getName(), bin);
+		} catch (IOException ioe) {
+			throw new LuaException(ioe);
+		} finally {
+			try {
+				if (bin != null) bin.close();
+			} catch (IOException ioe) {
+				throw new LuaException(ioe);
+			}
+		}
+	}
 	
-	public static <T extends LuaLinkedObject> void registerClass(
+	public static <T extends LuaLinkedObject> void registerClass2(
 			LuaRunState rs, LuaState vm, Class<T> c)
 	{
 		LTable table = new LTable();
@@ -178,7 +217,7 @@ public class LuaUtil {
 					LuaFunctionLink link = new LuaFunctionLink(rs, vm, vm.checkfunction(1));
 					pool.add(link);
 										
-					vm.pushuserdata(link);
+					vm.pushlvalue(LuajavaLib.toUserdata(link, link.getClass()));
 				} else {
 					vm.pushnil();
 				}
@@ -200,12 +239,14 @@ public class LuaUtil {
 		table.put("new", new LFunction() {
 			public int invoke(LuaState vm) {
 				if (vm.gettop() >= 6) {
-					vm.pushuserdata(rs.createField(vm.checkint(1), vm.checkint(2),
+					IField field = rs.createField(vm.checkint(1), vm.checkint(2),
 							vm.checkint(3), vm.checkint(4), vm.checkint(5),
-							vm.checkint(6)));
+							vm.checkint(6));
+					vm.pushlvalue(LuajavaLib.toUserdata(field, field.getClass()));
 				} else if (vm.gettop() >= 5) {
-					vm.pushuserdata(rs.createField(vm.checkint(1), vm.checkint(2),
-							vm.checkint(3), vm.checkint(4), vm.checkint(5)));
+					IField field = rs.createField(vm.checkint(1), vm.checkint(2),
+							vm.checkint(3), vm.checkint(4), vm.checkint(5));
+					vm.pushlvalue(LuajavaLib.toUserdata(field, field.getClass()));
 				} else {
 					vm.pushnil();
 				}

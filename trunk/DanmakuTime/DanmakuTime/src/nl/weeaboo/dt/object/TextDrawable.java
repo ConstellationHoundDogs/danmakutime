@@ -15,7 +15,7 @@ public class TextDrawable extends Drawable implements ITextDrawable {
 	//Functions
 	@Override
 	public void drawGeometry(IRenderer r) {
-		r.drawText(text, x, y, getZ(), getDrawAngle(), width, anchor);		
+		r.drawText(text, getX(), getY(), getZ(), getDrawAngle(), width, anchor);		
 	}
 	
 	//Getters

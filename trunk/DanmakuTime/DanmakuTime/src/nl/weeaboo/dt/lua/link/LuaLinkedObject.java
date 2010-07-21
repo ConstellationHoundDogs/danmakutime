@@ -4,16 +4,10 @@ import nl.weeaboo.dt.lua.LuaException;
 import nl.weeaboo.dt.lua.LuaRunState;
 
 import org.luaj.vm.LUserData;
-import org.luaj.vm.LValue;
 import org.luaj.vm.LuaState;
 
 public interface LuaLinkedObject {
 
 	public void init(LuaRunState rs, LuaState vm, LUserData udata) throws LuaException;
-	
-	/**
-	 * Calls a function like it would happen from Lua. 
-	 */
-	public LValue call(String methodName, Object... args) throws LuaException;
-	
+		
 }

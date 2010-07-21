@@ -3,12 +3,17 @@ package nl.weeaboo.dt.object;
 import java.awt.Rectangle;
 
 import nl.weeaboo.common.FastMath;
+import nl.weeaboo.dt.collision.ColHost;
+import nl.weeaboo.dt.collision.IColHost;
+import nl.weeaboo.dt.collision.IColNode;
+import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.lua.link.LuaLinkedObject;
 import nl.weeaboo.dt.renderer.ITexture;
 
 public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
-	
+
+	private IColHost colHost;
 	private boolean speedVecDirty;
 	private double speed, speedInc;
 	private double speedX, speedY;
@@ -17,17 +22,29 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 	protected boolean hasBeenInField, outOfBoundsDeath;
 	private Rectangle visualBounds;
 	
-	public Sprite() {
+	public Sprite() {		
 		clip = true;
+		drawAngleAuto = true;
 		outOfBoundsDeath = true;
 	}
 	
-	//Functions		
-	public Object test(String arg0, double arg1) {
-		System.out.println(arg0 + " " + arg1);
-		return this;
+	//Functions
+	@Override
+	public void destroy() {
+		super.destroy();
+		
+		if (isDestroyed()) {
+			if (colHost != null) {
+				colHost.destroy();
+			}
+		}
 	}
-
+	
+	@Override
+	public int addColNode(int type, IColNode c) {
+		return colHost.add(type, c);
+	}
+	
 	@Override
 	public void update(IInput input) {
 		super.update(input);
@@ -46,9 +63,9 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 	        speedY = -speed * FastMath.fastCos((float)angle);
 	    }
 
-		x += speedX;
-		y += speedY;
+		setPos(getX() + speedX, getY() + speedY);
 		
+		//Bounds check
 		if (outOfBoundsDeath && field != null) {
 			Rectangle fieldBounds = new Rectangle(0, 0, field.getWidth(), field.getHeight());
 			Rectangle imageBounds = getVisualBounds();
@@ -59,12 +76,18 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 				fieldBounds.grow(field.getPadding(), field.getPadding());				
 				if (hasBeenInField || !fieldBounds.intersects(imageBounds)) {				
 					destroy();
+					return;
 				}
 			}
 		}
 	}
 	
 	//Getters
+	@Override
+	public IColHost getColHost() {
+		return colHost;
+	}
+	
 	@Override
 	public double getAngle() {
 		return angle;
@@ -103,8 +126,8 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 			visualBounds = new Rectangle(0, 0, w, h);			
 		}
 		
-		visualBounds.x = (int)Math.round(x) - (visualBounds.width>>1);
-		visualBounds.y = (int)Math.round(y) - (visualBounds.height>>1);
+		visualBounds.x = (int)Math.round(getX()) - (visualBounds.width>>1);
+		visualBounds.y = (int)Math.round(getY()) - (visualBounds.height>>1);
 		
 		return visualBounds;
 	}
@@ -153,5 +176,19 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject {
 		
 		visualBounds = null;
 	}
+	
+	@Override
+	public void setPos(double x, double y) {
+		super.setPos(x, y);
 		
+		colHost.setPos(x, y);
+	}
+		
+	
+	@Override
+	public void setField(IField f) {
+		super.setField(f);
+		
+		colHost = new ColHost(f.getColField());		
+	}
 }

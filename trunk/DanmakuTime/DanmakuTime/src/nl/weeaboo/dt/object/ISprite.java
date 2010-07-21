@@ -2,11 +2,17 @@ package nl.weeaboo.dt.object;
 
 import java.awt.Rectangle;
 
+import nl.weeaboo.dt.collision.IColHost;
+import nl.weeaboo.dt.collision.IColNode;
+
 public interface ISprite extends IDrawable {
 
 	// === Functions ===========================================================
-
+	public int addColNode(int type, IColNode c);
+	
 	// === Getters =============================================================
+	public IColHost getColHost();
+	
 	public double getSpeed();
 	public double getSpeedInc();
 	public double getAngle();

@@ -6,12 +6,15 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 
+import nl.weeaboo.dt.collision.ColField;
+import nl.weeaboo.dt.collision.IColField;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.object.IDrawable;
 import nl.weeaboo.dt.renderer.IRenderer;
 
 public class Field implements IField {
 
+	private ColField colField;
 	private Rectangle bounds;
 	private int padding;
 	
@@ -19,6 +22,7 @@ public class Field implements IField {
 	private Collection<IDrawable> standbyList;	
 	
 	public Field(int x, int y, int w, int h, int pad) {
+		colField = new ColField(x, y, w, h);
 		bounds = new Rectangle(x, y, w, h);
 		padding = pad;
 		
@@ -53,6 +57,8 @@ public class Field implements IField {
 				itr.remove();
 			}
 		}
+		
+		colField.processCollisions();
 	}
 	
 	@Override
@@ -102,6 +108,11 @@ public class Field implements IField {
 	@Override
 	public int getPadding() {
 		return padding;
+	}
+
+	@Override
+	public IColField getColField() {
+		return colField;
 	}
 	
 	//Setters
