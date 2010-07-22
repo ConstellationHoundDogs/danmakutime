@@ -6,14 +6,14 @@ function buildLevel(background)
 	--Setup collision matrix
 	local colMatrix = ColMatrix.new()
 	playerColType = colMatrix:newColType()
-	playerGrazeType = colMatrix:newColType()	
+	playerGrazeColType = colMatrix:newColType()	
 	playerShotColType = colMatrix:newColType()	
 	enemyColType = colMatrix:newColType()	
 	enemyShotColType = colMatrix:newColType()	
 	colMatrix:setColliding(playerColType, enemyColType)
 	colMatrix:setColliding(playerColType, enemyShotColType)
-	colMatrix:setColliding(playerGrazeType, enemyColType)
-	colMatrix:setColliding(playerGrazeType, enemyShotColType)
+	colMatrix:setColliding(playerGrazeColType, enemyColType)
+	colMatrix:setColliding(playerGrazeColType, enemyShotColType)
 	colMatrix:setColliding(playerShotColType, enemyColType)
 	colMatrix:setColliding(enemyColType, playerShotColType)
 
@@ -35,15 +35,21 @@ function buildLevel(background)
 	overlayField = Field.new(2, 0, 0, screenWidth, screenHeight, 0)
 	
 	--Create some text
-	local text = TextDrawable.new(overlayField)
-	text:setText("Danmaku Time\nDay 3")
-	text:setBlockAnchor(7)
-	text:setFontName("DejaVuSans") --fontname is the file name without extension
-	text:setFontStyle(FontStyle.BOLD)
-	text:setFontSize(14)
-	text:setPos(0, -2)
+	local text = createText("Danmaku Time\nDay 4", 0, -2)
 	
 	--Create player
 	player = Player.new()
-		
+	
 end
+
+function createText(string, x, y)
+	local text = TextDrawable.new(overlayField)
+	text:setText(string)
+	text:setBlockAnchor(7)
+	text:setFontName("DejaVuSans") --fontname is the file name without extension
+	--text:setFontStyle(FontStyle.BOLD)
+	text:setFontSize(14)
+	text:setPos(x, y)
+	return text
+end
+

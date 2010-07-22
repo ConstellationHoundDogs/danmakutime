@@ -62,6 +62,7 @@ function main()
 		end
 	end)
 	
+	--[[
 	for group=1,50 do
 		for n=1,200 do
 			local s = Sprite.new{hp=1, power=1}
@@ -91,4 +92,5 @@ function main()
 		end		
 		yield(10)
 	end
+	]]--
 end

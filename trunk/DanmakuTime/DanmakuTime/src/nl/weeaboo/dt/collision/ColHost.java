@@ -9,7 +9,9 @@ public class ColHost implements IColHost {
 	private IColField field;
 	private IColHostCollisionHandler colHandler;
 	private TinyMap<IColNode> nodes;
+	private boolean hasRotateable;
 	private double x, y;
+	private double angle;
 	
 	public ColHost(IDrawable o, IColField f, IColHostCollisionHandler h) {
 		owner = o;
@@ -26,6 +28,7 @@ public class ColHost implements IColHost {
 			node.onDetached();
 		}
 		nodes.clear();
+		hasRotateable = false;
 	}
 	
 	@Override
@@ -54,6 +57,11 @@ public class ColHost implements IColHost {
 		return y;
 	}
 	
+	@Override
+	public double getAngle() {
+		return angle;
+	}	
+	
 	//Setters
 	@Override
 	public void setPos(double x, double y) {
@@ -65,11 +73,43 @@ public class ColHost implements IColHost {
 	public void setColNode(int index, int type, IColNode n) {
 		IColNode old = nodes.put(index, n);
 		if (old != null && old != n) {
-			old.onDetached();
+			old.onDetached();			
 		}
 
 		n.onAttached(this, index, type);
 		field.add(n);
+
+		if (n instanceof IRotateableColNode) {
+			hasRotateable = true;
+		} else {
+			if (old instanceof IRotateableColNode) {
+				//We may have removed the last rotateable col node
+				
+				hasRotateable = false;
+				for (IColNode cn : nodes.getValues()) {
+					if (cn instanceof IRotateableColNode) {
+						hasRotateable = true;
+						break;
+					}
+				}
+			}
+		}
+		
+	}
+
+	@Override
+	public void setAngle(double a) {
+		if (angle != a) {
+			angle = a;
+			
+			if (hasRotateable) {
+				for (IColNode node : nodes.getValues()) {
+					if (node instanceof LineSegColNode) {
+						((LineSegColNode)node).setAngle(angle);
+					}
+				}
+			}
+		}
 	}
 	
 }
