@@ -9,7 +9,7 @@ end
 function CircleGhost:init()
 	self:setPos(400, 300);
 	self:setZ(-100)
-	self:setTexture(textureStore:getTexture("test.png#g1"));
+	self:setTexture(texStore:get("test.png#g1"));
 	self:setColNode(0, enemyColType, CircleColNode.new(7))
 end
 
@@ -28,9 +28,9 @@ end
 
 function CircleGhost:animate()
 	while false do
-		self:setTexture(textureStore:getTexture("test.png#g0"));
+		self:setTexture(texStore:get("test.png#g0"));
 		yield(10)
-		self:setTexture(textureStore:getTexture("test.png#g1"));
+		self:setTexture(texStore:get("test.png#g1"));
 		yield(10)
 	end
 end
@@ -64,7 +64,7 @@ function main()
 	
 	for group=1,50 do
 		for n=1,200 do
-			local s = Sprite.new{hp=10, power=1}
+			local s = Sprite.new{hp=1, power=1}
 			s:setColNode(0, enemyColType, CircleColNode.new(7))
 			s.onCollision = function(self, other, myNode, otherNode)
 				self.hp = self.hp - other.power
@@ -74,11 +74,11 @@ function main()
 			end
 			
 			if math.random(10) >= 10 then
-				s:setTexture(textureStore:getTexture("test.png#g0"));
+				s:setTexture(texStore:get("test.png#g0"));
 				s:setZ(-1)
 				s:setDrawAngleAuto(false)
 			else
-				s:setTexture(textureStore:getTexture("test.png#g1"));
+				s:setTexture(texStore:get("test.png#g1"));
 				s:setBlendMode(BlendMode.ADD)
 			end
 			

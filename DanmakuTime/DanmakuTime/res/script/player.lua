@@ -14,7 +14,8 @@ Player = {
 	focus=false,
 	fireCooldown=0,
 	deathTime=0,
-	dx=0
+	dx=0,
+	focusSprites={}
 	}
 
 function Player.new(o)
@@ -23,12 +24,15 @@ function Player.new(o)
 end
 
 function Player:init()
-	self:setTexture(textureStore:getTexture("player.png#idle0"));
+	self:setTexture(texStore:get("player.png#idle0"));
 	self:setColNode(0, playerColType, CircleColNode.new(2.0))
 	self:setColNode(1, playerGrazeType, CircleColNode.new(10.0))
 
 	self:setPos(levelWidth/2, levelHeight - 32)
 	self:setZ(1000)	
+	
+	self.focusSprites[1] = FocusSprite.new(self, texStore:get("focus.png#upper"), -10, {fadeSpeed=.1})
+	self.focusSprites[2] = FocusSprite.new(self, texStore:get("focus.png#lower"), 10, {fadeSpeed=.05})
 end
 
 function Player:onCollision(other, myColNode, otherColNode)
@@ -141,7 +145,7 @@ function Player:fire()
 
 	for n=0,4 do
 		local s = Sprite.new{hp=1, power=1}
-		s:setTexture(textureStore:getTexture("test.png#g0"));
+		s:setTexture(texStore:get("test.png#g0"));
 		s:setColNode(0, playerShotColType, CircleColNode.new(7))
 		s.onCollision = function(self, other, myColNode, otherColNode)
 			self:destroy()
@@ -172,7 +176,7 @@ function Player:animate()
 			end
 		end
 	
-		self:setTexture(textureStore:getTexture("player.png#" .. animPrefix[anim] .. frame))
+		self:setTexture(texStore:get("player.png#" .. animPrefix[anim] .. frame))
 		
 		frame = frame + 1
 		if frame >= 8 then
