@@ -284,13 +284,13 @@ public class Game extends GameBase {
 				GLImage gli = addGeneratedImage(IntBuffer.wrap(argb),
 						size.width, size.height, true, false);
 				
-				IField overlayField = luaRunState.getField(2);
+				IField overlayField = luaRunState.getField(999);
 				
 				screenshot = new Drawable();
 				overlayField.add(screenshot);
 				screenshot.setPos(overlayField.getWidth()/2, overlayField.getHeight()/2);
 				screenshot.setColor(0xFFAAAAAA);
-				screenshot.setZ(1000);
+				screenshot.setZ(-99);
 				screenshot.setTexture(new Texture(gli));				
 			}
 		}

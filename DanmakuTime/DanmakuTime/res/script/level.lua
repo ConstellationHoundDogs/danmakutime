@@ -31,25 +31,27 @@ function buildLevel(background)
 	levelBG:setPos(screenWidth/2, screenHeight/2)
 	levelBG:setZ(32000)
 
-	--Create the overlay field (id=2)
-	overlayField = Field.new(2, 0, 0, screenWidth, screenHeight, 0)
+	--Create the overlay field (id=999)
+	overlayField = Field.new(999, 0, 0, screenWidth, screenHeight, 0)
 	
 	--Create some text
-	local text = createText("Danmaku Time\nDay 4", 0, -2)
-	
-	--Create player
-	player = Player.new()
-	
-end
-
-function createText(string, x, y)
 	local text = TextDrawable.new(overlayField)
-	text:setText(string)
+	text:setText("Danmaku Time\nDay 4")
 	text:setBlockAnchor(7)
 	text:setFontName("DejaVuSans") --fontname is the file name without extension
 	--text:setFontStyle(FontStyle.BOLD)
 	text:setFontSize(14)
-	text:setPos(x, y)
-	return text
+	text:setPos(0, -2)
+	
+	--Create player
+	player = Player.new()
+	
+	--Create OSD
+	local paramX = gameField:getX() + gameField:getWidth() + 10
+	local paramY = gameField:getY() + 10 + 50
+	local paramDY = 15
+	
+	ParamText.new(overlayField, player, "lives", "Lives", paramX, paramY)
+	paramY = paramY + paramDY
+	ParamText.new(overlayField, player, "bombs", "Bombs", paramX, paramY)
 end
-

@@ -7,7 +7,8 @@ Bugs:
     I SHOULD IMPLEMENT MY OWN VERSION OF LuajavaLib.java    
 
 Feature requests:
-[ ] Add additional collision shapes: line segment, polygon.
+[ ] Implement line segment <-> line segment collision test
+[ ] Add additional collision shapes: polygon.
 [ ] Think about bosses with lifebars, timeouts and spellcards. How would one
     implement those and how can I help.
 [ ] Create a "Boss extends Sprite" object to help with Boss creation? Or is

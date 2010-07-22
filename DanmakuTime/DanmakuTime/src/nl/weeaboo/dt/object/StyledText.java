@@ -10,7 +10,7 @@ public class StyledText {
 	private ITextStyle styles[];
 	
 	public StyledText(String t, ITextStyle s) {
-		text = StringUtil.toUnicodeArray(t);
+		text = (t != null ? StringUtil.toUnicodeArray(t) : new int[0]);
 		styles = new ITextStyle[text.length];
 		
 		Arrays.fill(styles, s);

@@ -31,10 +31,14 @@ function pauseHandler()
 	local dx = screenWidth/2
 	local dy = screenHeight/2
 
-	local pausedText = TextDrawable.new(2)
+	local pausedText = TextDrawable.new(999)
 	pausedText:setPos(dx, dy)
-	pausedText:setAnchor(5)
+	pausedText:setBlockAnchor(5)
+	pausedText:setFontName("DejaVuSans")
+	pausedText:setFontStyle(FontStyle.BOLD)
+	pausedText:setFontSize(14)	
 	pausedText:setText("Paused")
+	pausedText:setZ(-100)
 
 	while true do
 		if input:consumeKey(Keys.ESCAPE) then
