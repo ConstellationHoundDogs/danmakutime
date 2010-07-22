@@ -168,7 +168,8 @@ public class Game extends GameBase {
 			InputStream in = null;
 			try {				
 				in = rm.getInputStream(path);
-				LuaUtil.load(vm, path, in);
+				LuaUtil.loadModule(vm, path, in);
+				LuaUtil.initModule(vm);
 			} catch (Exception e) {
 				DTLog.showError(e);
 				error = true;

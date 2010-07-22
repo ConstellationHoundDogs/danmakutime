@@ -1,6 +1,22 @@
 
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+--
+-- External dependencies:
+-- 
+-- THSprite
+-- playerColType
+-- playerGrazeColType
+-- playerShotColType
+-- levelWidth
+-- levelHeight
+--
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
 
-Player = {
+THPlayer = {
 	--stats
 	speed=3,
 	focusSpeed=1.5,
@@ -9,21 +25,20 @@ Player = {
 	--state
 	lives=3,
 	bombs=2,
-	hp=1,
-	power=0,
 	focus=false,
+	grazeCounter=0,
 	fireCooldown=0,
 	deathTime=0,
 	dx=0,
 	focusSprites={}
 	}
 
-function Player.new(o)
-	local o = extend(Player, o or {})
-	return Sprite.new(o)
+function THPlayer.new(obj)
+	obj = extend(THSprite, THPlayer, obj or {})
+	return Sprite.new(obj)
 end
 
-function Player:init()
+function THPlayer:init()
 	self:setTexture(texStore:get("player.png#idle0"));
 	self:setColNode(0, playerColType, CircleColNode.new(2.0))
 	self:setColNode(1, playerGrazeColType, CircleColNode.new(10.0))
@@ -35,17 +50,24 @@ function Player:init()
 	self.focusSprites[2] = FocusSprite.new(self, texStore:get("focus.png#lower"), 10, {fadeSpeed=.05})
 end
 
-function Player:onCollision(other, myColNode, otherColNode)
+function THPlayer:onCollision(other, myColNode, otherColNode)
 	local type = myColNode:getType()
 	
 	if type == playerGrazeColType then
-		--print("graze")
-	elseif type == playerColType then
+		if not other.grazed then
+			other.grazed = true
+			self:onGrazed(other)
+		end
+	else
 		self:destroy()
 	end
 end
 
-function Player:update()
+function THPlayer:onGrazed(other)
+	self.grazeCounter = self.grazeCounter + 1
+end
+
+function THPlayer:update()
 	while true do
 		self:updateDeathTime()
 		
@@ -60,7 +82,7 @@ function Player:update()
 	end
 end
 
-function Player:updateDeathTime()
+function THPlayer:updateDeathTime()
 	if self.deathTime > 0 then
 		self:setAlpha(self.deathTime / self.deathBombTime)
 		
@@ -85,11 +107,11 @@ function Player:updateDeathTime()
 	end	
 end
 
-function Player:updateFocus()
+function THPlayer:updateFocus()
 	self.focus = input:isKeyHeld(Keys.SHIFT)
 end
 
-function Player:updatePos()
+function THPlayer:updatePos()
 	local x = self:getX()
 	local y = self:getY()
 		
@@ -124,7 +146,7 @@ function Player:updatePos()
 	self:setPos(x, y)
 end
 
-function Player:updateBomb()
+function THPlayer:updateBomb()
 	if self.bombs > 0 and input:consumeKey(Keys.X) then
 		self.bombs = self.bombs - 1		
 		self:bomb()
@@ -133,11 +155,11 @@ function Player:updateBomb()
 	return false
 end
 
-function Player:bomb()
+function THPlayer:bomb()
 	print("boom")
 end
 
-function Player:updateFire()	
+function THPlayer:updateFire()	
 	if self.fireCooldown > 0 then
 		self.fireCooldown = self.fireCooldown - 1
 	else
@@ -148,14 +170,14 @@ function Player:updateFire()
 	end
 end
 
-function Player:fire()
+function THPlayer:fire()
 	local x = self:getX()
 	local y = self:getY()
 	local z = self:getZ() + 100
 	local angle = self:getAngle()
 
 	for n=0,4 do
-		local s = Sprite.new{hp=1, power=1}
+		local s = THSprite.new{hp=1, power=1}
 		s:setTexture(texStore:get("test.png#g0"));
 		s:setColNode(0, playerShotColType, CircleColNode.new(7))
 		s.onCollision = function(self, other, myColNode, otherColNode)
@@ -168,7 +190,7 @@ function Player:fire()
 	end
 end
 
-function Player:animate()
+function THPlayer:animate()
 	local animPrefix = {"idle", "left", "right"}
 	local anim = 1
 	local frame = 0
@@ -204,15 +226,81 @@ function Player:animate()
 	end
 end
 
-function Player:onDestroy()
+function THPlayer:onDestroy()
 	if self.deathTime <= 0 then
 		self.deathTime = self.deathBombTime
 	end
 	
 	if self.lives <= 0 then
-		print("Player is out of lives")
 		return true
 	end
 	
 	return false
 end
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+FocusSprite = {
+	parent=nil,
+	rotSpeed=2,
+	fadeSpeed=0.1,
+	maxAlpha=0.5,
+	dz=1
+	}
+
+function FocusSprite.new(parent, tex, dz, o)
+	local o = extend(FocusSprite, o or {})
+	local s = Sprite.new(o)
+	s.parent = parent
+	s.dz = dz
+	s:setTexture(tex)
+	return s
+end
+
+function FocusSprite:init()
+	self:setAlpha(0)
+end
+
+function FocusSprite:update()
+	while not self.parent:isDestroyed() do
+		self:setPos(self.parent:getX(), self.parent:getY())
+		self:setZ(self.parent:getZ() + self.dz)
+		yield()
+	end
+end
+
+function FocusSprite:animate()
+	local targetAlpha = 0.0
+
+	self:setDrawAngleAuto(false)
+	while true do
+		if not self.parent:isDestroyed() and self.parent.focus then
+			targetAlpha = self.maxAlpha
+		else
+			targetAlpha = 0.0
+		end
+		
+		local alpha = self:getAlpha()
+		if math.abs(targetAlpha-alpha) > self.fadeSpeed then
+			alpha = alpha + self.fadeSpeed * signum(targetAlpha-alpha)
+		else
+			alpha = targetAlpha
+			if self.parent:isDestroyed() then
+				self:destroy()
+				return
+			end
+		end
+		alpha = math.max(0.0, math.min(self.maxAlpha, alpha))		
+		self:setAlpha(alpha)
+		
+		self:setDrawAngle(self:getDrawAngle() + self.rotSpeed)
+		
+		yield()
+	end
+end
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------

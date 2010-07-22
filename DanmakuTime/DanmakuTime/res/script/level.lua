@@ -44,7 +44,7 @@ function buildLevel(background)
 	text:setPos(0, -2)
 	
 	--Create player
-	player = Player.new()
+	player = THPlayer.new()
 	--player:setColNode(999, playerGrazeColType, LineSegColNode.new(0, 0, 0, -100, 1))
 	
 	--Create OSD
@@ -55,4 +55,6 @@ function buildLevel(background)
 	ParamText.new(overlayField, player, "lives", "Lives", paramX, paramY)
 	paramY = paramY + paramDY
 	ParamText.new(overlayField, player, "bombs", "Bombs", paramX, paramY)
+	paramY = paramY + paramDY
+	ParamText.new(overlayField, player, "grazeCounter", "Graze", paramX, paramY)
 end

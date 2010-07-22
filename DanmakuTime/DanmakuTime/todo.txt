@@ -5,10 +5,14 @@ Bugs:
     resolved at call time (we don't know which function exactly will be needed)
     It should return null if no method with that name exists.
     I SHOULD IMPLEMENT MY OWN VERSION OF LuajavaLib.java    
+[ ] Lua's include/require functions are broken.
 
 Feature requests:
 [x] Implement line segment <-> line segment collision test
 [ ] Add additional collision shapes: polygon.
+[ ] Game Menu
+[ ] Items
+[ ] Explosions
 [ ] Create thlib.lua which defines a THSprite {hp, power, grazed}
 	and other things you'd need like a player script, items, etc.
 [ ] Think about bosses with lifebars, timeouts and spellcards. How would one
@@ -19,3 +23,4 @@ Feature requests:
 [ ] How does the user specify which SoundEngine they want?
 [ ] Add scale attributes to drawables. Renderer need not change, the drawable
     can handle the width & height change itself in its draw method.
+[ ] Try to print a Lua stack trace in case of Lua errors

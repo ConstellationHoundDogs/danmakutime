@@ -7,13 +7,12 @@ function clone(obj)
 	return result
 end
 
-function extend(a, b)
+function extend(...)
 	local result = {}
-	for k,v in pairs(a) do
-		result[k] = v
-	end
-	for k,v in pairs(b) do
-		result[k] = v
+	for tableIndex,table in ipairs(arg) do
+		for k,v in pairs(table) do
+			result[k] = v
+		end
 	end
 	return result
 end
