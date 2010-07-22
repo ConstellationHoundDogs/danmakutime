@@ -13,6 +13,8 @@ public class CircleColNode extends AbstractColNode {
 	public boolean intersects(IColNode c) {
 		if (c instanceof CircleColNode) {
 			return ColUtil.intersectCircleCircle(this, (CircleColNode)c);
+		} else if (c instanceof RectColNode) {
+			return ColUtil.intersectCircleRect(this, (RectColNode)c);
 		} else if (c instanceof LineSegColNode) {
 			return ColUtil.intersectCircleLineSeg(this, (LineSegColNode)c);
 		}

@@ -68,5 +68,16 @@ public class ColMatrix implements IColMatrix {
 	public void setColliding(int t0, int t1, boolean c) {
 		matrix[t0][t1] = c;
 	}
+
+	@Override
+	public void setColliding2(int t0, int t1) {
+		setColliding2(t0, t1, true);
+	}
+
+	@Override
+	public void setColliding2(int t0, int t1, boolean c) {
+		matrix[t0][t1] = c;
+		matrix[t1][t0] = c;
+	}
 	
 }

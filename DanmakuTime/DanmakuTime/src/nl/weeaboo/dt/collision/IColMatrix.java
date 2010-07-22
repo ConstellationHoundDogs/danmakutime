@@ -8,6 +8,8 @@ public interface IColMatrix extends Cloneable {
 	public int newColType();
 	public void setColliding(int t0, int t1);
 	public void setColliding(int t0, int t1, boolean c);
+	public void setColliding2(int t0, int t1);
+	public void setColliding2(int t0, int t1, boolean c);
 	
 	// === Getters =============================================================
 	public boolean isColliding(int t0, int t1);

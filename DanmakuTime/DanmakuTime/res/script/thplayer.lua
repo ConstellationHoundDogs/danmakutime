@@ -42,6 +42,7 @@ function THPlayer:init()
 	self:setTexture(texStore:get("player.png#idle0"));
 	self:setColNode(0, playerColType, CircleColNode.new(2.0))
 	self:setColNode(1, playerGrazeColType, CircleColNode.new(10.0))
+	self:setColNode(2, playerItemColType, RectColNode.new(-12, -20, 24, 40))
 
 	self:setPos(levelWidth/2, levelHeight - 32)
 	self:setZ(1000)	
@@ -55,9 +56,9 @@ function THPlayer:onCollision(other, myColNode, otherColNode)
 		return
 	end
 
-	local type = myColNode:getType()
+	local t0 = myColNode:getType()
 	
-	if type == playerGrazeColType then
+	if t0 == playerGrazeColType then
 		if not other.grazed then
 			other.grazed = true
 			self:onGrazed(other)
@@ -69,6 +70,10 @@ end
 
 function THPlayer:onGrazed(other)
 	self.grazeCounter = self.grazeCounter + 1
+end
+
+function THPlayer:onCollectItem(other)
+	--Do whatever the 
 end
 
 function THPlayer:update()

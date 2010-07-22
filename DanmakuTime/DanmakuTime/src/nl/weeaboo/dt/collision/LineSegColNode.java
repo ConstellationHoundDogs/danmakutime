@@ -37,6 +37,8 @@ public class LineSegColNode extends AbstractColNode implements IRotateableColNod
 			return ColUtil.intersectCircleLineSeg((CircleColNode)c, this);
 		} else if (c instanceof LineSegColNode) {
 			return ColUtil.intersectLineSegLineSeg(this, (LineSegColNode)c);
+		} else if (c instanceof RectColNode) {
+			return ColUtil.intersectLineSegRect(this, (RectColNode)c);
 		}
 		return ColUtil.intersectUndefined(this, c);
 	}
