@@ -1,7 +1,8 @@
 <images>
-  <image filename="test.png" width="64" height="32">
+  <image filename="test.png" width="128" height="64">
     <subrect id="g0" rect=" 8, 8,16,16" />
     <subrect id="g1" rect="40, 8,16,16" />
+    <subrect id="laser" rect="104, 8,16,16" />
   </image>
   <image filename="player.png" width="256" height="256">
     <subrect id="idle0" rect="  0, 0,32,48" />

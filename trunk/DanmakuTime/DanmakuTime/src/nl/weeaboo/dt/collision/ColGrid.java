@@ -1,6 +1,5 @@
 package nl.weeaboo.dt.collision;
 
-import java.awt.Rectangle;
 import java.util.Arrays;
 import java.util.Collection;
 
@@ -8,7 +7,6 @@ import nl.weeaboo.dt.object.IDrawable;
 
 public class ColGrid {
 
-	private Rectangle bounds;
 	private IColMatrix colMatrix;
 	private GridCell grid[][][];
 	private GridCell fallbackCells[];
@@ -18,9 +16,8 @@ public class ColGrid {
 	private int cellsW;
 	private int cellsH;
 	
-	public ColGrid(IColMatrix m, int x, int y, int w, int h) {
+	public ColGrid(IColMatrix m, int w, int h) {
 		colMatrix = m;
-		bounds = new Rectangle(x, y, w, h);
 		
 		gridMagnitude = 5;
 		gridSize = 1 << gridMagnitude;
@@ -108,10 +105,10 @@ public class ColGrid {
 	}
 	
 	private final int toGridCoordX(double x) {
-		return ((int)(x + .5) - bounds.x) >> gridMagnitude;
+		return ((int)(x + .5)) >> gridMagnitude;
 	}
 	private final int toGridCoordY(double y) {
-		return ((int)(y + .5) - bounds.y) >> gridMagnitude;
+		return ((int)(y + .5)) >> gridMagnitude;
 	}
 	
 	//Getters
