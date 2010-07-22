@@ -46,8 +46,15 @@ public class ColGrid {
 		int minY = Math.max(0, toGridCoordY(centerY - r0));
 		int maxY = Math.min(cellsH-1, toGridCoordY(centerY + r0));
 
+		int cellX = toGridCoordX(centerX);
+		int cellY = toGridCoordY(centerY);
+		
 		int t1;
-		if (r0 > maxObjectRadius) {
+		if (r0 > maxObjectRadius
+				|| cellX < 0 || cellY < 0 || cellX >= cellsW || cellY >= cellsH)
+		{
+			//If object is large or otherwise not in a grid cell
+			
 			//Large <-> Large
 			for (t1 = t0; t1 < grid.length; t1++) {
 				boolean atob = colMatrix.isColliding(t0, t1);
