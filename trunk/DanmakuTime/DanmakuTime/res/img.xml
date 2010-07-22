@@ -31,4 +31,8 @@
     <subrect id="right6" rect="192,96,32,48" />
     <subrect id="right7" rect="224,96,32,48" />
   </image>
+  <image filename="focus.png" width="128" height="64">
+    <subrect id="upper" rect=" 0, 0,64,64" />
+    <subrect id="lower" rect="64, 0,64,64" />
+  </image>
 </images>

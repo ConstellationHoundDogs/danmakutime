@@ -66,9 +66,9 @@ public class LuaRunState {
 		LuaUtil.registerThreadLib(this, vm, threadPool);
 		LuaUtil.registerFieldLib(this, vm);
 
-		//global ITextureStore textureStore
+		//global ITextureStore texStore
 		vm.pushlvalue(LuajavaLib.toUserdata(ts, ts.getClass()));
-		vm.setglobal("textureStore");
+		vm.setglobal("texStore");
 
 		//global ISoundEngine soundEngine
 		vm.pushlvalue(LuajavaLib.toUserdata(se, se.getClass()));

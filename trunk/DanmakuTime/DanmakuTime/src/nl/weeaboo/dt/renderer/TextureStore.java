@@ -15,7 +15,7 @@ public class TextureStore implements ITextureStore {
 	
 	//Getters
 	@Override
-	public ITexture getTexture(String id) {
+	public ITexture get(String id) {
 		GLImage image = imageStore.getImage(id, true);
 		return (image != null ? new Texture(image) : null);
 	}

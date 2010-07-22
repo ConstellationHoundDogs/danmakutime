@@ -94,8 +94,11 @@ public class Game extends GameBase {
 		
 		Dimension d = GraphicsUtil.getProportionalScale(rw, rh, scw, sch);
 		
+		int captureFPS = config.graphics.getFPS();
+		//while (captureFPS > 30) captureFPS /= 2;
+		
 		videoCapture = new GLVideoCapture(this, filename, config.capture.getX264CRF(),
-				config.graphics.getFPS(), rw, rh, d.width, d.height, true);
+				captureFPS, rw, rh, d.width, d.height, true);
 		
 		try {
 			videoCapture.start();

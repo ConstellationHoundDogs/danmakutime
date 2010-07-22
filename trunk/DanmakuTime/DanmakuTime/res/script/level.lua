@@ -27,7 +27,7 @@ function buildLevel(background)
 
 	--Create background image
 	local levelBG = Drawable.new(0)
-	levelBG:setTexture(textureStore:getTexture(background))
+	levelBG:setTexture(texStore:get(background))
 	levelBG:setPos(screenWidth/2, screenHeight/2)
 	levelBG:setZ(32000)
 
