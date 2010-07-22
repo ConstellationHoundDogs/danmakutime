@@ -130,7 +130,7 @@ public class ColField implements IColField {
 			nodes.add(new ArrayList<IColNode>());
 		}	
 		
-		grid = new ColGrid(colMatrix, bounds.x, bounds.y, bounds.width, bounds.height);
+		grid = new ColGrid(colMatrix, bounds.width, bounds.height);
 	}
 
 }

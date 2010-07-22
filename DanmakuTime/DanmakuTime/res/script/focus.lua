@@ -21,11 +21,12 @@ function FocusSprite:init()
 end
 
 function FocusSprite:update()
-	while true do
+	while not self.parent:isDestroyed() do
 		self:setPos(self.parent:getX(), self.parent:getY())
 		self:setZ(self.parent:getZ() + self.dz)
 		yield()
 	end
+	self:destroy()
 end
 
 function FocusSprite:animate()

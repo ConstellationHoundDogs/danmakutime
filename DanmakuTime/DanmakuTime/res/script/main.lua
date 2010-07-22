@@ -62,6 +62,8 @@ function main()
 		end
 	end)
 	
+	Thread.new(fireLaser)
+	
 	for group=1,50 do
 		for n=1,200 do
 			local s = Sprite.new{hp=1, power=1}
@@ -90,5 +92,29 @@ function main()
 			--soundEngine:playSound("sfx01.ogg")
 		end		
 		yield(10)
+	end
+end
+
+function fireLaser()
+	while true do
+		local r = 8
+	
+		local s = Sprite.new{hp=1, power=1}
+		--s:setColNode(0, enemyShotColType, LineSegColNode.new(0, -8+r, 0, 8-r, r))
+		--lineseg will have length==0, which is the same as this circle col node:
+		s:setColNode(0, enemyShotColType, CircleColNode.new(r))
+		
+		s.onCollision = function(self, other, myNode, otherNode)
+			self:destroy()
+		end
+		s:setTexture(texStore:get("test.png#laser"));
+		s:setBlendMode(BlendMode.ADD)
+		
+		s:setPos(levelWidth*.9, -32)
+		s:setSpeed(2)
+		s:setAngle(256)
+		s:setAngleInc(.5)
+		
+		yield(2)
 	end
 end
