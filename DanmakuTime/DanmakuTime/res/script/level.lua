@@ -37,6 +37,10 @@ function buildLevel(background)
 	--Create some text
 	local text = TextDrawable.new(overlayField)
 	text:setText("Danmaku Time\nDay 3")
+	text:setBlockAnchor(7)
+	text:setFontName("DejaVuSans") --fontname is the file name without extension
+	text:setFontStyle(FontStyle.BOLD)
+	text:setFontSize(14)
 	text:setPos(0, -2)
 	
 	--Create player

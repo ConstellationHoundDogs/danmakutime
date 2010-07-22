@@ -11,11 +11,12 @@ import javax.media.opengl.GL2;
 
 import nl.weeaboo.common.FastMath;
 import nl.weeaboo.dt.DTLog;
+import nl.weeaboo.dt.object.ITextStyle;
+import nl.weeaboo.dt.object.StyledText;
+import nl.weeaboo.dt.object.TextStyle;
 import nl.weeaboo.game.gl.GLImage;
 import nl.weeaboo.game.gl.GLManager;
-import nl.weeaboo.game.text.MutableTextStyle;
 import nl.weeaboo.game.text.ParagraphRenderer;
-import nl.weeaboo.game.text.StyledText;
 import nl.weeaboo.game.text.layout.TextLayout;
 
 public class Renderer implements IRenderer {
@@ -100,13 +101,14 @@ public class Renderer implements IRenderer {
 	}
 	
 	@Override
-	public void drawText(String txt, double x, double y, short z, double angle,
-			double wrapWidth, int anchor)
+	public void drawText(StyledText stext, double x, double y, short z, double angle,
+			double wrapWidth, int blockAnchor)
 	{
 		x += translationX;
 		y += translationY;
+		
 		drawBuffer.add(new DrawTextCommand(clipEnabled, blendMode, color,
-				txt, x, y, z, angle, wrapWidth, anchor));
+				stext, x, y, z, angle, wrapWidth, blockAnchor));
 	}
 	
 	public void flush() {
@@ -218,18 +220,27 @@ public class Renderer implements IRenderer {
 				}
 			} else if (cmd.type == DrawType.TEXT) {
 				buffered = quadFlush(gl, buffered);
-				
+								
 				DrawTextCommand dcmd = (DrawTextCommand)cmd;
-				StyledText stext = new StyledText(dcmd.text);
-				MutableTextStyle mts = pr.getDefaultStyle().mutableCopy();
-				int hanchor = 8;
-				if (dcmd.anchor == 7 || dcmd.anchor == 4 || dcmd.anchor == 1) {
-					hanchor = 7;
-				} else if (dcmd.anchor == 9 || dcmd.anchor == 6 || dcmd.anchor == 3) {
-					hanchor = 9;
+				
+				int chars[] = dcmd.stext.getCharacters();
+				ITextStyle styles[] = dcmd.stext.getStyles();
+
+				nl.weeaboo.game.text.StyledText stext = new nl.weeaboo.game.text.StyledText(chars);
+				ITextStyle curStyle = null;
+				int curStyleStart = 0;
+				for (int n = 0; n < styles.length; n++) {
+					if (styles[n] != curStyle) {
+						if (curStyle != null) {
+							stext.setStyle(((TextStyle)curStyle).getInnerStyle().immutableCopy(), curStyleStart, n);
+						}
+						curStyle = styles[n];
+						curStyleStart = 0;
+					}
+				}				
+				if (curStyle != null) {
+					stext.setStyle(((TextStyle)curStyle).getInnerStyle().immutableCopy(), curStyleStart, styles.length);
 				}
-				mts.setAnchor(hanchor);
-				stext.setStyle(mts.immutableCopy());
 				
 				pr.setBounds(0, 0, dcmd.wrapWidth, virtualSize.height - dcmd.y);
 				TextLayout tl = pr.getLayout(glm, stext);
@@ -237,23 +248,23 @@ public class Renderer implements IRenderer {
 				float h = tl.getHeight();
 				
 				float tx = 0;
-				if (hanchor == 8) {
-					tx = -w/2;
-				} else if (hanchor == 9) {
-					tx = -w;
+				if (dcmd.anchor == 8 || dcmd.anchor == 5 || dcmd.anchor == 2) {
+					tx = w/2;
+				} else if (dcmd.anchor == 9 || dcmd.anchor == 6 || dcmd.anchor == 3) {
+					tx = w;
 				}
 				
 				float ty = 0;
 				if (dcmd.anchor >= 4 && dcmd.anchor <= 6) {
-					ty = -h / 2;
+					ty = h/2;
 				} else if (dcmd.anchor <= 3) {
-					ty = -h;
+					ty = h;
 				}
 				
 				gl.glPushMatrix();
-				gl.glTranslatef(dcmd.x + w/2, dcmd.y + h/2, 0);
+				gl.glTranslatef(dcmd.x, dcmd.y, 0);
 				gl.glRotated(dcmd.angle * 360.0 / 512.0, 0, 0, 1);
-				gl.glTranslatef(-w/2 + tx, -h/2 + ty, 0);
+				gl.glTranslatef(-tx, -ty, 0);
 				pr.drawLayout(glm, tl);				
 				gl.glPopMatrix();
 			} else {
@@ -398,25 +409,25 @@ public class Renderer implements IRenderer {
 
 	private static class DrawTextCommand extends DrawCommand {
 		
-		public final String text;
+		public final StyledText stext;
 		public final float x, y, angle, wrapWidth;
 		public final int anchor;
 			
-		public DrawTextCommand(boolean clip, BlendMode blend, int argb, String text,
+		public DrawTextCommand(boolean clip, BlendMode blend, int argb, StyledText stext,
 				double x, double y, short z, double angle, double wrapWidth,
 				int anchor)
 		{
-			this(clip, blend, argb, text, (float)x, (float)y, z, (float)angle,
+			this(clip, blend, argb, stext, (float)x, (float)y, z, (float)angle,
 					(float)wrapWidth, anchor);
 		}
 		
-		public DrawTextCommand(boolean clip, BlendMode blend, int argb, String text,
+		public DrawTextCommand(boolean clip, BlendMode blend, int argb, StyledText stext,
 				float x, float y, short z, float angle, float wrapWidth,
 				int anchor)
 		{
 			super(z, DrawType.TEXT, clip, blend, argb, (byte)0);
 			
-			this.text = text;
+			this.stext = stext;
 			this.x = x;
 			this.y = y;
 			this.angle = angle;
