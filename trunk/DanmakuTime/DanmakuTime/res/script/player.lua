@@ -37,10 +37,11 @@ end
 
 function Player:onCollision(other, myColNode, otherColNode)
 	local type = myColNode:getType()
-	if type == playerColType then
+	
+	if type == playerGrazeColType then
+		--print("graze")
+	elseif type == playerColType then
 		self:destroy()
-	elseif type == playerGrazeColType then
-		print("graze")
 	end
 end
 

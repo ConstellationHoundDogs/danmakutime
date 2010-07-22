@@ -45,6 +45,7 @@ function buildLevel(background)
 	
 	--Create player
 	player = Player.new()
+	--player:setColNode(999, playerGrazeColType, LineSegColNode.new(0, 0, 0, -100, 1))
 	
 	--Create OSD
 	local paramX = gameField:getX() + gameField:getWidth() + 10

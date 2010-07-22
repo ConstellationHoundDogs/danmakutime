@@ -17,8 +17,6 @@ public class LineSegColNode extends AbstractColNode implements IRotateableColNod
 	private Point2D.Double p1;
 	private boolean lengthDirty;
 	private double length;
-	private boolean unitLengthDirty;
-	private double unitLengthX, unitLengthY;
 	
 	public LineSegColNode(double dx0, double dy0, double dx1, double dy1,
 			double thickness)
@@ -30,7 +28,6 @@ public class LineSegColNode extends AbstractColNode implements IRotateableColNod
 		
 		this.thickness = thickness;
 		this.lengthDirty = true;
-		this.unitLengthDirty = true;
 	}
 	
 	//Functions
@@ -55,17 +52,6 @@ public class LineSegColNode extends AbstractColNode implements IRotateableColNod
 		p1.y = bp1.x*sinA + bp1.y*cosA;
 				
 		posDirty = false;
-	}
-	
-	protected void calculateUnitLengths() {
-		if (posDirty) applyRotation();
-		
-		double length = getLength();
-		
-		unitLengthX = (p1.x - p0.x) / length; 
-		unitLengthY = (p1.y - p0.y) / length;
-		
-		unitLengthDirty = false;
 	}
 	
 	//Getters
@@ -119,16 +105,6 @@ public class LineSegColNode extends AbstractColNode implements IRotateableColNod
 		}
 		return length;
 	}
-	
-	public double getUnitLengthX() {
-		if (unitLengthDirty) calculateUnitLengths();
-		return unitLengthX;
-	}
-	
-	public double getUnitLengthY() {
-		if (unitLengthDirty) calculateUnitLengths();
-		return unitLengthY;
-	}
 		
 	//Setters
 	@Override
@@ -137,7 +113,6 @@ public class LineSegColNode extends AbstractColNode implements IRotateableColNod
 			angle = a;
 			
 			posDirty = true;
-			unitLengthDirty = true;
 		}
 	}
 	

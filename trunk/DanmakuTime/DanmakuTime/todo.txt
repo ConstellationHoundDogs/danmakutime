@@ -9,6 +9,8 @@ Bugs:
 Feature requests:
 [ ] Implement line segment <-> line segment collision test
 [ ] Add additional collision shapes: polygon.
+[ ] Create thlib.lua which defines a THSprite {hp, power, grazed}
+	and other things you'd need like a player script, items, etc.
 [ ] Think about bosses with lifebars, timeouts and spellcards. How would one
     implement those and how can I help.
 [ ] Create a "Boss extends Sprite" object to help with Boss creation? Or is
