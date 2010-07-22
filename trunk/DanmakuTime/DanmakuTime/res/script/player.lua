@@ -26,7 +26,7 @@ end
 function Player:init()
 	self:setTexture(texStore:get("player.png#idle0"));
 	self:setColNode(0, playerColType, CircleColNode.new(2.0))
-	self:setColNode(1, playerGrazeType, CircleColNode.new(10.0))
+	self:setColNode(1, playerGrazeColType, CircleColNode.new(10.0))
 
 	self:setPos(levelWidth/2, levelHeight - 32)
 	self:setZ(1000)	
