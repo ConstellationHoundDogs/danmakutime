@@ -71,6 +71,21 @@ function main()
 		for n=1,200 do
 			local s = THSprite.new{hp=1, power=1}
 			s:setColNode(0, enemyColType, CircleColNode.new(7))
+			s.dropItems = function(self)
+				local s = THSprite.new()
+				s:setColNode(0, itemColType, RectColNode.new(-8, -8, 16, 16))
+				
+				s:setPos(self:getX(), self:getY())
+				s:setZ(player:getZ() + 50)
+				s:setTexture(texStore:get("items.png#pointLarge"));
+				s:setDrawAngleAuto(false)
+				s:setAngle(256)
+				s:setSpeed(1)
+				
+				s.onCollision = function(self, other)
+					self:destroy()
+				end
+			end
 			
 			if math.random(10) >= 10 then
 				s:setTexture(texStore:get("test.png#g0"));

@@ -42,4 +42,17 @@
     <subrect id="e2" rect=" 0,32, 32, 32" />
     <subrect id="e3" rect="32,32, 32, 32" />
   </image>
+  <image filename="items.png" width="64" height="64">
+    <subrect id="null"         rect=" 0, 0,16,16" />
+    <subrect id="pointSmall"   rect="16, 0,16,16" />
+    <subrect id="pointLarge"   rect="32, 0,16,16" />
+    <subrect id="powerSmall"   rect="48, 0,16,16" />
+    <subrect id="powerLarge"   rect=" 0,16,16,16" />
+    <subrect id="specialSmall" rect="16,16,16,16" />
+    <subrect id="specialLarge" rect="32,16,16,16" />
+    <subrect id="life"         rect="48,16,16,16" />
+    <subrect id="bomb"         rect=" 0,32,16,16" />
+    <subrect id="fullRestore"  rect="16,32,16,16" />
+    <subrect id="magnet"       rect="32,32,16,16" />
+  </image>
 </images>

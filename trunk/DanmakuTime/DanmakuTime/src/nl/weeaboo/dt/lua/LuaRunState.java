@@ -9,6 +9,7 @@ import nl.weeaboo.dt.audio.ISoundEngine;
 import nl.weeaboo.dt.collision.CircleColNode;
 import nl.weeaboo.dt.collision.ColMatrix;
 import nl.weeaboo.dt.collision.LineSegColNode;
+import nl.weeaboo.dt.collision.RectColNode;
 import nl.weeaboo.dt.field.Field;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
@@ -59,6 +60,7 @@ public class LuaRunState {
 			LuaUtil.registerClass(this, vm, ColMatrix.class);
 			LuaUtil.registerClass(this, vm, CircleColNode.class);
 			LuaUtil.registerClass(this, vm, LineSegColNode.class);
+			LuaUtil.registerClass(this, vm, RectColNode.class);
 		} catch (LuaException e) {
 			DTLog.showError(e);
 		}

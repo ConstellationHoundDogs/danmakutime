@@ -26,9 +26,13 @@ function THSprite:onCollision(other, myNode, otherNode)
 	self.hp = self.hp - other.power
 	if self.hp <= 0 then
 		if self:destroy() then
+			self:dropItems()
 			Explosion.new(self)
 		end
 	end
+end
+
+function THSprite:dropItems()	
 end
 
 -------------------------------------------------------------------------------
