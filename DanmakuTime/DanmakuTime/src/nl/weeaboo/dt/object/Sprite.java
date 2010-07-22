@@ -34,10 +34,6 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject,
 	}
 	
 	//Functions	
-	@Override
-	public void setColNode(int index, int type, IColNode c) {
-		colHost.setColNode(index, type, c);
-	}
 	
 	@Override
 	public void update(IInput input) {
@@ -180,6 +176,13 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject,
 	public void setDrawAngleAuto(boolean a) {
 		drawAngleAuto = a;
 	}
+	
+	@Override
+	public void setDrawAngle(double a) {
+		super.setDrawAngle(a);
+		
+		colHost.setAngle(a);
+	}
 
 	@Override
 	public void setOutOfBoundsDeath(boolean d) {
@@ -215,4 +218,9 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject,
 		}
 	}
 
+	@Override
+	public void setColNode(int index, int type, IColNode c) {
+		colHost.setColNode(index, type, c);
+	}
+	
 }

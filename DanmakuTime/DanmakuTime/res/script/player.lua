@@ -36,7 +36,12 @@ function Player:init()
 end
 
 function Player:onCollision(other, myColNode, otherColNode)
-	self:destroy()
+	local type = myColNode:getType()
+	if type == playerColType then
+		self:destroy()
+	elseif type == playerGrazeColType then
+		print("graze")
+	end
 end
 
 function Player:update()
@@ -108,6 +113,10 @@ function Player:updatePos()
 	    y = y + spd
 	end
 	
+	if input:isKeyHeld(Keys.R) then
+		self:setAngle(self:getDrawAngle() + 2)
+	end
+	
 	x = math.max(16, math.min(levelWidth-16, x))
 	y = math.max(24, math.min(levelHeight-24, y))
 	
@@ -142,6 +151,7 @@ function Player:fire()
 	local x = self:getX()
 	local y = self:getY()
 	local z = self:getZ() + 100
+	local angle = self:getAngle()
 
 	for n=0,4 do
 		local s = Sprite.new{hp=1, power=1}
@@ -152,7 +162,7 @@ function Player:fire()
 		end
 		s:setPos(x, y)
 		s:setZ(z)
-		s:setAngle(-32 + 16 * n)
+		s:setAngle(angle - 32 + 16 * n)
 		s:setSpeed(10)
 	end
 end
