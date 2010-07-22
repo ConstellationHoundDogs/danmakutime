@@ -24,9 +24,12 @@ public interface IDrawable {
 	public void draw(IRenderer renderer);
 
 	/**
-	 * Marks the object as destroyed
+	 * Attempt to destroy this drawable. The operation may be blocked, in which
+	 * case the return value will be <code>false</code>.
+	 * 
+	 * @return <code>true</code> if this drawable is now destroyed.
 	 */
-	public void destroy();
+	public boolean destroy();
 
 	// === Getters =============================================================
 

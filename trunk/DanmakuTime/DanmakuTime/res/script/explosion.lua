@@ -3,32 +3,36 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -- 
--- External dependencies:
---
--- Explosion
+-- External dependencies: none
 -- 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-THSprite = {
-	hp=1,
-	power=1,
-	grazed=false
+Explosion = {
+	alpha=.75,
+	frame=1,
+	frames={0, 1, 2, 3, 2, 1},
+	frameDurations={1, 1, 2, 4, 2, 1}
 	}
-
-function THSprite.new(obj)
-	obj = extend(THSprite, obj or {})
-	return Sprite.new(obj)
+	
+function Explosion.new(parent, obj)
+	obj = extend(Explosion, obj or {})	
+	obj = Sprite.new(obj)
+	obj:setPos(parent:getX(), parent:getY())
+	obj:setZ(parent:getZ() + 10)
+	obj:setAlpha(obj.alpha)
+	return obj
 end
 
-function THSprite:onCollision(other, myNode, otherNode)
-	self.hp = self.hp - other.power
-	if self.hp <= 0 then
-		if self:destroy() then
-			Explosion.new(self)
-		end
+function Explosion:animate()
+	while self.frame <= #self.frames do
+		self:setTexture(texStore:get("explosion.png#e" .. self.frames[self.frame]))
+		yield(self.frameDurations[self.frame])
+		
+		self.frame = self.frame + 1
 	end
+	self:destroy()
 end
 
 -------------------------------------------------------------------------------

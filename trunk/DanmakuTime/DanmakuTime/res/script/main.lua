@@ -71,12 +71,6 @@ function main()
 		for n=1,200 do
 			local s = THSprite.new{hp=1, power=1}
 			s:setColNode(0, enemyColType, CircleColNode.new(7))
-			s.onCollision = function(self, other, myNode, otherNode)
-				self.hp = self.hp - other.power
-				if self.hp <= 0 then
-					self:destroy()
-				end
-			end
 			
 			if math.random(10) >= 10 then
 				s:setTexture(texStore:get("test.png#g0"));
@@ -106,10 +100,7 @@ function fireLaser()
 		--s:setColNode(0, enemyShotColType, LineSegColNode.new(0, -8+r, 0, 8-r, r))
 		--lineseg will have length==0, which is the same as this circle col node:
 		s:setColNode(0, enemyShotColType, CircleColNode.new(r))
-		
-		s.onCollision = function(self, other, myNode, otherNode)
-			self:destroy()
-		end
+				
 		s:setTexture(texStore:get("test.png#laser"));
 		s:setBlendMode(BlendMode.ADD)
 		
