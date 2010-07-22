@@ -17,7 +17,9 @@ function ParamText:init()
 	self:setBlockAnchor(7)
 	self:setFontName("DejaVuSans") --fontname is the file name without extension
 	self:setFontStyle(FontStyle.BOLD)
-	self:setFontSize(14)	
+	self:setFontSize(14)
+	self:setOutlineColor(.1, .1, .1)
+	self:setOutlineSize(1.5)
 end
 
 function ParamText:update()

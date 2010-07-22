@@ -73,28 +73,29 @@ public class LuaUtil {
 		globals.put("coroutine", lib);
 	}
 	
-	public static void load(LuaState vm, File file) throws LuaException, IOException {
+	public static void loadModule(LuaState vm, File file) throws LuaException, IOException {
 		InputStream in = new BufferedInputStream(new FileInputStream(file));
 		try {
-			load(vm, file.getName(), in);
+			loadModule(vm, file.getName(), in);
 		} finally {
 			in.close();
 		}
 	}
 	
-	public static void load(LuaState vm, String filename, InputStream in) throws LuaException {
-		int res;
-		
-        res = vm.load(in, filename);
+	public static void loadModule(LuaState vm, String filename, InputStream in) throws LuaException {
+        int res = vm.load(in, filename);
 		if (res != 0) {			
 			throw new LuaException(String.format("Compile Error (%d) in \"%s\" :: %s", res, filename, vm.tostring(-1)));
 		}
-		
-		res = vm.pcall(0, 0);
-		if (res != 0) throw new LuaException(String.format("Runtime Error (%d) in \"%s\" :: %s", res, filename, vm.tostring(-1)));		
+	}
+	
+	public static int initModule(LuaState vm) throws LuaException {		
+		return vm.pcall(0, 0);
 	}
 
 	public static void registerClass(LuaRunState rs, LuaState vm, Class<?> c) throws LuaException {		
+		String filename = "ClassBinding-" + c.getName();
+
 		String code = String.format(
 				  "luajava.bindClass(\"%s\")\n"
 				+ "%s = {}\n"
@@ -106,7 +107,8 @@ public class LuaUtil {
 		ByteArrayInputStream bin = null;
 		try {
 			bin = new ByteArrayInputStream(code.getBytes("UTF-8"));
-			LuaUtil.load(vm, "ClassBinding-" + c.getName(), bin);
+			LuaUtil.loadModule(vm, filename, bin);
+			LuaUtil.initModule(vm);
 		} catch (IOException ioe) {
 			throw new LuaException(ioe);
 		} finally {

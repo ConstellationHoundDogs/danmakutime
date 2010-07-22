@@ -1,19 +1,22 @@
 
-CircleGhost = {xmul=100, ymul=100}
+Invulnerable = {
+	xmul=100,
+	ymul=100
+	}
 
-function CircleGhost.new(o)
-	local o = extend(CircleGhost, o or {})
-	return Sprite.new(o)
+function Invulnerable.new(obj)
+	obj = extend(THSprite, Invulnerable, obj or {})
+	return THSprite.new(obj)
 end
 
-function CircleGhost:init()
+function Invulnerable:init()
 	self:setPos(400, 300);
 	self:setZ(-100)
 	self:setTexture(texStore:get("test.png#g1"));
 	self:setColNode(0, enemyColType, CircleColNode.new(7))
 end
 
-function CircleGhost:update()
+function Invulnerable:update()
 	local n = 0
 	while n < 100 do	
 		self:setPos(levelWidth/2 + self.xmul * math.cos(n),
@@ -26,7 +29,7 @@ function CircleGhost:update()
 	self:destroy()
 end
 
-function CircleGhost:animate()
+function Invulnerable:animate()
 	while false do
 		self:setTexture(texStore:get("test.png#g0"));
 		yield(10)
@@ -35,7 +38,7 @@ function CircleGhost:animate()
 	end
 end
 
-function CircleGhost:onDestroy()
+function Invulnerable:onDestroy()
 	--return false from this function to prevent the destruction of the object
 	--You can call destroy() again later to attempt another destruction
 	return false
@@ -48,9 +51,9 @@ function main()
 
 	buildLevel("level-bg.png")
 
-	local ghost = CircleGhost.new{xmul=100, ymul=100}	
+	local ghost = Invulnerable.new{xmul=100, ymul=100}	
     yield(10)
-	local ghost2 = CircleGhost.new{xmul=-100, ymul=100}
+	local ghost2 = Invulnerable.new{xmul=-100, ymul=100}
 	
 	Thread.new(function()
 		while true do
@@ -66,7 +69,7 @@ function main()
 	
 	for group=1,50 do
 		for n=1,200 do
-			local s = Sprite.new{hp=1, power=1}
+			local s = THSprite.new{hp=1, power=1}
 			s:setColNode(0, enemyColType, CircleColNode.new(7))
 			s.onCollision = function(self, other, myNode, otherNode)
 				self.hp = self.hp - other.power
@@ -99,7 +102,7 @@ function fireLaser()
 	while true do
 		local r = 8
 	
-		local s = Sprite.new{hp=1, power=1}
+		local s = THSprite.new{hp=1, power=1}
 		--s:setColNode(0, enemyShotColType, LineSegColNode.new(0, -8+r, 0, 8-r, r))
 		--lineseg will have length==0, which is the same as this circle col node:
 		s:setColNode(0, enemyShotColType, CircleColNode.new(r))
