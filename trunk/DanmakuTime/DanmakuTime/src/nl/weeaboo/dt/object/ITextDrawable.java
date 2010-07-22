@@ -35,6 +35,23 @@ public interface ITextDrawable extends IDrawable {
 	 * numbers, so <code>7</code> is top-left and <code>5</code> is
 	 * center-middle.
 	 */
-	public void setAnchor(int anchor);
+	public void setTextAnchor(int anchor);
+
+	/**
+	 * Modifies the positioning of the block relative to its origin. 
+	 * 
+	 * @see #setTextAnchor(int)
+	 */
+	public void setBlockAnchor(int anchor);
 	
+	public void setFontName(String f);
+	public void setFontStyle(FontStyle s);
+	public void setFontSize(double s);
+	public void setTextColor(double r, double g, double b);
+	public void setTextColor(int rgb);
+	public void setUnderlined(boolean u);
+	public void setOutlineSize(double s);
+	public void setOutlineColor(double r, double g, double b);
+	public void setOutlineColor(int rgb);
+
 }

@@ -13,6 +13,7 @@ import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.lua.link.LuaLink;
 import nl.weeaboo.dt.object.Drawable;
+import nl.weeaboo.dt.object.FontStyle;
 import nl.weeaboo.dt.object.Sprite;
 import nl.weeaboo.dt.object.TextDrawable;
 import nl.weeaboo.dt.renderer.BlendMode;
@@ -61,6 +62,7 @@ public class LuaRunState {
 		}
 		
 		LuaUtil.registerEnum(vm, BlendMode.class);
+		LuaUtil.registerEnum(vm, FontStyle.class);
 		LuaUtil.registerKeyCodes(vm, KeyEvent.class);
 		
 		LuaUtil.registerThreadLib(this, vm, threadPool);

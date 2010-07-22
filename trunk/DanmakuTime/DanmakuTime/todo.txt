@@ -7,17 +7,17 @@ Bugs:
     I SHOULD IMPLEMENT MY OWN VERSION OF LuajavaLib.java    
 
 Feature requests:
-[ ] Draw focus/hitbox images with the default player script
+[x] Draw focus/hitbox images with the default player script
 [ ] Add additional collision shapes: line segment, polygon.
 [ ] Think about bosses with lifebars, timeouts and spellcards. How would one
     implement those and how can I help.
 [ ] Create a "Boss extends Sprite" object to help with Boss creation? Or is
     such an object better created from Lua?
-    
+[ ] Document the collision interfaces    
 [ ] How does the user specify which SoundEngine they want?
 [ ] Add scale attributes to drawables. Renderer need not change, the drawable
     can handle the width & height change itself in its draw method.
-[ ] There should be two separate anchors for the TextDrawable:
+[x] There should be two separate anchors for the TextDrawable:
     1. text box anchor
     2. text inside the box anchor
-[ ] Support rendering of IStyledText with TextDrawable and Renderer.
+[x] Support rendering of IStyledText with TextDrawable and Renderer.

@@ -6,16 +6,20 @@ public class TextDrawable extends Drawable implements ITextDrawable {
 
 	private int width;
 	private String text;
-	private int anchor;
+	private int blockAnchor;
+	private ITextStyle textStyle;
 	
 	public TextDrawable() {
-		anchor = 7;
+		blockAnchor = 5;
+		textStyle = new TextStyle();
 	}
 	
 	//Functions
 	@Override
 	public void drawGeometry(IRenderer r) {
-		r.drawText(text, getX(), getY(), getZ(), getDrawAngle(), width, anchor);		
+		StyledText stext = new StyledText(text, textStyle);
+		
+		r.drawText(stext, getX(), getY(), getZ(), getDrawAngle(), width, blockAnchor);		
 	}
 	
 	//Getters
@@ -36,8 +40,58 @@ public class TextDrawable extends Drawable implements ITextDrawable {
 	}
 
 	@Override
-	public void setAnchor(int anchor) {
-		this.anchor = (anchor >= 1 && anchor <= 9 ? anchor : 7);
+	public void setTextAnchor(int anchor) {
+		textStyle.setAnchor(anchor);
+	}
+
+	@Override
+	public void setBlockAnchor(int anchor) {
+		blockAnchor = (anchor >= 1 && anchor <= 9 ? anchor : 7);
+	}
+
+	@Override
+	public void setTextColor(double r, double g, double b) {
+		textStyle.setColor(r, g, b);
+	}
+
+	@Override
+	public void setTextColor(int rgb) {
+		textStyle.setColor(rgb);
+	}
+	
+	@Override
+	public void setFontName(String f) {
+		textStyle.setFontName(f);
+	}
+
+	@Override
+	public void setFontSize(double s) {
+		textStyle.setFontSize(s);
+	}
+
+	@Override
+	public void setFontStyle(FontStyle s) {
+		textStyle.setFontStyle(s);
+	}
+
+	@Override
+	public void setOutlineColor(double r, double g, double b) {
+		textStyle.setOutlineColor(r, g, b);
+	}
+
+	@Override
+	public void setOutlineColor(int rgb) {
+		textStyle.setOutlineColor(rgb);
+	}
+
+	@Override
+	public void setOutlineSize(double s) {
+		textStyle.setOutlineSize(s);
+	}
+
+	@Override
+	public void setUnderlined(boolean u) {
+		textStyle.setUnderlined(u);
 	}
 	
 }
