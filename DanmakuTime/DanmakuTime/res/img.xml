@@ -36,4 +36,10 @@
     <subrect id="upper" rect=" 0, 0,64,64" />
     <subrect id="lower" rect="64, 0,64,64" />
   </image>
+  <image filename="explosion.png" width="64" height="64">
+    <subrect id="e0" rect=" 0, 0, 32, 32" />
+    <subrect id="e1" rect="32, 0, 32, 32" />
+    <subrect id="e2" rect=" 0,32, 32, 32" />
+    <subrect id="e3" rect="32,32, 32, 32" />
+  </image>
 </images>

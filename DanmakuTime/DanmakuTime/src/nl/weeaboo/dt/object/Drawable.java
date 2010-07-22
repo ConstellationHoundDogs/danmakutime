@@ -74,7 +74,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	}
 	
 	@Override
-	public void destroy() {
+	public boolean destroy() {
 		LValue retval = LNil.NIL;
 		if (luaLink != null) {
 			try {
@@ -86,6 +86,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 		if (retval.isNil() || retval.toJavaBoolean()) {		
 			destroyed = true;
 		}
+		return destroyed;
 	}
 	
 	@Override

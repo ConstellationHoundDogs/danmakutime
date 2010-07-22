@@ -51,6 +51,10 @@ function THPlayer:init()
 end
 
 function THPlayer:onCollision(other, myColNode, otherColNode)
+	if self.deathTime > 0 then
+		return
+	end
+
 	local type = myColNode:getType()
 	
 	if type == playerGrazeColType then

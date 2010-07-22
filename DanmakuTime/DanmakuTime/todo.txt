@@ -24,3 +24,5 @@ Feature requests:
 [ ] Add scale attributes to drawables. Renderer need not change, the drawable
     can handle the width & height change itself in its draw method.
 [ ] Try to print a Lua stack trace in case of Lua errors
+
+[ ] 3D backgrounds?
