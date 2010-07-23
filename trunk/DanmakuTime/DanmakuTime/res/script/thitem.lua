@@ -35,6 +35,7 @@ function THItem.new(x, y, self)
 end
 
 function THItem:update()
+	--Cache function we're going to use for a tiny performance bonus
 	local setPos = self.setPos
 	local getX = self.getX
 	local getY = self.getY
@@ -43,7 +44,7 @@ function THItem:update()
 		self.dx = self.dx * 0.9
 		self.dy = self.dy * 0.9
 	
-		--self:setPos(self:getX() + self.dx, self:getY() + self.gravity + self.dy)
+		--self:setPos(self:getX() + self.dx, self:getY() + self.dy + self.gravity)
 		setPos(self, getX(self) + self.dx, getY(self) + self.dy + self.gravity)
 		
 		yield()

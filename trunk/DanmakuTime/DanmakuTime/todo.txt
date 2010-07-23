@@ -1,15 +1,15 @@
 
 Bugs:
-[ ] The javalualib returns an LMethod without checking if any method with
+[x] The javalualib returns an LMethod without checking if any method with
     that name actually exists. This is probably because overloading must be
     resolved at call time (we don't know which function exactly will be needed)
     It should return null if no method with that name exists.
     I SHOULD IMPLEMENT MY OWN VERSION OF LuajavaLib.java    
-[ ] Lua's include/require functions are broken.
-[ ] Collision detection between player and items is painfully slow.
+[x] Collision detection between player and items is painfully slow.
 	--This is caused by slow method lookup, when taking storing the values of
 	self.setPos, self.getX and self.getY in local variables, the slowdown is
 	gone.
+[ ] Lua's include/require functions are broken.
 
 Feature requests:
 [x] Implement line segment <-> line segment collision test

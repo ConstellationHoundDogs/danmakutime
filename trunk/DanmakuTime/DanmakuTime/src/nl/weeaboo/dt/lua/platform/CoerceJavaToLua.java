@@ -19,6 +19,9 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 ******************************************************************************/
+
+//Modified version of Luajava 1.1
+
 package nl.weeaboo.dt.lua.platform;
 
 import java.util.HashMap;
@@ -31,63 +34,63 @@ import org.luaj.vm.LNil;
 import org.luaj.vm.LString;
 import org.luaj.vm.LValue;
 
-
 public class CoerceJavaToLua {
 	
 	public static interface Coercion { 
-		public LValue coerce( Object javaValue );
+		public LValue coerce(Object javaValue);
 	};
 	
-	private static Map COERCIONS = new HashMap();
+	private static Map<Class<?>, Coercion> COERCIONS = new HashMap<Class<?>, Coercion>();
 	
 	static {
 		Coercion boolCoercion = new Coercion() {
-			public LValue coerce( Object javaValue ) {
-				Boolean b = (Boolean) javaValue;
-				return b.booleanValue()? LBoolean.TRUE: LBoolean.FALSE;
-			} 
-		} ;
+			public LValue coerce(Object javaValue) {
+				return ((Boolean)javaValue ? LBoolean.TRUE : LBoolean.FALSE);
+			}
+		};
 		Coercion intCoercion = new Coercion() {
-			public LValue coerce( Object javaValue ) {
-				Number n = (Number) javaValue;
-				return LInteger.valueOf( n.intValue() );
-			} 
-		} ;
+			public LValue coerce(Object javaValue) {
+				return LInteger.valueOf(((Number)javaValue).intValue());
+			}
+		};
 		Coercion charCoercion = new Coercion() {
-			public LValue coerce( Object javaValue ) {
-				Character c = (Character) javaValue;
-				return LInteger.valueOf( c.charValue() );
-			} 
-		} ;
+			public LValue coerce(Object javaValue) {
+				return LInteger.valueOf(((Character)javaValue).charValue());
+			}
+		};
 		Coercion doubleCoercion = new Coercion() {
-			public LValue coerce( Object javaValue ) {
-				Number n = (Number) javaValue;
-				return LDouble.numberOf( n.doubleValue() );
-			} 
-		} ;
+			public LValue coerce(Object javaValue) {
+				return LDouble.numberOf(((Number)javaValue).doubleValue());
+			}
+		};
 		Coercion stringCoercion = new Coercion() {
-			public LValue coerce( Object javaValue ) {
-				return new LString( javaValue.toString() );
-			} 
-		} ;
-		COERCIONS.put( Boolean.class, boolCoercion );
-		COERCIONS.put( Byte.class, intCoercion );
-		COERCIONS.put( Character.class, charCoercion );
-		COERCIONS.put( Short.class, intCoercion );
-		COERCIONS.put( Integer.class, intCoercion );
-		COERCIONS.put( Float.class, doubleCoercion );
-		COERCIONS.put( Double.class, doubleCoercion );
-		COERCIONS.put( String.class, stringCoercion );
+			public LValue coerce(Object javaValue) {
+				return new LString(javaValue.toString());
+			}
+		};
+		
+		COERCIONS.put(Boolean.class, boolCoercion);
+		COERCIONS.put(Byte.class, intCoercion);
+		COERCIONS.put(Character.class, charCoercion);
+		COERCIONS.put(Short.class, intCoercion);
+		COERCIONS.put(Integer.class, intCoercion);
+		COERCIONS.put(Float.class, doubleCoercion);
+		COERCIONS.put(Double.class, doubleCoercion);
+		COERCIONS.put(String.class, stringCoercion);
 	}
 
 	public static LValue coerce(Object o) {
-		if ( o == null )
-			return LNil.NIL;
-		Class clazz = o.getClass();
-		Coercion c = (Coercion) COERCIONS.get( clazz );
-		if ( c != null )
-			return c.coerce( o );
-		return LuajavaLib.toUserdata( o, clazz );
+		if (o == null) return LNil.NIL;
+		
+		Class<?> clazz = o.getClass();
+		Coercion c = (Coercion)COERCIONS.get(clazz);
+		if (c != null) {
+			//A specialized coercion was found, use it
+			return c.coerce(o);
+		}
+		
+		//Use the general Java Object -> Lua conversion
+		return LuajavaLib.toUserdata(o, clazz);
 	}
 
 }
