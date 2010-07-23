@@ -55,6 +55,26 @@ public interface IDrawable {
 	public double getY();
 
 	/**
+	 * @return The drawable's width
+	 */
+	public double getWidth();
+
+	/**
+	 * @return The drawable's height
+	 */
+	public double getHeight();
+	
+	/**
+	 * @return The horizontal scale factor
+	 */
+	public double getScaleX();
+
+	/**
+	 * @return The vertical scale factor
+	 */
+	public double getScaleY();
+	
+	/**
 	 * @return The drawable's angle (between 0.0 and 512.0)
 	 */
 	public double getDrawAngle();
@@ -159,5 +179,19 @@ public interface IDrawable {
 	 * @param b The new blend mode
 	 */
 	public void setBlendMode(BlendMode b);
+	
+	/**
+	 * Changes the width scale factor
+	 * 
+	 * @param sx The new width scale factor
+	 */
+	public void setScaleX(double sx);
+	
+	/**
+	 * Changes the height scale factor
+	 * 
+	 * @param sy The new height scale factor
+	 */	
+	public void setScaleY(double sy);
 	
 }

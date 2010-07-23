@@ -31,10 +31,12 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	protected boolean clip;
 	private int color;
 	private BlendMode blendMode;
+	private double scaleX, scaleY;
 	
 	public Drawable() {
 		color = 0xFFFFFFFF;
 		blendMode = BlendMode.NORMAL;
+		scaleX = scaleY = 1.0;
 	}
 	
 	//Functions
@@ -132,10 +134,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	public void drawGeometry(IRenderer renderer) {
 		if (texture == null) return;
 		
-		int tw = texture.getWidth();
-		int th = texture.getHeight();
-		
-		renderer.drawRotatedQuad(x, y, tw, th, z, drawAngle);		
+		renderer.drawRotatedQuad(x, y, getWidth(), getHeight(), z, drawAngle);		
 	}
 	
 	//Getters
@@ -162,6 +161,16 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	@Override
 	public double getY() {
 		return y;
+	}
+	
+	@Override
+	public double getWidth() {
+		return texture != null ? texture.getWidth() * scaleX : 1;
+	}
+	
+	@Override
+	public double getHeight() {
+		return texture != null ? texture.getHeight() * scaleY : 1;
 	}
 	
 	@Override
@@ -193,6 +202,16 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	@Override
 	public BlendMode getBlendMode() {
 		return blendMode;
+	}
+	
+	@Override
+	public double getScaleX() {
+		return scaleX;
+	}
+
+	@Override
+	public double getScaleY() {
+		return scaleY;
 	}
 	
 	//Setters
@@ -251,6 +270,16 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	public void setAlpha(double a) {
 		int ai = Math.max(0, Math.min(255, (int)Math.round(a * 255.0)));
 		setColor((ai<<24) | (color & 0xFFFFFF));
+	}
+
+	@Override
+	public void setScaleX(double sx) {
+		scaleX = sx;
+	}
+
+	@Override
+	public void setScaleY(double sy) {
+		scaleY = sy;
 	}
 		
 }
