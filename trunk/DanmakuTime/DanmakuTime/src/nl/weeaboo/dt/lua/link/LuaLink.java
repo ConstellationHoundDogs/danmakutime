@@ -90,8 +90,8 @@ public abstract class LuaLink {
 			
 			if (ignoreMissing && e.getCause() instanceof NoSuchMethodException) {
 				//Ignore methods that don't exist
-			} else {
-				throw new LuaException(e.getMessage(), e.getCause());
+			} else {				
+				throw new LuaException(e.getMessage(), e.getCause() != null ? e.getCause() : e);
 			}
 		} catch (RuntimeException e) {
 			if (vm != null) vm.pop(1);
@@ -133,7 +133,7 @@ public abstract class LuaLink {
 			if (e.getCause() instanceof NoSuchMethodException) {
 				throw new LuaException(e.getCause().getMessage());
 			} else {
-				throw new LuaException(e.getMessage(), e.getCause());
+				throw new LuaException(e.getMessage(), e.getCause() != null ? e.getCause() : e);
 			}
 		} catch (RuntimeException e) {
 			finished = true;

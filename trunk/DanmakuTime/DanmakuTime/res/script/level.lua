@@ -41,12 +41,15 @@ function buildLevel()
 	local paramX = gameField:getX() + gameField:getWidth() + 10
 	local paramY = gameField:getY() + 10 + 50
 	local paramDY = 15
+	local ww = screenWidth - paramX - 20
 	
-	ParamText.new(overlayField, player, "lives", "Lives", paramX, paramY, 99999)
+	ParamText.new(overlayField, player, "lives", "Lives", paramX, paramY, 7, ww)
 	paramY = paramY + paramDY
-	ParamText.new(overlayField, player, "bombs", "Bombs", paramX, paramY, 99999)
+	ParamText.new(overlayField, player, "bombs", "Bombs", paramX, paramY, 7, ww)
 	paramY = paramY + paramDY
-	ParamText.new(overlayField, player, "grazeCounter", "Graze", paramX, paramY, 99999)
+	ParamText.new(overlayField, player, "shotPower", "Power", paramX, paramY, 7, ww)
 	paramY = paramY + paramDY
-	ParamText.new(overlayField, player, "points", "Points", paramX, paramY, 99999)
+	ParamText.new(overlayField, player, "grazeCounter", "Graze", paramX, paramY, 7, ww)
+	paramY = paramY + paramDY
+	ParamText.new(overlayField, player, "points", "Points", paramX, paramY, 7, ww)
 end

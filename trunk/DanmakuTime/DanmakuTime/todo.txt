@@ -14,7 +14,9 @@ Bugs:
 Feature requests:
 [x] Implement line segment <-> line segment collision test
 [ ] Game Menu
-[ ] Items
+[x] Items
+[ ] Item autocollect line. Implement it by letting player index over all item
+    elements and forcibly moving them towards the player.
 [x] Explosions
 [ ] Add an interface for the script to iterate over all objects.
 [ ] Create thlib.lua which defines a THSprite {hp, power, grazed}

@@ -81,7 +81,8 @@ function main()
 			local s = THSprite.new{hp=1, power=1}
 			s:setColNode(0, enemyColType, CircleColNode.new(7))
 			s.dropItems = function(self)
-				dropPointItems(self:getX(), self:getY(), 5)
+				dropPointItems(self:getX(), self:getY(), math.random(0, 3), math.random(0, 1))
+				dropPowerItems(self:getX(), self:getY(), math.random(0, 3), math.random(0, 1))
 			end
 			
 			if math.random(10) >= 10 then
