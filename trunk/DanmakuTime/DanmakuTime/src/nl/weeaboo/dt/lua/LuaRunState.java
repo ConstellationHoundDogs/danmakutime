@@ -14,6 +14,8 @@ import nl.weeaboo.dt.field.Field;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.lua.link.LuaLink;
+import nl.weeaboo.dt.lua.platform.LuaPlatform;
+import nl.weeaboo.dt.lua.platform.LuajavaLib;
 import nl.weeaboo.dt.object.Drawable;
 import nl.weeaboo.dt.object.FontStyle;
 import nl.weeaboo.dt.object.Sprite;
@@ -23,8 +25,6 @@ import nl.weeaboo.dt.renderer.ITextureStore;
 import nl.weeaboo.dt.renderer.Renderer;
 
 import org.luaj.compiler.LuaC;
-import org.luaj.lib.j2se.LuajavaLib;
-import org.luaj.platform.J2sePlatform;
 import org.luaj.vm.LuaState;
 import org.luaj.vm.Platform;
 
@@ -38,14 +38,14 @@ public class LuaRunState {
 
 	private LuaLink current;
 	
-	public LuaRunState(long seed, LuaThreadPool tp, TinyMap<IField> fm,
-			ITextureStore ts, ISoundEngine se)
+	public LuaRunState(long seed, LuaPlatform platform, LuaThreadPool tp,
+			TinyMap<IField> fm,ITextureStore ts, ISoundEngine se)
 	{
 		random = new Random(seed);
 		threadPool = tp;
 		fieldMap = fm;
 		
-		Platform.setInstance(new J2sePlatform());
+		Platform.setInstance(platform);
 		LuaC.install();
 		
 		//Install default available objects

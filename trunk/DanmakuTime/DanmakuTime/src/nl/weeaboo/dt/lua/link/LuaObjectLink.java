@@ -41,7 +41,6 @@ public class LuaObjectLink extends LuaLink {
 	}
 	
 	public void init() throws LuaException {
-		call(true, "init");
 		inited = true;
 		
 		int pushed = pushMethod("update");

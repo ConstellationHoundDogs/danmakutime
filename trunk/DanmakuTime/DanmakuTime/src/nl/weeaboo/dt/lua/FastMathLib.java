@@ -108,7 +108,7 @@ public class FastMathLib extends LFunction {
 		}
 	}
 	
-	protected static LValue mathop(int id, LNumber arg0) {
+	public static LValue mathop(int id, LNumber arg0) {
 		double x = arg0.toJavaBoxedDouble();
 		double z;
 		

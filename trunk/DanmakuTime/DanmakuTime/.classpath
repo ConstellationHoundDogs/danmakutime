@@ -5,10 +5,10 @@
 	<classpathentry kind="lib" path="lib/gluegen-rt.jar"/>
 	<classpathentry kind="lib" path="lib/jnlp.jar"/>
 	<classpathentry kind="lib" path="lib/jogl.all.jar" sourcepath="C:/Java/jogl-src/jogl-2.0-src.zip"/>
-	<classpathentry kind="lib" path="lib/luaj-j2se-1.0.3.jar"/>
 	<classpathentry kind="lib" path="lib/nativewindow.all.jar"/>
 	<classpathentry kind="lib" path="lib/newt.all.jar"/>
 	<classpathentry kind="lib" path="lib/jdogg-0.3.3.jar"/>
+	<classpathentry kind="lib" path="lib/luaj-j2me-1.0.3.jar"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/GameCommon"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/TimonCommon"/>
 	<classpathentry kind="output" path="bin"/>
