@@ -26,7 +26,7 @@ function ParamText:update()
 	while true do
 		local value = tostring(self.object[self.param])
 		
-		self:setText(self.label .. ": " .. value)
+		self:setText(self.label .. value)
 		yield()
 	end
 end

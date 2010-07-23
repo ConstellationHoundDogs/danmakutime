@@ -8,6 +8,7 @@ Feature requests:
 [ ] Create a "Boss extends Sprite" object to help with Boss creation? Or is
     such an object better created from Lua?
 [ ] Restart level option/on dead menu handler
+[ ] Thread.new should pass arguments 2..* to the called function.
     
 [ ] Document the collision interfaces    
 [ ] How does the user specify which SoundEngine they want?

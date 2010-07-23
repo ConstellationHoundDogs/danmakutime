@@ -69,6 +69,8 @@ function main()
 			if input:consumeKey(Keys.Q) then
 				print("The global key listener thread saw your key. And will proceed to kill you.")
 				player:destroy()
+			elseif input:consumeKey(Keys.B) then
+				createBoss01()
 			end
 			yield()
 		end
@@ -76,9 +78,14 @@ function main()
 	
 	--Thread.new(fireLaser)
 	
-	--Thread.new(tenK)
+	Thread.new(stressTestA)
 	
-	local spellcard = Spellcard.new{time=100, hp=100}
+	--Thread.new(stressTestB)	
+		
+end
+
+function createBoss01()
+	local spellcard = Spellcard.new{time=30, hp=100}
 	spellcard.update = function(self, boss)
 		while true do
 			boss:setPos(math.random(0, levelWidth), math.random(0, levelHeight/2))
@@ -91,9 +98,17 @@ function main()
 	boss:addSpellcard(spellcard)
 end
 
-function tenK()
-	for group=1,50 do
-		for n=1,200 do
+function stressTestA()
+	stressTest(50, 200)
+end
+
+function stressTestB()
+	stressTest(50, 20)
+end
+
+function stressTest(a, b)
+	for group=1,a do
+		for n=1,b do
 			local s = THSprite.new{hp=1, power=1}
 			s:setColNode(0, enemyColType, CircleColNode.new(7))
 			s.dropItems = function(self)
