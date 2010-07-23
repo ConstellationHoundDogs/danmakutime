@@ -122,24 +122,16 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject,
 	
 	@Override
 	public Rectangle getVisualBounds() {
-		if (visualBounds == null) {
-			int w, h;
-			if (texture != null) {
-				w = texture.getWidth();
-				h = texture.getHeight();
-			} else {
-				w = h = 1;
-			}
-			
+		if (visualBounds == null) {			
 			final double scale = 1.4142135623730950488016887242097; //Math.sqrt(2)
-			w = (int)Math.ceil(scale * w);
-			h = (int)Math.ceil(scale * h);
+			int iw = (int)Math.ceil(scale * getWidth());
+			int ih = (int)Math.ceil(scale * getHeight());
 			
-			visualBounds = new Rectangle(0, 0, w, h);			
+			visualBounds = new Rectangle(0, 0, iw, ih);			
 		}
 		
-		visualBounds.x = (int)Math.round(getX()) - (visualBounds.width>>1);
-		visualBounds.y = (int)Math.round(getY()) - (visualBounds.height>>1);
+		visualBounds.x = ((int)getX()) - (visualBounds.width>>1);
+		visualBounds.y = ((int)getY()) - (visualBounds.height>>1);
 		
 		return visualBounds;
 	}
@@ -221,6 +213,20 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject,
 	@Override
 	public void setColNode(int index, int type, IColNode c) {
 		colHost.setColNode(index, type, c);
+	}
+	
+	@Override
+	public void setScaleX(double sx) {
+		super.setScaleX(sx);
+		
+		visualBounds = null;
+	}
+	
+	@Override
+	public void setScaleY(double sy) {
+		super.setScaleY(sy);
+		
+		visualBounds = null;
 	}
 	
 }

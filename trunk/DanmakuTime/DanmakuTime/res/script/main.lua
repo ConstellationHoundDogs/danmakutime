@@ -75,7 +75,20 @@ function main()
 	end)
 	
 	--Thread.new(fireLaser)
-	Thread.new(tenK)	
+	
+	--Thread.new(tenK)
+	
+	local spellcard = Spellcard.new{time=100, hp=100}
+	spellcard.update = function(self, boss)
+		while true do
+			boss:setPos(math.random(0, levelWidth), math.random(0, levelHeight/2))
+			yield(30)
+		end
+	end
+	
+	local boss = THBoss.new()
+	boss:setTexture(texStore:get("test.png#g0"))	
+	boss:addSpellcard(spellcard)
 end
 
 function tenK()
