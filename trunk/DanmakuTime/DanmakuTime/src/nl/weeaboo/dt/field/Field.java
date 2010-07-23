@@ -3,9 +3,8 @@ package nl.weeaboo.dt.field;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 
+import nl.weeaboo.dt.FastList;
 import nl.weeaboo.dt.collision.ColField;
 import nl.weeaboo.dt.collision.IColField;
 import nl.weeaboo.dt.input.IInput;
@@ -18,18 +17,23 @@ public class Field implements IField {
 	private Rectangle bounds;
 	private int padding;
 	
-	private Collection<IDrawable> drawables;
 	private Collection<IDrawable> standbyList;	
 	private Collection<IDrawable> garbage;
+
+	private Collection<IDrawable> drawables;
+	private IDrawable luaObjArr[];
 	
 	public Field(int x, int y, int w, int h, int pad) {
 		colField = new ColField(x-pad, y-pad, w+pad*2, h+pad*2);
 		bounds = new Rectangle(x, y, w, h);
 		padding = pad;
 		
-		drawables = new LinkedHashSet<IDrawable>();
 		standbyList = new ArrayList<IDrawable>();
 		garbage = new ArrayList<IDrawable>();
+
+		drawables = new FastList<IDrawable>(IDrawable.class);
+		//drawables = new LinkedHashSet<IDrawable>();
+		//drawables = new ArrayList<IDrawable>();
 	}
 	
 	//Functions
@@ -42,6 +46,7 @@ public class Field implements IField {
 	@Override
 	public void flushStandbyList() {
 		drawables.addAll(standbyList);
+		luaObjArr = null; //Invalidate cache
 		standbyList.clear();
 	}
 	
@@ -49,14 +54,13 @@ public class Field implements IField {
 	public void update(IInput input) {
 		flushStandbyList();
 		
-		Iterator<IDrawable> itr = drawables.iterator();
-		while (itr.hasNext()) {
-			IDrawable d = itr.next();
+		for (IDrawable d : drawables) {
+			if (d == null) continue;
+			
 			if (!d.isDestroyed()) {
 				d.update(input);
 			}
 			if (d.isDestroyed()) {
-				itr.remove();
 				garbage.add(d);
 			}
 		}
@@ -67,7 +71,10 @@ public class Field implements IField {
 	}
 	
 	protected void garbageCollect() {
-		IDrawable arr[] = garbage.toArray(new IDrawable[garbage.size()]);
+		drawables.removeAll(garbage);
+		luaObjArr = null; //Invalidate cache
+		
+		IDrawable arr[] = garbage.toArray(new IDrawable[0]);
 		garbage.clear();
 		
 		for (IDrawable d : arr) {
@@ -83,7 +90,10 @@ public class Field implements IField {
 		int dx = bounds.x;
 		int dy = bounds.y;
 		renderer.translate(dx, dy);		
+
 		for (IDrawable d : drawables) {
+			if (d == null) continue;
+
 			if (!d.isDestroyed()) {
 				d.draw(renderer);
 			}
@@ -93,7 +103,15 @@ public class Field implements IField {
 		renderer.setClipRect(oldClip.x, oldClip.y, oldClip.width, oldClip.height);
 	}
 	
-	//Getters
+	//Getters	
+	@Override
+	public IDrawable[] getAllObjects() {
+		if (luaObjArr == null) {
+			luaObjArr = drawables.toArray(new IDrawable[drawables.size()]);
+		}
+		return luaObjArr;
+	}
+	
 	@Override
 	public int getObjectCount() {
 		return drawables.size();

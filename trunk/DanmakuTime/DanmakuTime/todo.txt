@@ -15,16 +15,18 @@ Feature requests:
 [x] Implement line segment <-> line segment collision test
 [ ] Game Menu
 [x] Items
-[ ] Item autocollect line. Implement it by letting player index over all item
+[x] Item autocollect line. Implement it by letting player index over all item
     elements and forcibly moving them towards the player.
 [x] Explosions
-[ ] Add an interface for the script to iterate over all objects.
-[ ] Create thlib.lua which defines a THSprite {hp, power, grazed}
-	and other things you'd need like a player script, items, etc.
+[x] Add an interface for the script to iterate over all objects.
+[x] Create thlib.lua which defines a THSprite {hp, power, grazed}
+	and other things you'd need like a player script, items, etc.	
 [ ] Think about bosses with lifebars, timeouts and spellcards. How would one
     implement those and how can I help.
 [ ] Create a "Boss extends Sprite" object to help with Boss creation? Or is
     such an object better created from Lua?
+[ ] Restart level option/on dead menu handler
+    
 [ ] Document the collision interfaces    
 [ ] How does the user specify which SoundEngine they want?
 [ ] Add scale attributes to drawables. Renderer need not change, the drawable

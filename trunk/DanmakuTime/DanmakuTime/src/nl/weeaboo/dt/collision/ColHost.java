@@ -72,8 +72,9 @@ public class ColHost implements IColHost {
 	@Override
 	public void setColNode(int index, int type, IColNode n) {
 		IColNode old = nodes.put(index, n);
-		if (old != null && old != n) {
-			old.onDetached();			
+		if (old != null) {
+			field.remove(old);
+			old.onDetached();
 		}
 
 		n.onAttached(this, index, type);

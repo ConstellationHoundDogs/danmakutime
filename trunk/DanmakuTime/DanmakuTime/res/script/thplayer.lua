@@ -25,7 +25,10 @@ THPlayer = {
 	maxLives=99,
 	maxBombs=99,
 	maxShotPower=100,
-
+	autoCollectY=nil,
+	magnetAttrRadius=32,
+	magnetAttrSpeed=10,
+	
 	--state
 	lives=3,
 	bombs=2,
@@ -47,9 +50,12 @@ function THPlayer.new(self)
 	self:setColNode(0, playerColType, CircleColNode.new(2.0))
 	self:setColNode(1, playerGrazeColType, CircleColNode.new(10.0))
 	self:setColNode(2, playerItemColType, RectColNode.new(-9, -18, 18, 34))
+	self:setColNode(3, playerItemMagnetColType, CircleColNode.new(0))
 
 	self:setPos(levelWidth/2, levelHeight - 32)
 	self:setZ(1000)	
+	
+	self.autoCollectY = self.autoCollectY or levelHeight/4
 	
 	self.focusSprites[1] = FocusSprite.new(self, texStore:get("focus.png#upper"), -10, {fadeSpeed=.1})
 	self.focusSprites[2] = FocusSprite.new(self, texStore:get("focus.png#lower"), 10, {fadeSpeed=.05})
@@ -69,6 +75,8 @@ function THPlayer:onCollision(other, myColNode, otherColNode)
 			other.grazed = true
 			self:onGrazed(other)
 		end
+	elseif t0 == playerItemMagnetColType then
+		self:onItemMagnet(other)
 	else
 		self:destroy()
 	end
@@ -84,13 +92,14 @@ end
 
 function THPlayer:update()
 	while true do
-		self:updateDeathTime()
+		self:updateDeathTime()		
 		
-		if self.deathTime <= 0 then
+		if self.deathTime <= 0 then		
 			self:updateFocus()	
 			self:updatePos()
 			self:updateBomb()
 			self:updateFire()
+			self:updateItemCollect()
 		end
 		
 		yield()
@@ -203,6 +212,26 @@ function THPlayer:fire()
 		s:setAngle(angle - 32 + 16 * n)
 		s:setSpeed(10)
 	end
+end
+
+function THPlayer:updateItemCollect()
+	if self:getY() < self.autoCollectY then
+		self:setColNode(3, playerItemMagnetColType, CircleColNode.new(999999))
+	else
+		self:setColNode(3, playerItemMagnetColType, CircleColNode.new(self.magnetAttrRadius))
+	end
+end
+
+function THPlayer:onItemMagnet(item)
+	local ix = item:getX()
+	local iy = item:getY()
+	
+	local angle = math.atan2(self:getY()-iy, self:getX()-ix)
+	
+	local dx = self.magnetAttrSpeed * math.sin(angle)
+	local dy = self.magnetAttrSpeed * -math.cos(angle)
+	
+	item:setPos(ix+dx, iy+dy)
 end
 
 function THPlayer:animate()

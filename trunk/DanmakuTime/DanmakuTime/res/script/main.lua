@@ -74,8 +74,11 @@ function main()
 		end
 	end)
 	
-	Thread.new(fireLaser)
-	
+	--Thread.new(fireLaser)
+	Thread.new(tenK)	
+end
+
+function tenK()
 	for group=1,50 do
 		for n=1,200 do
 			local s = THSprite.new{hp=1, power=1}
