@@ -22,10 +22,15 @@ THPlayer = {
 	focusSpeed=1.5,
 	fireDelay=3,
 	deathBombTime=20,
+	maxLives=99,
+	maxBombs=99,
+	maxShotPower=100,
+
 	--state
 	lives=3,
 	bombs=2,
-	grazeCounter=0,
+	shotPower=0,
+	grazeCounter=0,	
 	points=0,
 	focus=false,
 	fireCooldown=0,
@@ -41,7 +46,7 @@ function THPlayer.new(self)
 	self:setTexture(texStore:get("player.png#idle0"));
 	self:setColNode(0, playerColType, CircleColNode.new(2.0))
 	self:setColNode(1, playerGrazeColType, CircleColNode.new(10.0))
-	self:setColNode(2, playerItemColType, RectColNode.new(-12, -20, 24, 40))
+	self:setColNode(2, playerItemColType, RectColNode.new(-9, -18, 18, 34))
 
 	self:setPos(levelWidth/2, levelHeight - 32)
 	self:setZ(1000)	

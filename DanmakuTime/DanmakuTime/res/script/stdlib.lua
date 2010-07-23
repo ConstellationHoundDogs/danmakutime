@@ -17,6 +17,12 @@ function extend(...)
 	return result
 end
 
+function append(a, b)
+	for i,v in ipairs(b) do
+		table.insert(a, v)
+	end
+end
+
 function signum(x)
 	if x > 0 then
 		return 1
