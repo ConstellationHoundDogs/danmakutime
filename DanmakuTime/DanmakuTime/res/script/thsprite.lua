@@ -17,9 +17,9 @@ THSprite = {
 	grazed=false
 	}
 
-function THSprite.new(obj)
-	obj = extend(THSprite, obj or {})
-	return Sprite.new(obj)
+function THSprite.new(self)
+	self = extend(THSprite, self or {})
+	return Sprite.new(self)
 end
 
 function THSprite:onCollision(other, myNode, otherNode)

@@ -4,9 +4,9 @@ Invulnerable = {
 	ymul=100
 	}
 
-function Invulnerable.new(obj)
-	obj = extend(THSprite, Invulnerable, obj or {})
-	return THSprite.new(obj)
+function Invulnerable.new(self)
+	self = extend(Invulnerable, self or {})
+	return THSprite.new(self)
 end
 
 function Invulnerable:init()
@@ -47,9 +47,18 @@ end
 --------------------------------------------------------------------------------
 
 function main()
+	levelWidth = 384
+	levelHeight = 448
+	
+	--Create the overlay field (id=999)
+	overlayField = Field.new(999, 0, 0, screenWidth, screenHeight, 0)
+
+	--mainMenu()
+
 	--soundEngine:setBGM("bgm/bgm01.ogg");
 
-	buildLevel("level-bg.png")
+	setBackground("level-bg.png", 30)
+	buildLevel()
 
 	local ghost = Invulnerable.new{xmul=100, ymul=100}	
     yield(10)
@@ -72,19 +81,7 @@ function main()
 			local s = THSprite.new{hp=1, power=1}
 			s:setColNode(0, enemyColType, CircleColNode.new(7))
 			s.dropItems = function(self)
-				local s = THSprite.new()
-				s:setColNode(0, itemColType, RectColNode.new(-8, -8, 16, 16))
-				
-				s:setPos(self:getX(), self:getY())
-				s:setZ(player:getZ() + 50)
-				s:setTexture(texStore:get("items.png#pointLarge"));
-				s:setDrawAngleAuto(false)
-				s:setAngle(256)
-				s:setSpeed(1)
-				
-				s.onCollision = function(self, other)
-					self:destroy()
-				end
+				dropPointItems(self:getX(), self:getY(), 5)
 			end
 			
 			if math.random(10) >= 10 then

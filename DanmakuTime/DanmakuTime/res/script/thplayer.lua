@@ -25,20 +25,19 @@ THPlayer = {
 	--state
 	lives=3,
 	bombs=2,
-	focus=false,
 	grazeCounter=0,
+	points=0,
+	focus=false,
 	fireCooldown=0,
 	deathTime=0,
 	dx=0,
 	focusSprites={}
 	}
 
-function THPlayer.new(obj)
-	obj = extend(THSprite, THPlayer, obj or {})
-	return Sprite.new(obj)
-end
-
-function THPlayer:init()
+function THPlayer.new(self)
+	self = extend(THPlayer, self or {})
+	self = THSprite.new(self)
+	
 	self:setTexture(texStore:get("player.png#idle0"));
 	self:setColNode(0, playerColType, CircleColNode.new(2.0))
 	self:setColNode(1, playerGrazeColType, CircleColNode.new(10.0))
@@ -49,6 +48,8 @@ function THPlayer:init()
 	
 	self.focusSprites[1] = FocusSprite.new(self, texStore:get("focus.png#upper"), -10, {fadeSpeed=.1})
 	self.focusSprites[2] = FocusSprite.new(self, texStore:get("focus.png#lower"), 10, {fadeSpeed=.05})
+	
+	return self
 end
 
 function THPlayer:onCollision(other, myColNode, otherColNode)
@@ -259,17 +260,16 @@ FocusSprite = {
 	dz=1
 	}
 
-function FocusSprite.new(parent, tex, dz, o)
-	local o = extend(FocusSprite, o or {})
-	local s = Sprite.new(o)
-	s.parent = parent
-	s.dz = dz
-	s:setTexture(tex)
-	return s
-end
-
-function FocusSprite:init()
+function FocusSprite.new(parent, tex, dz, self)
+	self = extend(FocusSprite, self or {})
+	self = Sprite.new(self)
+	
+	self.parent = parent
+	self.dz = dz
+	self:setTexture(tex)
 	self:setAlpha(0)
+	
+	return self
 end
 
 function FocusSprite:update()

@@ -2,8 +2,8 @@ package nl.weeaboo.dt.lua;
 
 import nl.weeaboo.dt.lua.link.LuaLink;
 import nl.weeaboo.dt.lua.link.LuaLinkedObject;
+import nl.weeaboo.dt.lua.platform.LuajavaLib;
 
-import org.luaj.lib.j2se.LuajavaLib;
 import org.luaj.vm.LFunction;
 import org.luaj.vm.LString;
 import org.luaj.vm.LTable;

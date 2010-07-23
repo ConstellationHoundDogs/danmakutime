@@ -9,6 +9,11 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.nio.IntBuffer;
+import java.text.Collator;
+import java.util.Comparator;
+import java.util.Locale;
+import java.util.SortedSet;
+import java.util.TreeSet;
 
 import javax.imageio.ImageIO;
 
@@ -24,6 +29,8 @@ import nl.weeaboo.dt.lua.LuaThreadPool;
 import nl.weeaboo.dt.lua.LuaUtil;
 import nl.weeaboo.dt.lua.link.LuaFunctionLink;
 import nl.weeaboo.dt.lua.link.LuaLink;
+import nl.weeaboo.dt.lua.platform.LuaPlatform;
+import nl.weeaboo.dt.lua.platform.LuajavaLib;
 import nl.weeaboo.dt.object.Drawable;
 import nl.weeaboo.dt.renderer.Blur;
 import nl.weeaboo.dt.renderer.ITextureStore;
@@ -41,7 +48,7 @@ import nl.weeaboo.game.text.MutableTextStyle;
 import nl.weeaboo.game.text.ParagraphRenderer;
 import nl.weeaboo.game.text.layout.ParagraphLayouter;
 
-import org.luaj.lib.j2se.LuajavaLib;
+import org.luaj.vm.LFunction;
 import org.luaj.vm.LuaState;
 
 public class Game extends GameBase {
@@ -156,15 +163,29 @@ public class Game extends GameBase {
 		fieldMap.put(2, new Field(0, 0, width, height, 0)); //Overlay field (2)
 		
 		//Init Lua
+		LuaPlatform platform = new LuaPlatform() {
+			@Override
+			public InputStream openFile(String fileName) {
+				return null;
+			}
+		};
 		LuaThreadPool threadPool = new LuaThreadPool();
 		
-		luaRunState = new LuaRunState(System.nanoTime(), threadPool, fieldMap,
-				texStore, soundEngine);
+		luaRunState = new LuaRunState(System.nanoTime(), platform, threadPool,
+				fieldMap, texStore, soundEngine);
 		
 		LuaState vm = getLuaState();
 				
 		//Compile code
-		for (String path : rm.getFolderContents("script")) {
+		SortedSet<String> scripts = new TreeSet<String>(new Comparator<String>() {
+			Collator c = Collator.getInstance(Locale.ROOT);
+			public int compare(String o1, String o2) {
+				return c.compare(o1, o2);
+			}	
+		});
+		scripts.addAll(rm.getFolderContents("script"));
+		
+		for (String path : scripts) {
 			InputStream in = null;
 			try {				
 				in = rm.getInputStream(path);
@@ -180,6 +201,14 @@ public class Game extends GameBase {
 				} catch (IOException ioe) { }
 			}
 		}
+		
+		//Install quit function
+		vm._G.put("quit", new LFunction() {
+			public int invoke(LuaState vm) {
+				dispose();
+				return 0;
+			}
+		});
 		
 		//Start main thread
 		threadPool.add(new LuaFunctionLink(luaRunState, vm, "main"));

@@ -1,8 +1,5 @@
 
-levelWidth = 384
-levelHeight = 448
-
-function buildLevel(background)
+function buildLevel()
 	--Setup collision matrix
 	local colMatrix = ColMatrix.new()
 	playerColType = colMatrix:newColType()
@@ -26,19 +23,10 @@ function buildLevel(background)
 	
 	gameColField = gameField:getColField()	
 	gameColField:setColMatrix(colMatrix)
-
-	--Create background image
-	local levelBG = Drawable.new(0)
-	levelBG:setTexture(texStore:get(background))
-	levelBG:setPos(screenWidth/2, screenHeight/2)
-	levelBG:setZ(32000)
-
-	--Create the overlay field (id=999)
-	overlayField = Field.new(999, 0, 0, screenWidth, screenHeight, 0)
 	
 	--Create some text
 	local text = TextDrawable.new(overlayField)
-	text:setText("Danmaku Time\nDay 4")
+	text:setText("Danmaku Time\nDay 5")
 	text:setBlockAnchor(7)
 	text:setFontName("DejaVuSans") --fontname is the file name without extension
 	--text:setFontStyle(FontStyle.BOLD)
@@ -54,9 +42,11 @@ function buildLevel(background)
 	local paramY = gameField:getY() + 10 + 50
 	local paramDY = 15
 	
-	ParamText.new(overlayField, player, "lives", "Lives", paramX, paramY)
+	ParamText.new(overlayField, player, "lives", "Lives", paramX, paramY, 99999)
 	paramY = paramY + paramDY
-	ParamText.new(overlayField, player, "bombs", "Bombs", paramX, paramY)
+	ParamText.new(overlayField, player, "bombs", "Bombs", paramX, paramY, 99999)
 	paramY = paramY + paramDY
-	ParamText.new(overlayField, player, "grazeCounter", "Graze", paramX, paramY)
+	ParamText.new(overlayField, player, "grazeCounter", "Graze", paramX, paramY, 99999)
+	paramY = paramY + paramDY
+	ParamText.new(overlayField, player, "points", "Points", paramX, paramY, 99999)
 end

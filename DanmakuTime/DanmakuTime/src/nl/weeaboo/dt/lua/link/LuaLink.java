@@ -2,8 +2,8 @@ package nl.weeaboo.dt.lua.link;
 
 import nl.weeaboo.dt.lua.LuaException;
 import nl.weeaboo.dt.lua.LuaRunState;
+import nl.weeaboo.dt.lua.platform.CoerceJavaToLua;
 
-import org.luaj.lib.j2se.CoerceJavaToLua;
 import org.luaj.vm.LFunction;
 import org.luaj.vm.LNil;
 import org.luaj.vm.LThread;

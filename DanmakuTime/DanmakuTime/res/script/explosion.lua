@@ -16,13 +16,15 @@ Explosion = {
 	frameDurations={1, 1, 2, 4, 2, 1}
 	}
 	
-function Explosion.new(parent, obj)
-	obj = extend(Explosion, obj or {})	
-	obj = Sprite.new(obj)
-	obj:setPos(parent:getX(), parent:getY())
-	obj:setZ(parent:getZ() + 10)
-	obj:setAlpha(obj.alpha)
-	return obj
+function Explosion.new(parent, self)
+	self = extend(Explosion, self or {})	
+	self = Sprite.new(self)
+	
+	self:setPos(parent:getX(), parent:getY())
+	self:setZ(parent:getZ() + 10)
+	self:setAlpha(self.alpha)
+	
+	return self
 end
 
 function Explosion:animate()
