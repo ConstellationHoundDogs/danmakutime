@@ -39,6 +39,11 @@ public interface IField {
 	// === Getters =============================================================
 	
 	/**
+	 * @return An array of all objects currently attached to this field
+	 */
+	public IDrawable[] getAllObjects();
+	
+	/**
 	 * @return The number of active objects in this field
 	 */
 	public int getObjectCount();

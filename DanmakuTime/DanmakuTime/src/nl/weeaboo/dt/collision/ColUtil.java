@@ -101,7 +101,7 @@ public final class ColUtil {
 		
 		IDrawable ao = a.getHost().getOwner();
 		IDrawable bo = b.getHost().getOwner();
-		if (ao == null || ao.isDestroyed() || bo == null || bo.isDestroyed()) {
+		if (ao.isDestroyed() || bo.isDestroyed()) {
 			return;
 		}
 		
