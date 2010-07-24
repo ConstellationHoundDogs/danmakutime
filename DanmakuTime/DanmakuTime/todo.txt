@@ -18,7 +18,7 @@ Feature requests:
 [x] How does the user specify which SoundEngine they want?
 [x] Helper function for 2d parallax scrolling backgrounds.
 [x] Character dialog boxes?
-[ ] Add optional sprite display to the Dialog pages, left=?, right=? 
+[x] Add optional sprite display to the Dialog pages, left=?, right=? 
 
 === Day 7 ====================================================================    
 
