@@ -3,18 +3,32 @@ Bugs:
 [ ] Lua's include/require functions are broken.
 
 Feature requests:
-[ ] Think about bosses with lifebars, timeouts and spellcards. How would one
-    implement those and how can I help.
-[ ] Create a "Boss extends Sprite" object to help with Boss creation? Or is
-    such an object better created from Lua?
+
+=== Day 6 ====================================================================    
+
+[x] Thread.new should pass arguments 2..* to the called function.
+[x] Add a globalReset function taking a func + arguments and resetting
+    everything except creating a new thread with the supplied function.
+[ ] Player invincibilityTime after getting hit.
+[ ] Boss indicator sprite
+[ ] Add pause/unpause functionality to the script. Game shouldn't be the one
+    activating the pause screen. The script wants to be able to pause too when
+    the player loses all their lives.
 [ ] Restart level option/on dead menu handler
-[ ] Thread.new should pass arguments 2..* to the called function.
-    
-[ ] Document the collision interfaces    
 [ ] How does the user specify which SoundEngine they want?
-[ ] Add scale attributes to drawables. Renderer need not change, the drawable
-    can handle the width & height change itself in its draw method.
+[ ] Helper function for 2d parallax scrolling backgrounds.
+
+=== Day 7 ====================================================================    
+
+[ ] Document the collision interfaces    
 [ ] Try to print a Lua stack trace in case of Lua errors
+[ ] Write documentation on the wiki
+
+==============================================================================
+
+[ ] Replays
+[ ] Key config    
+[ ] Joypad support
 [ ] This silliness with the boundingrectradius needs to stop, a proper bounding
     rect is much more accurate. A more limited bounding rect could reduce the
     number of grid cells we sould need to check in ColGrid. 

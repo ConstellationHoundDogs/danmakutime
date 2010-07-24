@@ -14,6 +14,8 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 
+import nl.weeaboo.common.Benchmark;
+
 import org.luaj.vm.LFunction;
 import org.luaj.vm.LInteger;
 import org.luaj.vm.LString;
@@ -46,7 +48,7 @@ final class ClassInfo {
 	
 	public ClassInfo(Class<?> c) {
 		clazz = c;
-		isArray = c.isArray();
+		isArray = c.isArray();		
 	}
 	
 	//Functions
@@ -148,6 +150,8 @@ final class ClassInfo {
 
 	protected MethodInfo[] getMethods(String name) {
 		if (methods == null) {
+			Benchmark.tick();
+			
 			Method marr[] = clazz.getMethods();
 			Arrays.sort(marr, methodSorter);
 			

@@ -7,6 +7,8 @@ function clone(obj)
 	return result
 end
 
+--Takes a list of tables and generates a new table containing SHALLOW copies
+--of all attributes
 function extend(...)
 	local result = {}
 	for tableIndex,table in ipairs(arg) do
@@ -33,6 +35,9 @@ function signum(x)
 end
 
 function pauseHandler()
+	showPauseMenu()
+
+--[[
 	local dx = screenWidth/2
 	local dy = screenHeight/2
 
@@ -54,4 +59,53 @@ function pauseHandler()
 	end
 	
 	pausedText:destroy()
+]]--	
+end
+
+function showPauseMenu(canResume)
+	if canResume == nil then
+		canResume = true
+	end
+	
+	local exit = false
+
+	--Create menu
+	local menu = MenuGroup.new()
+		
+	local resumeItem = MenuOption.new(999, screenWidth/2, screenHeight/2 - 25,
+		{ label="Resume", blockAnchor=5,
+		select=function(self)
+			exit = true
+		end
+	})
+	menu:add(resumeItem)
+
+	local restartItem = MenuOption.new(999, screenWidth/2, screenHeight/2 + 0,
+		{ label="Restart Game", blockAnchor=5,
+		select=function(self)
+			print("Ask for confirmation (restart)")
+			exit = true
+			Thread.new(restart)
+		end
+	})
+	menu:add(restartItem)
+
+	local titleItem = MenuOption.new(999, screenWidth/2, screenHeight/2 + 25,
+		{ label="Quit Game", blockAnchor=5,
+		select=function(self)
+			print("Ask for confirmation (title)")
+			exit = true
+			Thread.new(returnTitle)
+		end
+	})
+	menu:add(titleItem)
+	
+	--Event loop
+	while not exit do
+		menu:update()
+		yield()
+	end
+	
+	--Destroy menu
+	menu:destroy()
 end

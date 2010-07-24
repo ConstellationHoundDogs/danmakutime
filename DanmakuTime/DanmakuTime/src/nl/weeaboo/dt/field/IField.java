@@ -16,11 +16,6 @@ public interface IField {
 	 * @throws IllegalArgumentException If <code>d</code> is <code>null</code>
 	 */
 	public void add(IDrawable d);
-
-	/**
-	 * Adds all pending new objects to the current list of objects.
-	 */
-	public void flushStandbyList();
 	
 	/**
 	 * Updates this field and all objects it contains
@@ -35,6 +30,12 @@ public interface IField {
 	 * @param renderer The renderer to use for drawing
 	 */
 	public void draw(IRenderer renderer);
+	
+	/**
+	 * Removes all objects from this field and destroys them. Resets the field
+	 * back to its initial state.
+	 */
+	public void clear();
 	
 	// === Getters =============================================================
 	

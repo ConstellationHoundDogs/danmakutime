@@ -5,6 +5,7 @@ import nl.weeaboo.dt.lua.LuaRunState;
 
 import org.luaj.vm.LFunction;
 import org.luaj.vm.LThread;
+import org.luaj.vm.LValue;
 import org.luaj.vm.LuaState;
 
 public class LuaFunctionLink extends LuaLink {
@@ -20,10 +21,11 @@ public class LuaFunctionLink extends LuaLink {
 		this.funcName = funcName;
 		this.args = args;
 	}
-	public LuaFunctionLink(LuaRunState runState, LuaState vm, LFunction func) {
+	public LuaFunctionLink(LuaRunState runState, LuaState vm, LFunction func, LValue... args) {
 		super(runState, vm);
 		
 		this.func = func;
+		this.args = args;
 	}
 	
 	//Functions
@@ -35,6 +37,9 @@ public class LuaFunctionLink extends LuaLink {
 				vm = thread.vm;
 			} else {
 				vm.pushlvalue(func);
+			}
+			for (Object arg : args) {
+				vm.pushlvalue((LValue)arg);
 			}
 		} else {
 			pushCall(funcName, args);

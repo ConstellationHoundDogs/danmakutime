@@ -16,7 +16,7 @@
 -------------------------------------------------------------------------------
 
 THBoss = {
-	spellcards={},
+	spellcards=nil,
 	currentSpellcard=0,
 	maxHP=1,
 	lifebar=nil,
@@ -27,6 +27,8 @@ THBoss = {
 function THBoss.new(self)
 	self = extend(THBoss, self or {})	
 	self = THSprite.new(self)
+	
+	self.spellcards = self.spellcards or {}
 	
 	self:setColNode(0, enemyColType, RectColNode.new(-16, -16, 32, 32))
 	self:setPos(levelWidth/2, -self:getHeight())

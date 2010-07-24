@@ -13,13 +13,14 @@ function MenuOption.new(field, x, y, self)
 	self = TextDrawable.new(field, self)
 	
 	self:setPos(x or 0, y or 0)
-	self:setBlockAnchor(7)
+	self:setZ(-100)
+	self:setBlockAnchor(self.blockAnchor or 7)
 	self:setFontName("DejaVuSans") --fontname is the file name without extension
 	self:setFontStyle(FontStyle.BOLD)
 	self:setFontSize(24)
 	self:setOutlineColor(.1, .1, .1)
 	self:setOutlineSize(4)
-	self:setText(self.label)
+	self:setText(self.label or "---")
 	
 	return self
 end
@@ -55,11 +56,13 @@ end
 
 MenuGroup = {
 	selected=1,
-	items={}
+	items=nil
 	}
 
 function MenuGroup.new(self)
-	return extend(MenuGroup, self or {})
+	self = extend(MenuGroup, self or {})
+	self.items = self.items or {}
+	return self
 end
 
 function MenuGroup:destroy()
