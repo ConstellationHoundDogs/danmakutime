@@ -80,7 +80,7 @@ function start()
 	
 	--Thread.new(fireLaser)
 	
-	Thread.new(stressTest, 50, 200)
+	--Thread.new(stressTest, 50, 200)
 	
 	--Thread.new(stressTest, 50, 20)			
 end

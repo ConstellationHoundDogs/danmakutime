@@ -57,5 +57,6 @@
   </image>
   <image filename="osd.png" width="256" height="256">
     <subrect id="lifebar" rect="1,4,1,8" />
+    <subrect id="bossIndicator" rect="16,0,32,16" />
   </image>
 </images>

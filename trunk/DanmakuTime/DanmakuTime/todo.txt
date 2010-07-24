@@ -10,7 +10,7 @@ Feature requests:
 [x] Add a globalReset function taking a func + arguments and resetting
     everything except creating a new thread with the supplied function.
 [x] Player invincibilityTime after getting hit.
-[ ] Boss indicator sprite
+[x] Boss indicator sprite
 [ ] Add pause/unpause functionality to the script. Game shouldn't be the one
     activating the pause screen. The script wants to be able to pause too when
     the player loses all their lives.
