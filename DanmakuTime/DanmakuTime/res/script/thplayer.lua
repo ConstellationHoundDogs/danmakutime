@@ -22,6 +22,7 @@ THPlayer = {
 	focusSpeed=1.5,
 	fireDelay=3,
 	deathBombTime=20,
+	deathInvincibleTime=180,
 	maxLives=99,
 	maxBombs=99,
 	maxShotPower=100,
@@ -38,6 +39,7 @@ THPlayer = {
 	focus=false,
 	fireCooldown=0,
 	deathTime=0,
+	invincible=0,
 	dx=0,
 	focusSprites=nil
 	}
@@ -65,7 +67,7 @@ function THPlayer.new(self)
 end
 
 function THPlayer:onCollision(other, myColNode, otherColNode)
-	if self.deathTime > 0 then
+	if self.deathTime > 0 or self.invincible > 0 then
 		return
 	end
 
@@ -92,7 +94,7 @@ function THPlayer:onCollectItem(other)
 end
 
 function THPlayer:update()
-	while true do
+	while true do		
 		self:updateDeathTime()		
 		
 		if self.deathTime <= 0 then		
@@ -108,6 +110,10 @@ function THPlayer:update()
 end
 
 function THPlayer:updateDeathTime()
+	if self.invincible > 0 then
+		self.invincible = self.invincible - 1
+	end
+
 	if self.deathTime > 0 then
 		self:setAlpha(self.deathTime / self.deathBombTime)
 		
@@ -120,7 +126,8 @@ function THPlayer:updateDeathTime()
 			end
 		else
 			if self.lives > 0 then
-			    self.lives = self.lives - 1			    
+			    self.lives = self.lives - 1
+			    self.invincible = self.deathInvincibleTime
 			end
 			
 			if self.lives <= 0 then
@@ -128,7 +135,7 @@ function THPlayer:updateDeathTime()
 			end
 		end
 	else
-		self:setAlpha(1)
+		self:setAlpha(0.75 + 0.25 * math.cos(32 * self.invincible))
 	end	
 end
 
