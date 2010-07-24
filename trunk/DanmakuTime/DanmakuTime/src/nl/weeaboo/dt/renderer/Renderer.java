@@ -1,6 +1,7 @@
 package nl.weeaboo.dt.renderer;
 
 import java.awt.Dimension;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -124,13 +125,11 @@ public class Renderer implements IRenderer {
 		//Setup clipping
 		gl.glEnable(GL.GL_SCISSOR_TEST);
 		
-		float scale = Math.min(realSize.width / (float)virtualSize.width, realSize.height / (float)virtualSize.height);
-		float clipDX = (realSize.width - scale*virtualSize.width) / 2;
-		float clipDY = (realSize.height - scale*virtualSize.height) / 2;			
+		Point s0 = virtualToGL(clipRect.x, clipRect.y);
+		Point s1 = virtualToGL(clipRect.x+clipRect.width, clipRect.y+clipRect.height);
 		
-		gl.glScissor(Math.round(clipDX + scale * clipRect.x),
-				realSize.height - Math.round(clipDY + scale * (clipRect.y+clipRect.height)),
-				Math.round(scale * clipRect.width), Math.round(scale * clipRect.height));
+		gl.glScissor(Math.min(s0.x, s1.x), Math.min(s0.y, s1.y),
+				Math.abs(s1.x-s0.x), Math.abs(s1.y-s0.y));
 
 		boolean clipping = true;
 
@@ -315,6 +314,23 @@ public class Renderer implements IRenderer {
 	}
 	
 	//Setters
+	@Override
+	public Point virtualToReal(double x, double y) {
+		float scale = Math.min(realSize.width / (float)virtualSize.width, realSize.height / (float)virtualSize.height);
+		float dx = (realSize.width - scale*virtualSize.width) / 2;
+		float dy = (realSize.height - scale*virtualSize.height) / 2;			
+		
+		Point p = new Point();
+		p.x = (int)Math.round(dx + scale * x);
+		p.y = (int)Math.round(dy + scale * y);
+		return p;
+	}
+	
+	protected Point virtualToGL(double x, double y) {
+		Point p = virtualToReal(x, y);
+		p.y = realSize.height - p.y; 
+		return p;
+	}
 	
 	@Override
 	public void setTexture(ITexture tex) {

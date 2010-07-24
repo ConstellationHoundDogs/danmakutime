@@ -1,5 +1,6 @@
 package nl.weeaboo.dt.renderer;
 
+import java.awt.Point;
 import java.awt.Rectangle;
 
 import nl.weeaboo.dt.object.StyledText;
@@ -83,6 +84,14 @@ public interface IRenderer {
 	 * @return The current blend mode
 	 */
 	public BlendMode getBlendMode();
+	
+	/**
+	 * Performs a coordinate transform from object coordinates to screen
+	 * coordinates.
+	 * 
+	 * @return a Point containing the transformed coords.
+	 */
+	public Point virtualToReal(double x, double y);
 	
 	// === Setters =============================================================
 	

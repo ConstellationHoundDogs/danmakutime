@@ -140,13 +140,10 @@ public abstract class LuaLink {
 			throw new LuaException(e);
 		} finally {
 			runState.setCurrentLink(null);
-			if (thread.getStatusCode() == LThread.STATUS_RUNNING) {
+			if (finished || thread.getStatusCode() == LThread.STATUS_RUNNING) {
 				finished = true;
+				thread = null;
 			}
-		}
-		
-		if (finished) {
-			thread = null;
 		}
 	}
 	

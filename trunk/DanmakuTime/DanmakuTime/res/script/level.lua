@@ -2,7 +2,7 @@
 function buildLevel()	
 	--Create some text
 	local text = TextDrawable.new(overlayField)
-	text:setText("Danmaku Time\nDay 5")
+	text:setText("Danmaku Time\nDay 6")
 	text:setBlockAnchor(7)
 	text:setFontName("DejaVuSans") --fontname is the file name without extension
 	--text:setFontStyle(FontStyle.BOLD)

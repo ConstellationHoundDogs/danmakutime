@@ -163,6 +163,11 @@ public interface IDrawable {
 	public void setColor(int argb);
 	
 	/**
+	 * Changes the color this object is blended with
+	 */
+	public void setColor(double r, double g, double b, double a);
+	
+	/**
 	 * Convenience method for just changing the alpha part of the blending
 	 * color.
 	 * 
