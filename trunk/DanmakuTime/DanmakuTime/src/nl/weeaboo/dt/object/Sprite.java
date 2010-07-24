@@ -86,8 +86,10 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject,
 		
 		if (luaLink != null) {
 			try {
-				luaLink.call(true, "onCollision",
-						other.getHost().getOwner().getLuaObject(), child, other);
+				IDrawable owner = other.getHost().getOwner();
+				if (owner != null) {
+					luaLink.call(true, "onCollision", owner.getLuaObject(), child, other);
+				}
 			} catch (LuaException e) {
 				DTLog.warning(e);
 			}

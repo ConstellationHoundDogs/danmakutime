@@ -1,6 +1,7 @@
 
 function main()	
-	returnTitle0()
+	--returnTitle0()
+	restart0()
 end
 
 function returnTitle()
