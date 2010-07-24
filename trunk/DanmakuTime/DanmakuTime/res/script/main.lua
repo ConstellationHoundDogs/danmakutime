@@ -1,69 +1,70 @@
 
-Invulnerable = {
-	xmul=100,
-	ymul=100
-	}
-
-function Invulnerable.new(self)
-	self = extend(Invulnerable, self or {})
-	return THSprite.new(self)
+function main()	
+	returnTitle0()
 end
 
-function Invulnerable:init()
-	self:setPos(400, 300);
-	self:setZ(-100)
-	self:setTexture(texStore:get("test.png#g1"));
-	self:setColNode(0, enemyColType, CircleColNode.new(7))
+function returnTitle()
+	globalReset("returnTitle0")
 end
 
-function Invulnerable:update()
-	local n = 0
-	while n < 100 do	
-		self:setPos(levelWidth/2 + self.xmul * math.cos(n),
-			levelHeight/2 + self.ymul * math.sin(n))
-		n = n + 1
-		
-		yield()
-	end
-	
-	self:destroy()
+function returnTitle0()
+	initFields()
+	mainMenu()
+	start()
 end
 
-function Invulnerable:animate()
-	while false do
-		self:setTexture(texStore:get("test.png#g0"));
-		yield(10)
-		self:setTexture(texStore:get("test.png#g1"));
-		yield(10)
-	end
+function restart()
+	globalReset("restart0")
 end
 
-function Invulnerable:onDestroy()
-	--return false from this function to prevent the destruction of the object
-	--You can call destroy() again later to attempt another destruction
-	return false
+function restart0()
+	initFields()
+	start()
 end
 
---------------------------------------------------------------------------------
-
-function main()
+function initFields()
 	levelWidth = 384
 	levelHeight = 448
+
+	--Setup collision matrix
+	local colMatrix = ColMatrix.new()
+	playerColType = colMatrix:newColType()
+	playerGrazeColType = colMatrix:newColType()	
+	playerItemColType = colMatrix:newColType()	
+	playerItemMagnetColType = colMatrix:newColType()	
+	playerShotColType = colMatrix:newColType()
+	itemColType = colMatrix:newColType()	
+	enemyColType = colMatrix:newColType()	
+	enemyShotColType = colMatrix:newColType()	
+	colMatrix:setColliding(playerColType, enemyColType)
+	colMatrix:setColliding(playerColType, enemyShotColType)
+	colMatrix:setColliding(playerGrazeColType, enemyColType)
+	colMatrix:setColliding(playerGrazeColType, enemyShotColType)
+	colMatrix:setColliding(itemColType, playerItemColType)
+	colMatrix:setColliding(playerItemMagnetColType, itemColType)
+	colMatrix:setColliding2(playerShotColType, enemyColType)
+
+	--Create the background area (id=0)
+	backgroundField = Field.new(0, 0, 0, screenWidth, screenHeight, 0)
+
+	--Create the game area (id=1)
+	gameField = Field.new(1,
+		(screenWidth-levelWidth)/2, (screenHeight-levelHeight)/2,
+		levelWidth, levelHeight, 32)
 	
-	--Create the overlay field (id=999)
-	overlayField = Field.new(999, 0, 0, screenWidth, screenHeight, 0)
+	gameColField = gameField:getColField()	
+	gameColField:setColMatrix(colMatrix)
+	
+	--Create the overlay area (id=2)
+	overlayField = Field.new(2, 0, 0, screenWidth, screenHeight, 0)	
+end
 
-	--mainMenu()
-
+function start()
 	--soundEngine:setBGM("bgm/bgm01.ogg");
 
 	setBackground("level-bg.png", 30)
 	buildLevel()
 
-	local ghost = Invulnerable.new{xmul=100, ymul=100}	
-    yield(10)
-	local ghost2 = Invulnerable.new{xmul=-100, ymul=100}
-	
 	Thread.new(function()
 		while true do
 			if input:consumeKey(Keys.Q) then
@@ -78,10 +79,9 @@ function main()
 	
 	--Thread.new(fireLaser)
 	
-	Thread.new(stressTestA)
+	Thread.new(stressTest, 50, 200)
 	
-	--Thread.new(stressTestB)	
-		
+	--Thread.new(stressTest, 50, 20)			
 end
 
 function createBoss01()
@@ -96,14 +96,6 @@ function createBoss01()
 	local boss = THBoss.new()
 	boss:setTexture(texStore:get("test.png#g0"))	
 	boss:addSpellcard(spellcard)
-end
-
-function stressTestA()
-	stressTest(50, 200)
-end
-
-function stressTestB()
-	stressTest(50, 20)
 end
 
 function stressTest(a, b)

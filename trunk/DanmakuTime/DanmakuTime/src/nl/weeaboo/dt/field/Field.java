@@ -44,7 +44,13 @@ public class Field implements IField {
 	}
 
 	@Override
-	public void flushStandbyList() {
+	public void clear() {
+		flushStandbyList();
+		garbage.addAll(drawables);
+		garbageCollect();
+	}
+	
+	protected void flushStandbyList() {
 		drawables.addAll(standbyList);
 		luaObjArr = null; //Invalidate cache
 		standbyList.clear();
@@ -78,7 +84,7 @@ public class Field implements IField {
 		garbage.clear();
 		
 		for (IDrawable d : arr) {
-			d.setField(null);
+			if (d != null) d.setField(null);
 		}
 	}
 	

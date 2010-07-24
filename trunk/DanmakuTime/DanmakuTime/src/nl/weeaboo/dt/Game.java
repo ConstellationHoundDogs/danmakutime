@@ -11,7 +11,9 @@ import java.io.OutputStream;
 import java.nio.IntBuffer;
 import java.text.Collator;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Locale;
+import java.util.Map;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -138,7 +140,7 @@ public class Game extends GameBase {
 		
 		DTLog.getInstance().start(isDebug(), notifier, err);
 			
-		restart();
+		restart("main");
 	}
 	
 	public void unloadResources() {
@@ -147,9 +149,12 @@ public class Game extends GameBase {
 		super.unloadResources();
 	}
 	
-	public void restart() {
+	public void restart(String mainFuncName) {
 		error = false;
 
+		paused = false;
+		pauseThread = null;
+		
 		ResourceManager rm = getResourceManager();
 		int width = getWidth();
 		int height = getHeight();
@@ -157,10 +162,10 @@ public class Game extends GameBase {
 		texStore = createTextureStore();
 		soundEngine = createSoundEngine();
 				
-		TinyMap<IField> fieldMap = new TinyMap<IField>();
+		Map<Integer, IField> fieldMap = new HashMap<Integer, IField>();
 		fieldMap.put(0, new Field(0, 0, width, height, 0)); //Full-screen field (0)
 		fieldMap.put(1, new Field(0, 0, width, height, 0)); //Game field (1)
-		fieldMap.put(2, new Field(0, 0, width, height, 0)); //Overlay field (2)
+		fieldMap.put(999, new Field(0, 0, width, height, 0)); //Pause field (2)
 		
 		//Init Lua
 		LuaPlatform platform = new LuaPlatform() {
@@ -202,6 +207,17 @@ public class Game extends GameBase {
 			}
 		}
 		
+		//Install globalReset function
+		vm._G.put("globalReset", new LFunction() {
+			public int invoke(LuaState vm) {
+				String funcName = vm.tostring(1);
+				vm.resettop();
+				
+				restart(funcName);
+				return 0;
+			}
+		});
+
 		//Install quit function
 		vm._G.put("quit", new LFunction() {
 			public int invoke(LuaState vm) {
@@ -211,7 +227,7 @@ public class Game extends GameBase {
 		});
 		
 		//Start main thread
-		threadPool.add(new LuaFunctionLink(luaRunState, vm, "main"));
+		threadPool.add(new LuaFunctionLink(luaRunState, vm, mainFuncName));
 				
 		error = false;
 	}
@@ -252,9 +268,9 @@ public class Game extends GameBase {
 			}
 		}
 		
+		luaRunState.update(ii, paused);
+		
 		if (paused) {
-			luaRunState.updatePaused();
-			
 			if (!pauseThread.isFinished()) {
 				try {
 					pauseThread.update();
@@ -270,9 +286,7 @@ public class Game extends GameBase {
 				screenshot.destroy();
 				screenshot = null;
 			}
-		} else {
-			luaRunState.update(ii);
-			
+		} else {			
 			if (input.consumeKey(KeyEvent.VK_ESCAPE)) {				
 				paused = true;
 				screenshotRequest = true;
@@ -320,7 +334,7 @@ public class Game extends GameBase {
 				overlayField.add(screenshot);
 				screenshot.setPos(overlayField.getWidth()/2, overlayField.getHeight()/2);
 				screenshot.setColor(0xFFAAAAAA);
-				screenshot.setZ(-99);
+				screenshot.setZ(32000);
 				screenshot.setTexture(new Texture(gli));				
 			}
 		}

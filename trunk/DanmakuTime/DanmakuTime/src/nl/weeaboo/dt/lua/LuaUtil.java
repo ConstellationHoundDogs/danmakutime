@@ -207,18 +207,20 @@ public class LuaUtil {
 	 * 
 	 * @param rs The LuaRunState object
 	 * @param vm The LuaState to install the new bindings in
-	 * @param pool The thread pool object that the new threads get added to
 	 */
-	public static void registerThreadLib(final LuaRunState rs, LuaState vm,
-			final LuaThreadPool pool)
-	{
+	public static void registerThreadLib(final LuaRunState rs, LuaState vm) {
 		LTable table = new LTable();
 		table.put("new", new LFunction() {
 			public int invoke(LuaState vm) {
 				if (vm.gettop() >= 1 && vm.isfunction(1)) {
-					LuaFunctionLink link = new LuaFunctionLink(rs, vm, vm.checkfunction(1));
-					pool.add(link);
-										
+					LFunction func = vm.checkfunction(1);
+					LValue args[] = new LValue[vm.gettop()-1];
+					for (int n = 0; n < args.length; n++) {
+						args[n] = vm.topointer(2+n);
+					}
+					
+					LuaFunctionLink link = new LuaFunctionLink(rs, vm, func, args);					
+					rs.addThread(link);										
 					vm.pushlvalue(LuajavaLib.toUserdata(link, link.getClass()));
 				} else {
 					vm.pushnil();

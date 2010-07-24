@@ -39,7 +39,7 @@ THPlayer = {
 	fireCooldown=0,
 	deathTime=0,
 	dx=0,
-	focusSprites={}
+	focusSprites=nil
 	}
 
 function THPlayer.new(self)
@@ -57,6 +57,7 @@ function THPlayer.new(self)
 	
 	self.autoCollectY = self.autoCollectY or levelHeight/4
 	
+	self.focusSprites = self.focusSprites or {}
 	self.focusSprites[1] = FocusSprite.new(self, texStore:get("focus.png#upper"), -10, {fadeSpeed=.1})
 	self.focusSprites[2] = FocusSprite.new(self, texStore:get("focus.png#lower"), 10, {fadeSpeed=.05})
 	

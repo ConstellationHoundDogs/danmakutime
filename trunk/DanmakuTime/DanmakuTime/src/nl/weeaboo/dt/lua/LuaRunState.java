@@ -1,10 +1,11 @@
 package nl.weeaboo.dt.lua;
 
 import java.awt.event.KeyEvent;
+import java.util.Map;
 import java.util.Random;
+import java.util.Map.Entry;
 
 import nl.weeaboo.dt.DTLog;
-import nl.weeaboo.dt.TinyMap;
 import nl.weeaboo.dt.audio.ISoundEngine;
 import nl.weeaboo.dt.collision.CircleColNode;
 import nl.weeaboo.dt.collision.ColMatrix;
@@ -34,12 +35,12 @@ public class LuaRunState {
 		
 	private Random random;
 	private LuaThreadPool threadPool;
-	private TinyMap<IField> fieldMap;
+	private Map<Integer, IField> fieldMap;
 
 	private LuaLink current;
 	
 	public LuaRunState(long seed, LuaPlatform platform, LuaThreadPool tp,
-			TinyMap<IField> fm,ITextureStore ts, ISoundEngine se)
+			Map<Integer, IField> fm,ITextureStore ts, ISoundEngine se)
 	{
 		random = new Random(seed);
 		threadPool = tp;
@@ -69,7 +70,7 @@ public class LuaRunState {
 		LuaUtil.registerEnum(vm, FontStyle.class);
 		LuaUtil.registerKeyCodes(vm, KeyEvent.class);
 		
-		LuaUtil.registerThreadLib(this, vm, threadPool);
+		LuaUtil.registerThreadLib(this, vm);
 		LuaUtil.registerFieldLib(this, vm);
 
 		//global ITextureStore texStore
@@ -83,7 +84,7 @@ public class LuaRunState {
 	
 	//Functions
 	public IField createField(int x, int y, int w, int h, int pad) {
-		int id = fieldMap.getSize();
+		int id = fieldMap.size();
 		while (fieldMap.containsKey(id)) {
 			id++;
 		}
@@ -91,28 +92,34 @@ public class LuaRunState {
 	}
 	public IField createField(int id, int x, int y, int w, int h, int pad) {
 		Field field = new Field(x, y, w, h, pad);
-		fieldMap.put(id, field);
+		IField old = fieldMap.put(id, field);
+		if (old != null) {
+			old.clear();
+		}
 		return field;
 	}
 	
-	public void updatePaused() {
-		for (IField field : fieldMap.getValues()) {
-			field.flushStandbyList();
-		}
+	public void addThread(LuaLink t) {
+		threadPool.add(t);
 	}
 	
-	public void update(IInput input) {					
-		//Update threads
-		threadPool.update();
+	public void update(IInput input, boolean paused) {
+		if (!paused) {
+			//Update threads
+			threadPool.update();
+		}
 			
 		//Update fields
-		for (IField field : fieldMap.getValues()) {
-			field.update(input);
+		int pauseFieldId = 999;
+		for (Entry<Integer, IField> entry : fieldMap.entrySet()) {
+			if (entry.getKey().intValue() == pauseFieldId || !paused) {
+				entry.getValue().update(input);
+			}
 		}
 	}
 	
 	public void draw(Renderer r) {
-		for (IField field : fieldMap.getValues()) {
+		for (IField field : fieldMap.values()) {
 			field.draw(r);
 		}
 	}
@@ -129,7 +136,7 @@ public class LuaRunState {
 	}
 	public int getObjectCount() {
 		int count = 0;
-		for (IField field : fieldMap.getValues()) {
+		for (IField field : fieldMap.values()) {
 			count += field.getObjectCount();
 		}
 		return count;		
