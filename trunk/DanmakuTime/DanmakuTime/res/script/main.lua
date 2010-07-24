@@ -74,17 +74,29 @@ function start()
 				print("The global key listener thread saw your key. And will proceed to kill you.")
 				player:destroy()
 			elseif input:consumeKey(Keys.B) then
-				createBoss01()
+				Thread.new(createBoss01)
+			elseif input:consumeKey(Keys.D) then
+				Thread.new(dialogTest)
+			elseif input:consumeKey(Keys.L) then
+				Thread.new(fireLaser)
 			end
 			yield()
 		end
 	end)
 	
-	--Thread.new(fireLaser)
-	
 	Thread.new(stressTest, 50, 200)
 	
-	--Thread.new(stressTest, 50, 20)			
+	--Thread.new(stressTest, 50, 20)		
+end
+
+function dialogTest()
+	local d = Dialog.new()
+	d:addPage("[Raymoo]\nMOO")
+	d:addPage("TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT ")
+	
+	while not d:isDestroyed() do
+		yield()
+	end
 end
 
 function createBoss01()

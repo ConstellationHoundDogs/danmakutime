@@ -17,7 +17,8 @@ Feature requests:
 [x] Restart level option/on dead menu handler
 [x] How does the user specify which SoundEngine they want?
 [x] Helper function for 2d parallax scrolling backgrounds.
-[ ] Character dialog boxes?
+[x] Character dialog boxes?
+[ ] Add optional sprite display to the Dialog pages, left=?, right=? 
 
 === Day 7 ====================================================================    
 
