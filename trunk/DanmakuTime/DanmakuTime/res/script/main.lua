@@ -90,9 +90,11 @@ function start()
 end
 
 function dialogTest()
+	local p = "player-dialog.png"
+
 	local d = Dialog.new()
-	d:addPage("[Raymoo]\nMOO")
-	d:addPage("TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT ")
+	d:addPage("[Player]\nHerp.\nDerp.", p, nil)
+	d:addPage("TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT TEXT", p, p)
 	
 	while not d:isDestroyed() do
 		yield()

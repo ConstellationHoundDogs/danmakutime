@@ -16,7 +16,7 @@ public class GameFrame extends GameFrameBase {
 	public GameFrame(String title, int w, int h, int fps,
 			boolean startFullscreen, boolean trueFullscreen, boolean debugGL)
 	{
-		super(title, w, h, fps, startFullscreen, trueFullscreen, debugGL);
+		super(title, w, h, fps, startFullscreen, trueFullscreen, debugGL, false);
 		
 		setFullScreenSize(new Dimension(w, h));
 	}
