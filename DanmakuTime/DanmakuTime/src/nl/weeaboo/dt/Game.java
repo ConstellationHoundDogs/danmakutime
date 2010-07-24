@@ -361,16 +361,18 @@ public class Game extends GameBase {
 		}
 									
 		//Draw HUD
-		ParagraphRenderer pr = createParagraphRenderer();
-		pr.setBounds(2, -2, w-6, h-4);
-		
-		MutableTextStyle mts = pr.getDefaultStyle().mutableCopy();
-		mts.setAnchor(9);
-		pr.setDefaultStyle(mts.immutableCopy());
-		
-		String hudText = String.format("%.2f FPS\n%d Objects\n",
-				getFPS(), luaRunState.getObjectCount());
-		pr.drawText(glm, hudText);
+		if (isDebug()) {
+			ParagraphRenderer pr = createParagraphRenderer();
+			pr.setBounds(2, -2, w-6, h-4);
+			
+			MutableTextStyle mts = pr.getDefaultStyle().mutableCopy();
+			mts.setAnchor(9);
+			pr.setDefaultStyle(mts.immutableCopy());
+			
+			String hudText = String.format("%.2f FPS\n%d Objects\n",
+					getFPS(), luaRunState.getObjectCount());
+			pr.drawText(glm, hudText);
+		}
 
 		//Video capture
 		if (videoCapture != null) {

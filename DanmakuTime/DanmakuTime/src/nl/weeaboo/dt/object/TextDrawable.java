@@ -75,6 +75,13 @@ public class TextDrawable extends Drawable implements ITextDrawable {
 	}
 
 	@Override
+	public void setFont(String fn, FontStyle fs, double sz) {
+		setFontName(fn);
+		setFontStyle(fs);
+		setFontSize(sz);
+	}
+	
+	@Override
 	public void setOutlineColor(double r, double g, double b) {
 		textStyle.setOutlineColor(r, g, b);
 	}

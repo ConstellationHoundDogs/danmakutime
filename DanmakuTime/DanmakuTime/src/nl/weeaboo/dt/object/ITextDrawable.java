@@ -47,6 +47,7 @@ public interface ITextDrawable extends IDrawable {
 	public void setFontName(String f);
 	public void setFontStyle(FontStyle s);
 	public void setFontSize(double s);
+	public void setFont(String fn, FontStyle fs, double sz);
 	public void setTextColor(double r, double g, double b);
 	public void setTextColor(int rgb);
 	public void setUnderlined(boolean u);

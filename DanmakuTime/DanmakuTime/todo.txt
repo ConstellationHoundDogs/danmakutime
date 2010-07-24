@@ -14,7 +14,7 @@ Feature requests:
 [x] Add pause/unpause functionality to the script. Game shouldn't be the one
     activating the pause screen. The script wants to be able to pause too when
     the player loses all their lives.
-[ ] Restart level option/on dead menu handler
+[x] Restart level option/on dead menu handler
 [ ] How does the user specify which SoundEngine they want?
 [ ] Helper function for 2d parallax scrolling backgrounds.
 [ ] Character dialog boxes?

@@ -26,6 +26,11 @@ public class Input implements IInput {
 	public boolean isKeyPressed(int keycode) {
 		return input.isKeyPressed(keycode);
 	}
+
+	@Override
+	public void clear() {
+		input.clearAll();
+	}
 	
 	//Setters
 	
