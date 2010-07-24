@@ -1,17 +1,21 @@
 package nl.weeaboo.dt;
 
 import java.awt.Dimension;
+import java.awt.Point;
+import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
+import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.IntBuffer;
 import java.text.Collator;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.SortedSet;
@@ -33,15 +37,11 @@ import nl.weeaboo.dt.lua.link.LuaFunctionLink;
 import nl.weeaboo.dt.lua.link.LuaLink;
 import nl.weeaboo.dt.lua.platform.LuaPlatform;
 import nl.weeaboo.dt.lua.platform.LuajavaLib;
-import nl.weeaboo.dt.object.Drawable;
-import nl.weeaboo.dt.renderer.Blur;
 import nl.weeaboo.dt.renderer.ITextureStore;
 import nl.weeaboo.dt.renderer.Renderer;
-import nl.weeaboo.dt.renderer.Texture;
 import nl.weeaboo.dt.renderer.TextureStore;
 import nl.weeaboo.game.GameBase;
 import nl.weeaboo.game.ResourceManager;
-import nl.weeaboo.game.gl.GLImage;
 import nl.weeaboo.game.gl.GLManager;
 import nl.weeaboo.game.gl.GLVideoCapture;
 import nl.weeaboo.game.gl.Screenshot;
@@ -51,21 +51,21 @@ import nl.weeaboo.game.text.ParagraphRenderer;
 import nl.weeaboo.game.text.layout.ParagraphLayouter;
 
 import org.luaj.vm.LFunction;
+import org.luaj.vm.LValue;
 import org.luaj.vm.LuaState;
 
 public class Game extends GameBase {
 
 	private boolean error;
 	private GLVideoCapture videoCapture;
-	private Drawable screenshot;
-	private boolean screenshotRequest, screenshotRequestSave;
 	private Notifier notifier;
+	private List<DelayedScreenshot> pendingScreenshots;
 	
 	private ITextureStore texStore;	
 	private ISoundEngine soundEngine;
 	
 	private LuaRunState luaRunState;
-	private boolean paused;
+	private boolean paused, pauseRequest;
 	private LuaLink pauseThread;
 	
 	public Game(Config c, ResourceManager rm, GameFrame gf) {
@@ -152,8 +152,9 @@ public class Game extends GameBase {
 	public void restart(String mainFuncName) {
 		error = false;
 
-		paused = false;
+		paused = pauseRequest = false;
 		pauseThread = null;
+		pendingScreenshots = new ArrayList<DelayedScreenshot>();
 		
 		ResourceManager rm = getResourceManager();
 		int width = getWidth();
@@ -206,6 +207,40 @@ public class Game extends GameBase {
 				} catch (IOException ioe) { }
 			}
 		}
+
+		//Install pause function
+		vm._G.put("pause", new LFunction() {
+			public int invoke(LuaState vm) {
+				LFunction func = vm.checkfunction(1);
+				LValue args[] = new LValue[vm.gettop()-1];
+				for (int n = 0; n < args.length; n++) {
+					args[n] = vm.topointer(2+n);
+				}
+				
+				pause();
+				
+				pauseThread = new LuaFunctionLink(luaRunState, luaRunState.vm, func, args);
+				
+				vm.resettop();
+				return 0;
+			}
+		});
+		
+		//Install screenshot function
+		vm._G.put("screenshot", new LFunction() {
+			public int invoke(LuaState vm) {
+				int x = (vm.isnumber(1) ? vm.tointeger(1) : 0);
+				int y = (vm.isnumber(2) ? vm.tointeger(2) : 0);
+				int w = (vm.isnumber(3) ? vm.tointeger(3) : getWidth());
+				int h = (vm.isnumber(4) ? vm.tointeger(4) : getHeight());
+				boolean blur = (vm.isboolean(5) ? vm.toboolean(5) : false);
+				
+				vm.resettop();
+				DelayedScreenshot ds = screenshot(x, y, w, h, blur);
+				vm.pushlvalue(LuajavaLib.toUserdata(ds, ds.getClass()));
+				return 1;
+			}
+		});
 		
 		//Install globalReset function
 		vm._G.put("globalReset", new LFunction() {
@@ -233,6 +268,10 @@ public class Game extends GameBase {
 	}
 	
 	public void update(UserInput input, float dt) {
+		//Update paused state
+		paused = pauseRequest;
+		if (!paused) pauseThread = null;
+		
 		super.update(input, dt);
 				
 		notifier.update(Math.round(1000f * dt));
@@ -252,8 +291,17 @@ public class Game extends GameBase {
 
 		if (ii.consumeKey(KeyEvent.VK_F7)) {
 			//Screen capture activation key
-			screenshotRequest = true;
-			screenshotRequestSave = true;
+			pendingScreenshots.add(new DelayedScreenshot(this, 0, 0, getWidth(), getHeight()) {
+				public void set(int argb[], int w, int h) {
+					try {
+						BufferedImage img = GraphicsUtil.createBufferedImage(w, h, argb);
+						ImageIO.write(img, "png", new File("capture-" + System.currentTimeMillis() + ".png"));
+						DTLog.message("Screenshot saved");
+					} catch (IOException e) {
+						DTLog.showError(e);
+					}					
+				}
+			});
 		} else if (ii.consumeKey(KeyEvent.VK_F8)) {
 			//Video capture activation key
 			if (isRecordingVideo()) {
@@ -271,27 +319,16 @@ public class Game extends GameBase {
 		luaRunState.update(ii, paused);
 		
 		if (paused) {
-			if (!pauseThread.isFinished()) {
-				try {
-					pauseThread.update();
-				} catch (LuaException e) {
-					DTLog.warning(e);
-					paused = false;
-				}
-			} else {
-				paused = false;				
+			try {
+				pauseThread.update();
+			} catch (LuaException e) {
+				DTLog.warning(e);
+				unpause();
 			}
 			
-			if (!paused && screenshot != null) {
-				screenshot.destroy();
-				screenshot = null;
+			if (pauseThread == null || pauseThread.isFinished()) {
+				unpause();
 			}
-		} else {			
-			if (input.consumeKey(KeyEvent.VK_ESCAPE)) {				
-				paused = true;
-				screenshotRequest = true;
-				pauseThread = new LuaFunctionLink(luaRunState, vm, "pauseHandler");
-			}			
 		}
 	}
 	
@@ -306,39 +343,23 @@ public class Game extends GameBase {
 		r.flush();
 				
 		//Take screen capture
-		if (screenshotRequest) {
-			screenshotRequest = false;
+		if (!pendingScreenshots.isEmpty()) {
+			Screenshot ss = Screenshot.screenshot(glm, w, h, rw, rh);
 			
-			Screenshot ss = Screenshot.screenshot(glm, w, h, rw, rh);			
-			if (screenshotRequestSave) {
-				screenshotRequest = false;
-
-				try {
-					BufferedImage img = GraphicsUtil.createBufferedImage(ss.width, ss.height, ss.getARGB());
-					ImageIO.write(img, "png", new File("capture-" + System.currentTimeMillis() + ".png"));
-					DTLog.message("Screenshot saved");
-				} catch (IOException e) {
-					DTLog.showError(e);
-				}
-			} else {
-				int argb[] = ss.getARGB();
-				Dimension size = new Dimension(ss.width, ss.height);
-				argb = Blur.process(argb, size, 4, true, true);
+			int argb[] = ss.getARGB();
+			for (DelayedScreenshot ds : pendingScreenshots) {
+				Rectangle2D cr = ds.getCaptureRect();
+				Point p0 = new Point(r.virtualToReal(cr.getX(), cr.getY()));
+				Point p1 = new Point(r.virtualToReal(cr.getX()+cr.getWidth(), cr.getY()+cr.getHeight()));
+				Rectangle take = new Rectangle(Math.min(p0.x, p1.x), Math.min(p0.y, p1.y),
+						Math.abs(p1.x-p0.x), Math.abs(p1.y-p0.y));
 				
-				GLImage gli = addGeneratedImage(IntBuffer.wrap(argb),
-						size.width, size.height, true, false);
-				
-				IField overlayField = luaRunState.getField(999);
-				
-				screenshot = new Drawable();
-				overlayField.add(screenshot);
-				screenshot.setPos(overlayField.getWidth()/2, overlayField.getHeight()/2);
-				screenshot.setColor(0xFFAAAAAA);
-				screenshot.setZ(32000);
-				screenshot.setTexture(new Texture(gli));				
+				int pixels[] = DelayedScreenshot.copyRect(argb, ss.width, ss.height, take);				
+				ds.set(pixels, take.width, take.height);
 			}
+			pendingScreenshots.clear();
 		}
-		
+									
 		//Draw HUD
 		ParagraphRenderer pr = createParagraphRenderer();
 		pr.setBounds(2, -2, w-6, h-4);
@@ -384,6 +405,25 @@ public class Game extends GameBase {
 	
 	protected ISoundEngine createSoundEngine() {
 		return new SoftSyncSoundEngine(getSoundManager(), getConfig().graphics.getFPS());
+	}
+	
+	public DelayedScreenshot screenshot(double x, double y, double w, double h, boolean blur) {
+		DelayedScreenshot ss;
+		if (blur) {
+			ss = new BlurringScreenshot(this, x, y, w, h);
+		} else {
+			ss = new DelayedScreenshot(this, x, y, w, h);
+		}
+		pendingScreenshots.add(ss);
+		return ss;
+	}
+	
+	public void pause() {
+		pauseRequest = true;
+	}
+	
+	public void unpause() {
+		pauseRequest = false;
 	}
 	
 	//Getters

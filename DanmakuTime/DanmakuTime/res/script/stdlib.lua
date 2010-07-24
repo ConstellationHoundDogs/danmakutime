@@ -62,6 +62,29 @@ function pauseHandler()
 ]]--	
 end
 
+function pauseListener()
+	while true do
+		if input:consumeKey(Keys.ESCAPE) then
+			local ds = screenshot(0, 0, screenWidth, screenHeight, true)
+			while not ds:isAvailable() do
+				yield()
+			end
+			
+			local ss = Drawable.new(999)
+			ss:setPos(screenWidth/2, screenHeight/2)
+			ss:setColor(.66, .66, .66, 1.0)
+			ss:setZ(32000)
+			ss:setTexture(ds:asTexture())
+									
+			pause(function()
+				showPauseMenu()
+				ss:destroy()
+			end)
+		end
+		yield()
+	end
+end
+
 function showPauseMenu(canResume)
 	if canResume == nil then
 		canResume = true
@@ -101,7 +124,7 @@ function showPauseMenu(canResume)
 	menu:add(titleItem)
 	
 	--Event loop
-	while not exit do
+	while not exit and not input:consumeKey(Keys.ESCAPE) do
 		menu:update()
 		yield()
 	end

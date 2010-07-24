@@ -66,6 +66,8 @@ function start()
 	setBackground("level-bg.png", 30)
 	buildLevel()
 
+	Thread.new(pauseListener)
+
 	Thread.new(function()
 		while true do
 			if input:consumeKey(Keys.Q) then
@@ -80,7 +82,7 @@ function start()
 	
 	--Thread.new(fireLaser)
 	
-	--Thread.new(stressTest, 50, 200)
+	Thread.new(stressTest, 50, 200)
 	
 	--Thread.new(stressTest, 50, 20)			
 end

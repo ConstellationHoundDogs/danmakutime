@@ -267,6 +267,15 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	}
 
 	@Override
+	public void setColor(double r, double g, double b, double a) {
+		int ri = Math.max(0, Math.min(255, (int)Math.round(r * 255.0)));
+		int gi = Math.max(0, Math.min(255, (int)Math.round(g * 255.0)));
+		int bi = Math.max(0, Math.min(255, (int)Math.round(b * 255.0)));
+		int ai = Math.max(0, Math.min(255, (int)Math.round(a * 255.0)));
+		setColor((ai<<24)|(ri<<16)|(gi<<8)|(bi));
+	}
+	
+	@Override
 	public void setAlpha(double a) {
 		int ai = Math.max(0, Math.min(255, (int)Math.round(a * 255.0)));
 		setColor((ai<<24) | (color & 0xFFFFFF));
