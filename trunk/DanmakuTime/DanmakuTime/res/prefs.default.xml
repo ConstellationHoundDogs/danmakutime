@@ -5,5 +5,7 @@
   <property name="graphics.width" type="int">640</property>
   <property name="graphics.height" type="int">480</property>
   <property name="graphics.vsyncEnabled" type="boolean">true</property>
+
+  <property name="audio.hardSync" type="boolean">false</property>
   
 </root>

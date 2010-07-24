@@ -53,7 +53,11 @@ public class Config extends ConfigBase {
 	public static class AudioView extends nl.weeaboo.game.ConfigBase.AudioView {
 		public AudioView(PreferenceStore store) {
 			super(store);
+
+			setProperty("hardSync", false);
 		}
+		
+		public boolean isHardSync() { return (Boolean)getProperty("hardSync"); }
 	}
 	
 	public static class CaptureView extends PreferenceStoreView {
