@@ -22,7 +22,9 @@ Feature requests:
 
 === Day 7 ====================================================================    
 
-[ ] Document the collision interfaces    
+[ ] A damage flash on enemies? Implement by spawning a thread (to avoid
+    hindering game creators from overriding either update or animate)?
+[ ] Document the collision interfaces
 [ ] Try to print a Lua stack trace in case of Lua errors
 [ ] Write documentation on the wiki
 [ ] Document how to change build settings / Config settings
@@ -35,5 +37,6 @@ Feature requests:
 [ ] Joypad support
 [ ] This silliness with the boundingrectradius needs to stop, a proper bounding
     rect is much more accurate. A more limited bounding rect could reduce the
-    number of grid cells we sould need to check in ColGrid. 
+    number of grid cells we sould need to check in ColGrid.
+    Or I could intersect the object with the colgrid cells in some way? 
 [ ] 3D backgrounds?
