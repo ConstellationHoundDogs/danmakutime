@@ -28,7 +28,6 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject,
 	private Rectangle visualBounds;
 	
 	public Sprite() {
-		clip = true;
 		drawAngleAuto = true;
 		outOfBoundsDeath = true;
 	}

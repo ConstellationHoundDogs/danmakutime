@@ -16,7 +16,7 @@ Feature requests:
     the player loses all their lives.
 [x] Restart level option/on dead menu handler
 [x] How does the user specify which SoundEngine they want?
-[ ] Helper function for 2d parallax scrolling backgrounds.
+[x] Helper function for 2d parallax scrolling backgrounds.
 [ ] Character dialog boxes?
 
 === Day 7 ====================================================================    

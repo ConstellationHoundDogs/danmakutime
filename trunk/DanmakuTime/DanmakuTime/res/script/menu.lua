@@ -177,24 +177,28 @@ end
 function pauseListener()
 	while true do
 		if input:consumeKey(Keys.ESCAPE) then
-			local ds = screenshot(0, 0, screenWidth, screenHeight, true)
-			while not ds:isAvailable() do
-				yield()
-			end
-			
-			local ss = Drawable.new(999)
-			ss:setPos(screenWidth/2, screenHeight/2)
-			ss:setColor(.66, .66, .66, 1.0)
-			ss:setZ(32000)
-			ss:setTexture(ds:asTexture())
-									
-			pause(function()
-				pauseMenu()
-				ss:destroy()
-			end)
+			doPause()
 		end
 		yield()
 	end
+end
+
+function doPause()
+	local ds = screenshot(0, 0, screenWidth, screenHeight, true)
+	while not ds:isAvailable() do
+		yield()
+	end
+	
+	local ss = Drawable.new(999)
+	ss:setPos(screenWidth/2, screenHeight/2)
+	ss:setColor(.66, .66, .66, 1.0)
+	ss:setZ(32000)
+	ss:setTexture(ds:asTexture())
+							
+	pause(function()
+		pauseMenu()
+		ss:destroy()
+	end)
 end
 
 function confirmMenu()
