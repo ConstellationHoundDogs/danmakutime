@@ -21,4 +21,9 @@ public interface IInput {
 	 */
 	public boolean consumeKey(int keycode);
 
+	/**
+	 * Clears all pressed key states.
+	 */
+	public void clear();
+	
 }
