@@ -17,6 +17,7 @@ import nl.weeaboo.dt.object.StyledText;
 import nl.weeaboo.dt.object.TextStyle;
 import nl.weeaboo.game.gl.GLImage;
 import nl.weeaboo.game.gl.GLManager;
+import nl.weeaboo.game.gl.TextureState;
 import nl.weeaboo.game.text.ParagraphRenderer;
 import nl.weeaboo.game.text.layout.TextLayout;
 
@@ -180,6 +181,12 @@ public class Renderer implements IRenderer {
 				if (image != null) {				
 					if (cur != dcmd.tex) {
 						buffered = quadFlush(gl, buffered);
+						
+						int t = 0;
+						while (image.getTexture().getState() == TextureState.DIRTY && t < 16) {
+							image.getTexture().update(gl);
+							t++;
+						}
 						
 						glm.setTexture(image.getTexture());
 					}

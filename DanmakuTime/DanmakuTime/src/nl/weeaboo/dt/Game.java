@@ -24,6 +24,7 @@ import java.util.TreeSet;
 import javax.imageio.ImageIO;
 
 import nl.weeaboo.common.GraphicsUtil;
+import nl.weeaboo.dt.audio.HardSyncSoundEngine;
 import nl.weeaboo.dt.audio.ISoundEngine;
 import nl.weeaboo.dt.audio.SoftSyncSoundEngine;
 import nl.weeaboo.dt.field.Field;
@@ -406,7 +407,11 @@ public class Game extends GameBase {
 	}
 	
 	protected ISoundEngine createSoundEngine() {
-		return new SoftSyncSoundEngine(getSoundManager(), getConfig().graphics.getFPS());
+		if (getConfig().audio.isHardSync()) {
+			return new HardSyncSoundEngine(getSoundManager(), getConfig().graphics.getFPS());
+		} else {
+			return new SoftSyncSoundEngine(getSoundManager(), getConfig().graphics.getFPS());
+		}
 	}
 	
 	public DelayedScreenshot screenshot(double x, double y, double w, double h, boolean blur) {

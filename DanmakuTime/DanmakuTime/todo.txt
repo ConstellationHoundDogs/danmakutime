@@ -15,7 +15,7 @@ Feature requests:
     activating the pause screen. The script wants to be able to pause too when
     the player loses all their lives.
 [x] Restart level option/on dead menu handler
-[ ] How does the user specify which SoundEngine they want?
+[x] How does the user specify which SoundEngine they want?
 [ ] Helper function for 2d parallax scrolling backgrounds.
 [ ] Character dialog boxes?
 
@@ -24,6 +24,8 @@ Feature requests:
 [ ] Document the collision interfaces    
 [ ] Try to print a Lua stack trace in case of Lua errors
 [ ] Write documentation on the wiki
+[ ] Document how to change build settings / Config settings
+[ ] Document how to change between the sound engines
 
 ==============================================================================
 

@@ -40,7 +40,7 @@ public class LuaRunState {
 	private LuaLink current;
 	
 	public LuaRunState(long seed, LuaPlatform platform, LuaThreadPool tp,
-			Map<Integer, IField> fm,ITextureStore ts, ISoundEngine se)
+			Map<Integer, IField> fm, ITextureStore ts, ISoundEngine se)
 	{
 		random = new Random(seed);
 		threadPool = tp;
