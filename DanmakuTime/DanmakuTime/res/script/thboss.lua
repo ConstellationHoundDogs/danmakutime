@@ -9,6 +9,7 @@
 -- ParamText
 -- Timer
 -- gameField
+-- overlayField
 -- enemyColNode
 -- 
 -------------------------------------------------------------------------------
@@ -21,7 +22,8 @@ THBoss = {
 	maxHP=1,
 	lifebar=nil,
 	timer=nil,
-	timeText=nil
+	timeText=nil,
+	indicator=nil
 	}
 
 function THBoss.new(self)
@@ -37,6 +39,8 @@ function THBoss.new(self)
 	self.lifebar = LifeBar.new(self)
 	
 	self.timeText = ParamText.new(gameField, self, "time", "", levelWidth-8, 4, 9, 64-8*2)
+	
+	self.indicator = BossIndicator.new(self)
 	
 	return self
 end
@@ -71,6 +75,7 @@ function THBoss:onDestroy()
 	
 	self.lifebar:destroy()
 	self.timeText:destroy()
+	self.indicator:destroy()
 	
 	return true
 end
@@ -130,6 +135,39 @@ function LifeBar:animate()
 		local enemy = self.enemy
 		self:setScaleX(maxW * enemy.hp / enemy.maxHP)
 		self:setPos(pad + self:getWidth()/2, pad + self:getHeight()/2)
+		yield()
+	end
+end
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+BossIndicator = {
+	enemy=nil
+	}
+	
+function BossIndicator.new(enemy, self)
+	self = extend(BossIndicator, self or {})	
+	self = Drawable.new(overlayField, self)
+	
+	self.enemy = enemy
+
+	self:setTexture(texStore:get("osd.png#bossIndicator"))
+	self:setPos(levelWidth/2, gameField:getY() + gameField:getHeight() + self:getHeight()/2)
+	self:setZ(-32000)
+	
+	return self
+end
+
+function BossIndicator:update()
+	local offsetX = gameField:getX()
+	local minX = self:getWidth()/2
+	local maxX = gameField:getWidth() - self:getWidth()/2
+	while true do
+		local newX = self.enemy:getX()
+		newX = math.max(minX, math.min(maxX, newX))
+		self:setPos(offsetX + newX, self:getY())
 		yield()
 	end
 end
