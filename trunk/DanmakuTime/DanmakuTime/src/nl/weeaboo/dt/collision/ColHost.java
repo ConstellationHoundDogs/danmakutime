@@ -17,7 +17,7 @@ public class ColHost implements IColHost {
 		owner = o;
 		field = f;
 		colHandler = h;
-		nodes = new TinyMap<IColNode>();
+		nodes = new TinyMap<IColNode>(1);
 	}
 	
 	//Functions
