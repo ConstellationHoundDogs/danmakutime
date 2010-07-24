@@ -63,7 +63,7 @@ end
 function start()
 	--soundEngine:setBGM("bgm/bgm01.ogg");
 
-	setBackground("level-bg.png", 30)
+	setBackground("screen-border.png", 30)
 	buildLevel()
 
 	Thread.new(pauseListener)

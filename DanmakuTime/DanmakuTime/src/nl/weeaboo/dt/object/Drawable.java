@@ -35,6 +35,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	
 	public Drawable() {
 		color = 0xFFFFFFFF;
+		clip = true;
 		blendMode = BlendMode.NORMAL;
 		scaleX = scaleY = 1.0;
 	}

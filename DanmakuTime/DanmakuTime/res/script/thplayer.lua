@@ -6,11 +6,14 @@
 -- External dependencies:
 -- 
 -- THSprite
+-- THItem
+-- Timer
 -- playerColType
 -- playerGrazeColType
 -- playerShotColType
 -- levelWidth
 -- levelHeight
+-- doPause()
 --
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -67,19 +70,21 @@ function THPlayer.new(self)
 end
 
 function THPlayer:onCollision(other, myColNode, otherColNode)
-	if self.deathTime > 0 or self.invincible > 0 then
+	if self.deathTime > 0 then
 		return
 	end
 
 	local t0 = myColNode:getType()
-	
-	if t0 == playerGrazeColType then
+	if t0 == playerItemMagnetColType then
+		self:onItemMagnet(other)
+		return
+	elseif self.invincible > 0 then
+		return
+	elseif t0 == playerGrazeColType then
 		if not other.grazed then
 			other.grazed = true
 			self:onGrazed(other)
 		end
-	elseif t0 == playerItemMagnetColType then
-		self:onItemMagnet(other)
 	else
 		self:destroy()
 	end
@@ -284,8 +289,11 @@ function THPlayer:onDestroy()
 	end
 	
 	if self.lives <= 0 then
+		Timer.new(1, doPause)
 		return true
 	end
+	
+	self.shotPower = math.max(0, self.shotPower - 20)
 	
 	return false
 end
