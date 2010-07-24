@@ -49,7 +49,7 @@ public class AppletLauncher extends JApplet {
 					// There should really be a proper API for this.
 
 					JnlpUtil.deleteFile(ps, getCodeBase(), "padding");
-					ps.create(JnlpUtil.makeURL(getCodeBase(), "padding"), 50<<20);
+					ps.create(JnlpUtil.makeURL(getCodeBase(), "padding"), 20<<20);
 					JnlpUtil.deleteFile(ps, getCodeBase(), "padding");
 				}
 			} catch (IOException e) {
