@@ -3,9 +3,9 @@
   <information>
     <title>${project-name}</title>
     <vendor>Anonymous</vendor>
-    <homepage href="http://www.example.com"/>
-    <description>Long Description</description>
-    <description kind="short">Short Description</description>
+    <homepage href="http://code.google.com/p/danmakutime/"/>
+    <description>Shoot-em-up game</description>
+    <description kind="short">Shoot-em-up game</description>
     <offline-allowed />
   </information>
 
@@ -22,7 +22,7 @@
 -->  
   
   <applet-desc name="${project-name}" width="${applet-width}" height="${applet-height}"
-    main-class="nl.weeaboo.vn.template.AppletLauncher"
+    main-class="nl.weeaboo.dt.AppletLauncher"
     archive="http://download.java.net/media/applet-launcher/applet-launcher.jar,
              http://download.java.net/media/jogl/jsr-231-2.x-webstart/nativewindow.all.jar,
              http://download.java.net/media/jogl/jsr-231-2.x-webstart/jogl.all.jar,
