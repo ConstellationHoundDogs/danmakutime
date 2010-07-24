@@ -17,7 +17,11 @@ public class TextureStore implements ITextureStore {
 	@Override
 	public ITexture get(String id) {
 		GLImage image = imageStore.getImage(id, true);
-		return (image != null ? new Texture(image) : null);
+		if (image != null) {
+			//image.getTexture().setInterpolation(GL.GL_NEAREST);
+			return new Texture(image);
+		}
+		return null;
 	}
 	
 	//Setters

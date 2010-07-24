@@ -22,6 +22,8 @@ import java.util.SortedSet;
 import java.util.TreeSet;
 
 import javax.imageio.ImageIO;
+import javax.media.opengl.GL;
+import javax.media.opengl.GL2ES1;
 
 import nl.weeaboo.common.GraphicsUtil;
 import nl.weeaboo.dt.audio.HardSyncSoundEngine;
@@ -389,6 +391,15 @@ public class Game extends GameBase {
 		notifier.draw(glm, w, h);
 		
 		super.draw(glm);
+		
+		//Set FBO parameters
+		int fboTex = glm.getFBOTexturePtr();
+		if (fboTex != 0) {
+			GL2ES1 gl = glm.getGL();
+			gl.glBindTexture(GL.GL_TEXTURE_2D, fboTex);
+			gl.glTexParameteri(GL2ES1.GL_TEXTURE_2D, GL.GL_TEXTURE_MAG_FILTER, GL.GL_NEAREST);
+			glm.setTexture(null);
+		}
 	}
 	
 	public ParagraphRenderer createParagraphRenderer(ParagraphLayouter layouter) {	

@@ -281,6 +281,9 @@ public class Renderer implements IRenderer {
 		
 		buffered = quadFlush(gl, buffered);
 				
+		blendMode = BlendMode.NORMAL;
+		gl.glBlendFunc(blendMode.sfactor, blendMode.dfactor);
+
 		gl.glDisable(GL.GL_SCISSOR_TEST);
 		glm.popBlendMode();
 		glm.popColor();

@@ -1,7 +1,7 @@
 
 function main()	
-	--returnTitle0()
-	restart0()
+	returnTitle0()
+	--restart0()
 end
 
 function returnTitle()
@@ -84,9 +84,9 @@ function start()
 		end
 	end)
 	
-	Thread.new(stressTest, 50, 200)
+	--Thread.new(stressTest, 50, 200)
 	
-	--Thread.new(stressTest, 50, 20)		
+	Thread.new(stressTest, 25, 20)		
 end
 
 function dialogTest()
