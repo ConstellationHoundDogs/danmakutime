@@ -3,6 +3,10 @@ package nl.weeaboo.dt.audio;
 import nl.weeaboo.game.sound.Music;
 import nl.weeaboo.game.sound.SoundManager;
 
+/**
+ * {@link ISoundEngine} implementation that favors gapless playback over perfect
+ * synchronization with the game logic.
+ */
 public class SoftSyncSoundEngine extends AbstractSoundEngine {
 
 	private Music bgm;

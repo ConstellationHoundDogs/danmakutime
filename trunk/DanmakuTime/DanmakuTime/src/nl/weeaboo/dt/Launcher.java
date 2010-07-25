@@ -43,7 +43,6 @@ public class Launcher {
 		System.err.println("Usage: java -jar DanmakuTime.jar [options] <sourceFolder>"
 				+ "\n\toptions:"
 				+ "\n\t\t-debug\t\t\tRun program in debug mode"
-				+ "\n\t\t-script <filename>\t\t\tChange the first script that gets loaded"
 				);
 	}
 	

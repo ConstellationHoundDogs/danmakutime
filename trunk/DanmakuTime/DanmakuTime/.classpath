@@ -8,7 +8,7 @@
 	<classpathentry kind="lib" path="lib/nativewindow.all.jar"/>
 	<classpathentry kind="lib" path="lib/newt.all.jar"/>
 	<classpathentry kind="lib" path="lib/jdogg-0.3.3.jar"/>
-	<classpathentry kind="lib" path="lib/luaj-j2me-1.0.3.jar"/>
+	<classpathentry kind="lib" path="lib/luaj-j2me-1.0.3.jar" sourcepath="bak/luaj-1.0.3/src"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/GameCommon"/>
 	<classpathentry combineaccessrules="false" kind="src" path="/TimonCommon"/>
 	<classpathentry kind="output" path="bin"/>

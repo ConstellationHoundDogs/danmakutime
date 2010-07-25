@@ -19,6 +19,7 @@ public interface ITextStyle {
 	public void setFontName(String f);
 	public void setFontStyle(FontStyle s);
 	public void setFontSize(double s);
+	public void setFont(String fn, FontStyle fs, double sz);
 	public void setColor(double r, double g, double b);
 	public void setColor(int rgb);
 	public void setAnchor(int a);

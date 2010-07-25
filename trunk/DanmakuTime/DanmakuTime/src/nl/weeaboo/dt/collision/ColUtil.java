@@ -10,7 +10,7 @@ public final class ColUtil {
 	public static boolean intersectCircleCircle(CircleColNode c0, CircleColNode c1) {
 		double dx = c1.getCenterX() - c0.getCenterX();
 		double dy = c1.getCenterY() - c0.getCenterY();
-		double r = c0.getBoundingRectangleRadius() + c1.getBoundingRectangleRadius();
+		double r = c0.getBoundingCircleRadius() + c1.getBoundingCircleRadius();
 		
 		return (dx*dx) + (dy*dy) <= (r*r);
 	}
@@ -18,16 +18,16 @@ public final class ColUtil {
 	public static boolean intersectCircleLineSeg(CircleColNode c0, LineSegColNode c1) {
 		double distSq = Line2D.ptSegDistSq(c1.getX0(), c1.getY0(), c1.getX1(), c1.getY1(),
 				c0.getCenterX(), c0.getCenterY());
-		double r = c0.getBoundingRectangleRadius() + c1.getThickness();
+		double r = c0.getBoundingCircleRadius() + c1.getThickness();
 		return distSq <= (r*r);
 	}
 
 	public static boolean intersectCircleRect(CircleColNode c0, RectColNode c1) {
 		return intersectCircleRect(c0.getCenterX(), c0.getCenterY(),
-				c0.getBoundingRectangleRadius(), c1);
+				c0.getBoundingCircleRadius(), c1);
 	}
 	
-	protected static boolean intersectCircleRect(double x, double y, double r, RectColNode c1) {
+	private static boolean intersectCircleRect(double x, double y, double r, RectColNode c1) {
 	    double dx = Math.abs(x - c1.getCenterX());
 	    double dy = Math.abs(y - c1.getCenterY());
 
@@ -61,7 +61,7 @@ public final class ColUtil {
 	}
 	
 	public static boolean intersectLineSegRect(LineSegColNode c0, RectColNode c1) {
-		double r = c0.getBoundingRectangleRadius();
+		double r = c0.getBoundingCircleRadius();
 
 		Rectangle2D.Double rect = new Rectangle2D.Double(c1.getX0()-r, c1.getY0()-r,
 				c1.getWidth()+r+r, c1.getHeight()+r+r);

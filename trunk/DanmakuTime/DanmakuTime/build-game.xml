@@ -181,7 +181,7 @@
 <!-- ====================================================================== -->
   
   <target name="doc" depends="compile">
-    <javadoc destdir="${docs.dir}" sourcepath="${src.dir};../GameCommon/src;../TimonCommon/src" classpathref="classpath">
+    <javadoc destdir="${docs.dir}" sourcepath="${src.dir}" classpathref="classpath">
       <link href="http://java.sun.com/javase/6/docs/api/" />
     </javadoc>
   </target>

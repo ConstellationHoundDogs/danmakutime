@@ -22,7 +22,7 @@ public class CircleColNode extends AbstractColNode {
 	}
 
 	@Override
-	public double getBoundingRectangleRadius() {
+	public double getBoundingCircleRadius() {
 		return radius;
 	}
 	

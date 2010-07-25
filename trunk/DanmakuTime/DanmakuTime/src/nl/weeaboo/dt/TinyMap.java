@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
+/**
+ * Map-like container optimized for small (&lt;10 elements) data sets.
+ */
 public class TinyMap<T> {
 
 	private List<Integer> keys;

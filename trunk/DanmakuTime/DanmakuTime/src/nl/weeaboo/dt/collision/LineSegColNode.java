@@ -58,7 +58,7 @@ public class LineSegColNode extends AbstractColNode implements IRotateableColNod
 	
 	//Getters
 	@Override
-	public double getBoundingRectangleRadius() {
+	public double getBoundingCircleRadius() {
 		return .5 * getLength() + thickness;
 	}
 	
