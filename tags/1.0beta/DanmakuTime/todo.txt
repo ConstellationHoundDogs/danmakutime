@@ -1,0 +1,51 @@
+
+Bugs:
+[ ] Lua's include/require functions are broken.
+
+Feature requests:
+
+=== Day 6 ====================================================================    
+
+[x] Thread.new should pass arguments 2..* to the called function.
+[x] Add a globalReset function taking a func + arguments and resetting
+    everything except creating a new thread with the supplied function.
+[x] Player invincibilityTime after getting hit.
+[x] Boss indicator sprite
+[x] Add pause/unpause functionality to the script. Game shouldn't be the one
+    activating the pause screen. The script wants to be able to pause too when
+    the player loses all their lives.
+[x] Restart level option/on dead menu handler
+[x] How does the user specify which SoundEngine they want?
+[x] Helper function for 2d parallax scrolling backgrounds.
+[x] Character dialog boxes?
+[x] Add optional sprite display to the Dialog pages, left=?, right=? 
+
+=== Day 7 ====================================================================    
+
+[x] Document the collision interfaces
+[x] Document how to change build settings / Config settings
+[x] Document how to change between the sound engines
+[x] Documemt Drawable.update/animate
+[x] Write documentation on the wiki
+
+[ ] Upload the Javadoc as a download on the google code page
+[ ] Upload the final build as a download on google code
+
+==============================================================================
+
+[ ] A damage flash on enemies? Implement by spawning a thread (to avoid
+    hindering game creators from overriding either update or animate)?
+    ^ Give sprites their own thread pool?
+[ ] Add a second global preferencestore for use by the Lua scripts to store
+    highscores, unlocks, etc.
+[ ] Give the Lua scripts a way to read/write files.
+[ ] The # operator doesn't return the length of a Java array.
+[ ] Try to print a Lua stack trace in case of Lua errors
+[ ] Replays
+[ ] Key config    
+[ ] Joypad support
+[ ] This silliness with the boundingrectradius needs to stop, a proper bounding
+    rect is much more accurate. A more limited bounding rect could reduce the
+    number of grid cells we sould need to check in ColGrid.
+    Or I could intersect the object with the colgrid cells in some way? 
+[ ] 3D backgrounds?

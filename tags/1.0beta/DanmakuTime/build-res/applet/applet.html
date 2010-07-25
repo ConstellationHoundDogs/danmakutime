@@ -1,0 +1,60 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>${project-name}</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+  </head>
+
+  <body style="font-family: arial, sans-serif;">
+    <div>
+      <applet
+        id="jvnApplet"
+        code="org.jdesktop.applet.util.JNLPAppletLauncher"
+        width="${applet-width}" height="${applet-height}"
+        archive="http://download.java.net/media/applet-launcher/applet-launcher.jar,
+                 http://download.java.net/media/jogl/jsr-231-2.x-webstart/nativewindow.all.jar,
+                 http://download.java.net/media/jogl/jsr-231-2.x-webstart/jogl.all.jar,
+                 http://download.java.net/media/gluegen/webstart-2.x/gluegen-rt.jar,
+                 ${project-name}.jar">
+        <param name="cache_archive" value="${project-name}.jar" />
+        <param name="codebase_lookup" value="false" />
+        <param name="separate_jvm" value="true" />
+
+        <param name="subapplet.classname" value="nl.weeaboo.dt.AppletLauncher" />
+        <param name="subapplet.displayname" value="${project-name}" />
+        <param name="noddraw.check" value="true" />
+        <param name="progressbar" value="true" />
+        <param name="jnlpNumExtensions" value="1" />
+        <param name="jnlpExtension1"
+               value="http://download.java.net/media/jogl/jsr-231-2.x-webstart/jogl-core.jnlp" />
+        <param name="jnlp_href" value="applet.jnlp" />
+             
+        <param name="java_arguments" value="${jvm-args} -Djnlp.packEnabled=true" />
+        <param name="gameId" value="${project-name}" />
+        <param name="args" value="${program-args}" />
+      </applet>
+      
+      <div style="padding: 10px;">
+        <span>
+          scale: 
+          <a href="javascript:scale(50)">small</a>
+          <a href="javascript:scale(75)">medium</a>
+          <a href="javascript:scale(100)">full</a>
+        </span>
+        <span style="padding-left: 100px; color: #666666; size: .8em;">
+          (right click on the game window to open up the menu)
+        </span>
+      </div>
+      
+    </div>
+    
+    <script type="text/javascript">        
+        function scale(pct) {
+            var applet = document.getElementById("jvnApplet");
+            applet.width  = ${applet-width}  * pct / 100;
+            applet.height = ${applet-height} * pct / 100;
+        }
+    </script>
+      
+  </body>
+</html>

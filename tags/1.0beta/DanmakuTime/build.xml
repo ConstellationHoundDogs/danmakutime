@@ -1,0 +1,20 @@
+<!-- Apache Ant Build Config -->
+
+<project name="DanmakuTime" basedir="." default="main">
+
+<!-- imports -->
+
+  <import file="build-game.xml" />
+
+<!-- Properties -->
+
+  <pathconvert property="tools-jar-classpath-raw" pathsep=" " refid="classpath">
+    <map from="${basedir}/" to="../" />
+  </pathconvert>
+  <property name="tools-jar-classpath" value="${tools-jar-classpath-raw}" />
+  
+<!-- Tasks -->
+
+<!-- Targets -->
+  
+</project>
