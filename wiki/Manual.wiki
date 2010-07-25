@@ -114,11 +114,11 @@ The files in `applet` are templates for building in applet mode.
 
 The build script (`build.xml`) is written in Ant (a copy of Ant is included in the `tools` folder). The build script contains multiple targets. To call ant with a specific target, use:
 {{{
-$>tools/ant/bin/ant target_name
+tools/ant/bin/ant target_name
 }}}
-or
+or on Windows:
 {{{
-C:\DanmakuTime>tools\ant\bin\ant target_name
+tools\ant\bin\ant target_name
 }}}
 replacing `target_name` with the target you want.
 
@@ -131,4 +131,254 @@ Targets:
 
 = Scripting =
 
-TODO
+The bulk of the engine is implemented in Java, but made available to Lua. Some Java objects call Lua functions, but you can't generally subclass a Java object with Lua code.
+
+== Program Structure ==
+
+Every game needs to somehow display things, in Danmaku Time these are called drawable. 
+
+_Note: The interface is defined as IDrawable, and Drawable is the implementation. This is a common pattern throughout the code. Lua doesn't care about the difference between the two._
+
+When a drawable is created, it gets added to something called a field. There can be many fields, and they are drawn in order of field ID (you specify a field ID when you create a new field). A field's bounds define a [http://en.wikipedia.org/wiki/Clipping_%28computer_graphics%29 clipping rectangle] on the screen.
+
+Sprites are a kind of drawable, and add some additional functionality. A sprite can have a number of colnode objects attached to it. These colnodes are used by the collision detection system to detect collisions between different colnodes and report those back to the sprites.
+
+== Java objects creatable from Lua ==
+  * [#Drawable]
+  * [#TextDrawable]
+  * [#Sprite]
+  * [#ColMatrix]
+  * [#CircleColNode]
+  * [#LineSegColNode]
+  * [#RectColNode]
+  * [#Thread]
+  * [#Field]
+
+=== Drawable ===
+
+Everything you see on screen is a drawable. Almost everything you code will involve drawables (sprites to be more exact, which is a kind of drawable).
+
+To create a new drawable object from Lua:
+{{{
+self = Drawable.new(fieldId, self)
+}}}
+
+For other kinds of Drawable, simply substitute `Drawable` for `Sprite` or `TextDrawable`.
+
+`Drawable.new` takes a field id and a lua table as arguments. It returns returns a newly constructed drawable object attached to the specified field, and with all entries of the second argument added to it.
+
+A full list of available methods is in the JavaDoc: `nl.weeaboo.dt.object.IDrawable`
+
+In addition to the Java methods you can call from Lua, there are also Lua methods which are called from Java.
+
+ * update()
+ * animate()
+ * onDestroy()
+ * onCollision(other, myNode, otherNode) --(sprite only)
+
+When a drawable is constructed, two new threads are started that call update/animate. Once the function ends it's not called again, but you can use `yield()` to pause execution until the next frame. If defined, an update function usually has the form:
+
+{{{
+function MySprite:update()
+    while true do
+        --Do something interesting
+        yield()
+    end
+end
+}}}
+
+The `onDestroy` and `onCollision` functions can't use `yield()`, their execution must end in the frame they're called.
+
+`onDestroy` gets called when an attempt is made to destroy the drawable (someone called `destroy` either directly on the Java object or through the Lua object). If `onDestroy` returns `false`, the destruction is cancelled.
+
+`onCollision` gets (beside the implicit self argument) three arguments: `other`, `myNode`, `otherNode`. These arguments get filled in with information about a collision when one occurs; a reference to the other sprite and references to the colliding colnodes.
+
+=== Sprite ===
+
+Sprite is a special kind of drawable that can do collision detection and has speed vector. Implement an `onCollision` function to receive any collision events.
+
+The speed/angle attributes are there to improve performance for simple bullets. Often, you don't need an update function at all for simple bullets. Just set the `speed`, `speedInc`, `angle` and/or `angleInc` to the appropriate values.
+
+A full list of available methods is in the JavaDoc: `nl.weeaboo.dt.object.ISprite`
+
+=== TextDrawable ===
+
+A special kind of drawable that renders a paragraph of text.
+
+A full list of available methods is in the JavaDoc: `nl.weeaboo.dt.object.ITextDrawable`
+
+=== ColMatrix ===
+
+ColMatrix defines a collision matrix that limits the number of collision checks required. There are usually multiple 'kinds' of objects like players, items or enemies that don't care about every possible collision. For example:
+
+||        || player || item || enemy ||
+|| player ||        ||      || x     ||
+|| item   || x      ||      ||       ||
+|| enemy  ||        ||      ||       ||
+
+We only need 2 checks, `player -> enemy` and `item->player` (assuming enemies are not damaged by the player flying into them).
+
+The above implemented in a script:
+{{{
+local colMatrix = ColMatrix.new()
+playerColType = colMatrix:newColType()
+itemColType = colMatrix:newColType()	
+enemyColType = colMatrix:newColType()	
+colMatrix:setColliding(playerColType, enemyColType)
+colMatrix:setColliding(itemColType, playerColType)
+
+gameField = Field.new(1, (screenWidth-384)/2, (screenHeight-448)/2, 384, 448, 32)
+gameColField = gameField:getColField()	
+gameColField:setColMatrix(colMatrix)
+}}}
+
+We've only activated collisions in one direction, so in this case when the player and an enemy collide only the player will be notified of the collision. To also have the enemy be notified, add a line `colMatrix:setColliding(enemyColType, playerColType)` or use `colMatrix:setColliding2(playerColType, enemyColType)` to set both at once.
+
+=== CircleColNode ===
+
+Creates a circular colnode with the specified radius.
+
+{{{
+--defined as: CircleColNode.new(radius)
+
+player:setColNode(0, playerColType, CircleColNode.new(2.0))
+}}}
+
+=== LineSegColNode ===
+
+Creates a line segment colnode with a given thickness. The coordinates are relative to the sprite you attach it to, and it rotates along with the sprite's draw angle.
+
+{{{
+--defined as: LineSegColNode.new(x0, y0, x1, y1, thickness)
+
+player:setColNode(0, playerColType, LineSegColNode.new(0, -12, 0, 12, 4))
+}}}
+
+=== RectColNode ===
+
+Creates a rectangular colnode that doesn't rotate together with the sprite. The x and y coordinates are relative to the sprite's position.
+
+{{{
+--defined as: RectColNode.new(x, y, w, h)
+
+player:setColNode(0, playerColType, LineSegColNode.new(0, -12, 0, 12, 4))
+}}}
+
+=== Thread ===
+
+Use `Thread.new(func, ...)` to create a new thread of execution using the supplied function. If additional arguments are given, they are passed as arguments to the function when it's called. The function may use `yield()` in its implementation.
+
+=== Field ===
+
+Creates a new field with an specific `id`, `bounds` and `pad`.
+
+Example use:
+{{{
+gameField = Field.new(1, (screenWidth-384)/2, (screenHeight-448)/2, 384, 448, 32)
+}}}
+
+The above creates a new field with `id=1` (the default field id for new sprites), `size=384,448`, centered on the screen, and with `pad=32`. The value of `pad` determines how fast sprites leaving the screen are automatically destroyed (the field pads the border with `pad` and removes all sprites outside this larger border automatically). 
+
+== Built-in globals ==
+
+The following globals are made available to Lua by default:
+
+  * [#pause pause(func, ...)]
+  * [#screenshot screenshot(x, y, w, h, blurMagnitude)]
+  * [#globalReset globalReset(funcName)]
+  * [#quit quit()]
+  * [#input input]
+  * [#texStore texStore]
+  * [#soundEngine soundEngine]
+  * [#BlendMode BlendMode]
+  * [#FontStyle FontStyle]
+  * [#Keys Keys]
+
+=== pause ===
+
+`pause` calls the supplied function with the supplied arguments after putting the game in a paused state. When paused, only drawables in a field with `id=999` are updated. The pause function may use `yield()`. To unpause, simply return from the function.
+
+=== screenshot ===
+
+`screenshot` returns a `DelayedScreenshot` Java object which will take a screenshot of the specified subrect of the screen sometime in the future (may take several frames). An example using the screenshot function:
+
+{{{
+local ds = screenshot(0, 0, screenWidth, screenHeight, 4)
+while not ds:isAvailable() do
+    yield()
+end
+	
+local ss = Drawable.new(999)
+ss:setPos(screenWidth/2, screenHeight/2)
+ss:setColor(.66, .66, .66, 1.0)
+ss:setZ(32000)
+ss:setTexture(ds:asTexture())
+}}}
+
+Here, the `blurMagnitude` is set to `4`. If the blur magnitude is supplied and it is greater than `1`, the resulting screenshot will be blurred. Higher magnitude results in a stronger blur.
+
+Anyway, the screenshot command is called and the function waits until `isAvailable` returns `true`. Once it does, the screenshot is available and it can be turned into a texture through `asTexture`.
+
+=== globalReset ===
+
+Resets _everything_, then restarts the game calling the global function with the supplied name (if no name is specified, "main" is used). Example:
+{{{
+globalReset("returnTitle0")
+}}}
+
+=== quit ===
+
+Exits the game and closes its window.
+
+=== input ===
+
+A lua-accessible implementation of `nl.weeaboo.dt.input.IInput`.
+
+Example use:
+{{{
+if input:consumeKey(Keys.Z) then
+    --shoot
+end
+}}}
+
+=== texStore ===
+
+Makes available a Java object implementing `nl.weeaboo.dt.renderer.ITextureStore`. Use the `get` method to retrieve textures by name. Example:
+
+{{{
+enemy:setTexture(texStore:get("test.png#g0"))
+}}}
+
+=== soundEngine ===
+
+Allows access to an `nl.weeaboo.dt.audio.ISoundEngine`.
+
+Example use:
+{{{
+soundEngine:setBGM("bgm/bgm01.ogg")
+soundEngine:playSound("test.ogg")
+yield(300)
+soundEngine:stopBGM()
+}}}
+
+=== BlendMode ===
+
+A table containing the following values:
+
+  * NORMAL
+  * ADD
+
+`NORMAL` is the default blend mode of OpenGL. `ADD` is the ever popular brightness-increasing blend where drawing multiple objects on top of each other increases the brightness each time.
+
+=== FontStyle ===
+
+A table containing the following values:
+
+  * PLAIN
+  * BOLD
+  * ITALIC
+  * BOLDITALIC
+
+=== Keys ===
+
+A table containing the key codes for all keys on a normal keyboard. The naming of the fields is the same as those in `java.awt.event.KeyEvent`, but without the `VK_` prefix.
