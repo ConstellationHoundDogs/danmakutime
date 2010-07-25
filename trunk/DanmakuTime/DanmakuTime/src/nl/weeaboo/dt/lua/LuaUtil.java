@@ -29,6 +29,7 @@ public class LuaUtil {
 		fixCoroutineLib(globals);
 		FastMathLib.install(globals, rs.getRandom());		
 		
+		//Custom yield function taking a wait time
 		globals.put("yield", new LFunction() {
 			public int invoke(LuaState vm) {
 				LuaLink link = rs.getCurrentLink();
@@ -49,7 +50,7 @@ public class LuaUtil {
 				super.luaStackCall(vm);
 				return true;
 			}
-		});		
+		});	
 	}
 
 	/** Workaround for a bug in LuaJ 1.0.3, yield doesn't end exec() */
@@ -89,8 +90,11 @@ public class LuaUtil {
 		}
 	}
 	
-	public static int initModule(LuaState vm) throws LuaException {		
-		return vm.pcall(0, 0);
+	public static void initModule(LuaState vm, String filename) throws LuaException {		
+		int res = vm.pcall(0, 0);
+		if (res != 0) {			
+			throw new LuaException(String.format("Initialization Error (%d) in \"%s\" :: %s", res, filename, vm.tostring(-1)));
+		}
 	}
 
 	public static void registerClass(LuaRunState rs, LuaState vm, Class<?> c) throws LuaException {		
@@ -108,7 +112,7 @@ public class LuaUtil {
 		try {
 			bin = new ByteArrayInputStream(code.getBytes("UTF-8"));
 			LuaUtil.loadModule(vm, filename, bin);
-			LuaUtil.initModule(vm);
+			LuaUtil.initModule(vm, filename);
 		} catch (IOException ioe) {
 			throw new LuaException(ioe);
 		} finally {

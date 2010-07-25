@@ -184,7 +184,7 @@ function pauseListener()
 end
 
 function doPause()
-	local ds = screenshot(0, 0, screenWidth, screenHeight, true)
+	local ds = screenshot(0, 0, screenWidth, screenHeight, 4)
 	while not ds:isAvailable() do
 		yield()
 	end

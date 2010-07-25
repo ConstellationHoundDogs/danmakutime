@@ -189,6 +189,7 @@ public class Game extends GameBase {
 		SortedSet<String> scripts = new TreeSet<String>(new Comparator<String>() {
 			Collator c = Collator.getInstance(Locale.ROOT);
 			public int compare(String o1, String o2) {
+				//Sort scripts by their paths
 				return c.compare(o1, o2);
 			}	
 		});
@@ -199,7 +200,7 @@ public class Game extends GameBase {
 			try {				
 				in = rm.getInputStream(path);
 				LuaUtil.loadModule(vm, path, in);
-				LuaUtil.initModule(vm);
+				LuaUtil.initModule(vm, path);
 			} catch (Exception e) {
 				DTLog.showError(e);
 				error = true;
@@ -236,10 +237,14 @@ public class Game extends GameBase {
 				int y = (vm.isnumber(2) ? vm.tointeger(2) : 0);
 				int w = (vm.isnumber(3) ? vm.tointeger(3) : getWidth());
 				int h = (vm.isnumber(4) ? vm.tointeger(4) : getHeight());
-				boolean blur = (vm.isboolean(5) ? vm.toboolean(5) : false);
+				
+				int blurMagnitude = 4;
+				if (vm.isnumber(5)) {
+					blurMagnitude = vm.tointeger(5);
+				}
 				
 				vm.resettop();
-				DelayedScreenshot ds = screenshot(x, y, w, h, blur);
+				DelayedScreenshot ds = screenshot(x, y, w, h, blurMagnitude);
 				vm.pushlvalue(LuajavaLib.toUserdata(ds, ds.getClass()));
 				return 1;
 			}
@@ -425,10 +430,12 @@ public class Game extends GameBase {
 		}
 	}
 	
-	public DelayedScreenshot screenshot(double x, double y, double w, double h, boolean blur) {
+	public DelayedScreenshot screenshot(double x, double y, double w, double h,
+			int blurMagnitude)
+	{
 		DelayedScreenshot ss;
-		if (blur) {
-			ss = new BlurringScreenshot(this, x, y, w, h);
+		if (blurMagnitude > 0) {
+			ss = new BlurringScreenshot(this, x, y, w, h, blurMagnitude);
 		} else {
 			ss = new DelayedScreenshot(this, x, y, w, h);
 		}

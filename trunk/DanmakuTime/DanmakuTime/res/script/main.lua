@@ -71,8 +71,10 @@ function start()
 	Thread.new(function()
 		while true do
 			if input:consumeKey(Keys.Q) then
-				print("The global key listener thread saw your key. And will proceed to kill you.")
-				player:destroy()
+				local objects = gameField:getAllObjects()
+				for n=1,objects.length do
+					--Do something interesting
+				end
 			elseif input:consumeKey(Keys.B) then
 				Thread.new(createBoss01)
 			elseif input:consumeKey(Keys.D) then

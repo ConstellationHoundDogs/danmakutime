@@ -6,8 +6,12 @@ import nl.weeaboo.dt.renderer.Blur;
 
 public class BlurringScreenshot extends DelayedScreenshot {
 
-	public BlurringScreenshot(Game game, double x, double y, double w, double h) {
+	private int magnitude;
+	
+	public BlurringScreenshot(Game game, double x, double y, double w, double h, int magnitude) {
 		super(game, x, y, w, h);
+		
+		this.magnitude = magnitude;
 	}
 
 	//Functions
@@ -18,7 +22,7 @@ public class BlurringScreenshot extends DelayedScreenshot {
 	@Override
 	public void set(int argb[], int w, int h) {
 		Dimension size = new Dimension(w, h);
-		argb = Blur.process(argb, size, 4, true, true);
+		argb = Blur.process(argb, size, magnitude, true, true);
 		super.set(argb, size.width, size.height);
 	}
 	
