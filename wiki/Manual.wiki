@@ -25,9 +25,9 @@ Resources must be placed in the appropriate folders to be recognized by the engi
 
 == Fonts ==
 
-Fonts must be stored in the `font` folder. Where in-game you need to supply a font name, the font name is the filename of the font file without its file extension (DejaVuSans.ttf -> DejaVuSans).
+Fonts must be stored in the `font` folder. Where in-game you need to supply a font name, the font name is the filename of the font file without its file extension (!DejaVuSans.ttf -> !DejaVuSans).
 
-Warning: The default font (DejaVuSans) doesn't have glyphs for East-Asian characters. If you need to use those, [#Changing_preferences change the default font].
+Warning: The default font (!DejaVuSans) doesn't have glyphs for East-Asian characters. If you need to use those, [#Changing_preferences change the default font].
 
 == Images ==
 
@@ -54,7 +54,7 @@ Sound files must be of filetype Ogg Vorbis and reside in a subfolder of `snd`.
 
 The Lua scripts are stored in `script`. When starting a game, all files in `script` and its subfolders are compiled and run in alphabetical order by path. Please don't write scripts that rely on this order, it can cause major headaches for yourself and others.
 
-[Scripting Further information about scripting]
+[#Scripting Further information about scripting]
 
 == Changing Preferences ==
 
@@ -167,7 +167,7 @@ For other kinds of Drawable, simply substitute `Drawable` for `Sprite` or `TextD
 
 `Drawable.new` takes a field id and a lua table as arguments. It returns returns a newly constructed drawable object attached to the specified field, and with all entries of the second argument added to it.
 
-A full list of available methods is in the JavaDoc: `nl.weeaboo.dt.object.IDrawable`
+A full list of available methods is in the javadoc: `nl.weeaboo.dt.object.IDrawable`
 
 In addition to the Java methods you can call from Lua, there are also Lua methods which are called from Java.
 
@@ -199,13 +199,13 @@ Sprite is a special kind of drawable that can do collision detection and has spe
 
 The speed/angle attributes are there to improve performance for simple bullets. Often, you don't need an update function at all for simple bullets. Just set the `speed`, `speedInc`, `angle` and/or `angleInc` to the appropriate values.
 
-A full list of available methods is in the JavaDoc: `nl.weeaboo.dt.object.ISprite`
+A full list of available methods is in the javadoc: `nl.weeaboo.dt.object.ISprite`
 
 === !TextDrawable ===
 
 A special kind of drawable that renders a paragraph of text.
 
-A full list of available methods is in the JavaDoc: `nl.weeaboo.dt.object.ITextDrawable`
+A full list of available methods is in the javadoc: `nl.weeaboo.dt.object.ITextDrawable`
 
 === !ColMatrix ===
 
