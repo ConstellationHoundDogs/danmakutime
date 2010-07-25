@@ -85,7 +85,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 			} catch (LuaException e) {
 				DTLog.warning(e);
 			}
-		}		
+		}
 		if (retval.isNil() || retval.toJavaBoolean()) {		
 			destroyed = true;
 		}

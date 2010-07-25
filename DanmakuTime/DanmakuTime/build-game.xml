@@ -204,7 +204,6 @@
 
     <!-- ZIP source code -->
     <zip basedir="src" destfile="${dist.dir}/${project-name}-src.zip" />
-    <delete dir="${dist.dir}/src" />
 
     <copy todir="${dist.dir}">
       <fileset dir="${gamedata.dir}"
@@ -225,7 +224,10 @@
     <copy todir="${dist.dir}/tools">
       <fileset dir="${tools.dir}" />
     </copy>
-    <mkdir dir="${dist.dir}/src" />
+    
+    <copy todir="${dist.dir}/src">
+      <fileset dir="src" />
+    </copy>
 
     <copy todir="${dist.dir}">
       <fileset dir="${gamedata.dir}" includes="*license.txt" />
@@ -271,7 +273,8 @@
       <filterChain>
         <expandProperties />
       </filterChain>
-    </copy>    
+    </copy>
+    <copy tofile="${dist.dir}/favicon.ico" file="${gamedata.dir}/res/icon.ico" />
   </target>
   
   <target name="dist-applet" depends="dist,applet-common">
