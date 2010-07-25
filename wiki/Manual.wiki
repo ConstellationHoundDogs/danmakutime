@@ -1,0 +1,134 @@
+#summary Manual index
+
+= Introduction =
+
+Danmaku Time (DT) uses [http://www.lua.org/manual/5.1/manual.html Lua] as its scripting language. Familiarize yourself with Lua first before continuing.
+
+= Resources =
+
+Resources are stored in the `res` subfolder. When building a distribution of your game, all resources in `res` are automatically packaged into a `res.zip` file.
+
+The `res` folder has the following structure:
+{{{
+- res + font --- *.ttf
+      + img ---- *.png, *.jpg, *.tga
+      + snd ---- *.ogg
+      + script - *.lua
+      - icon.ico
+      - icon.png
+      - img.xml
+      - snd.xml
+      - prefs.default.xml
+}}}
+
+Resources must be placed in the appropriate folders to be recognized by the engine, and resource paths are relative to the folder for that resource type (image paths are relative to `res/img`, sound paths to `res/snd`, etc.)
+
+== Fonts ==
+
+Fonts must be stored in the `font` folder. Where in-game you need to supply a font name, the font name is the filename of the font file without its file extension (DejaVuSans.ttf -> DejaVuSans).
+
+Warning: The default font (DejaVuSans) doesn't have glyphs for East-Asian characters. If you need to use those, [#Changing_preferences change the default font].
+
+== Images ==
+
+Images are stored in the `img` folder and its subfolders. You can define subrectangles to pack multiple sprites inside a single image file. To do so, add an entry to `img.xml`:
+
+{{{
+  <image filename="explosion.png" width="64" height="64">
+    <subrect id="e0" rect=" 0, 0, 32, 32" />
+    <subrect id="e1" rect="32, 0, 32, 32" />
+    <subrect id="e2" rect=" 0,32, 32, 32" />
+    <subrect id="e3" rect="32,32, 32, 32" />
+  </image>
+}}}
+
+The XML is fairly straightforward. The filename, width and height attributes must match the relative path and size of an image. The subrect elements define named subrectangles inside the image.
+
+To reference a subrectangle, use the image path followed by a '#' and the subrect id (`"explosion.png#e0"`).
+
+== Sounds ==
+
+Sound files must be of filetype Ogg Vorbis and reside in a subfolder of `snd`.
+
+== Scripts ==
+
+The Lua scripts are stored in `script`. When starting a game, all files in `script` and its subfolders are compiled and run in alphabetical order by path. Please don't write scripts that rely on this order, it can cause major headaches for yourself and others.
+
+[Scripting Further information about scripting]
+
+== Changing Preferences ==
+
+The preferences are loaded from `prefs.default.xml` and accessible from the `Config` object at runtime. The default `prefs.default.xml` looks like this:
+{{{
+<root>
+  <property name="game.gameName" type="string">Danmaku Time</property>
+  <property name="game.defaultFont" type="string">DejaVuSans</property>
+
+  <property name="graphics.fps" type="int">60</property>
+  <property name="graphics.width" type="int">640</property>
+  <property name="graphics.height" type="int">480</property>
+  <property name="graphics.vsyncEnabled" type="boolean">true</property>
+
+  <property name="audio.hardSync" type="boolean">false</property> 
+</root>
+}}}
+
+  * *game.gameName*: Displayed in the title bar of the window
+  * *game.defaultFont*: The default font's name
+  * *graphics.fps*: The target FPS the game should run at
+  * *graphics.width*, *graphics.height*: The desired width/height of the content area of the window. If they're small enough (800x600 or smaller) the window starts out at the desired size, otherwise the window starts at 800x600. When going to fullscreen (alt+enter to switch at runtime), the screen resolution changes to the available resolution closest to the desired values.
+  * *graphics.vsyncEnabled*: Enable/disable vertical sync. Enabling prevents screen tearing at the cost of worse framerate drops during slowdown.
+  * *audio.hardSync*: When `true`, syncs the music to the gameplay at the cost of stuttering music during slowdown. When `false`, prefers lighter resource usage and gapless playback over perfect synchronization.
+
+To change the window icon, replace `icon.ico` and `icon.png` with your own images.
+
+= Distribution =
+
+Most of the distribution-related settings are stored in `build-res`.
+
+{{{
++ build-res + applet --- applet.html
+            |          - applet.jnlp
+            + launcher - *.bat, *.sh
+            - build.properties
+}}}
+
+The `build.properties` files contains simple key=value pairs that modify the build parameters:
+
+{{{
+project-name = DanmakuTime
+applet-width = 640
+applet-height = 480
+program-args = 
+}}}
+
+  * *project-name*: Name of the generated JAR and EXE files, please keep it ASCII to avoid cross-platform compatibility issues.
+  * *applet-width*, *applet-height*: Default dimensions of the applet when building an applet distribution.
+  * *program-args*: Additional arguments to pass to the application (`-debug` runs the game in debug mode).
+
+The files in `launcher` are templates for run scripts that get filled in with properties from the build config.
+
+The files in `applet` are templates for building in applet mode.
+
+== Running the build scripts ==
+
+The build script (`build.xml`) is written in Ant (a copy of Ant is included in the `tools` folder). The build script contains multiple targets. To call ant with a specific target, use:
+{{{
+$>tools/ant/bin/ant target_name
+}}}
+or
+{{{
+C:\DanmakuTime>tools\ant\bin\ant target_name
+}}}
+replacing `target_name` with the target you want.
+
+Targets:
+  * *clean*: Removes all generated files
+  * *jar*: Compiles the game and generates launcher scripts
+  * *dist*: Creates a clean copy of the game - ready for distribution - in the `dist` folder
+  * *dist-applet*: Creates an applet distribution in `dist`
+  * *make-installer*: Wraps the files in `dist` into a self-extracting Java program.
+
+= Scripting =
+
+TODO
