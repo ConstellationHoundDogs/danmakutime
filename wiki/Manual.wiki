@@ -145,8 +145,8 @@ Sprites are a kind of drawable, and add some additional functionality. A sprite 
 
 == Java objects creatable from Lua ==
   * [#Drawable Drawable]
-  * [#TextDrawable TextDrawable]
   * [#Sprite Sprite]
+  * [#TextDrawable TextDrawable]
   * [#ColMatrix ColMatrix]
   * [#CircleColNode CircleColNode]
   * [#LineSegColNode LineSegColNode]
@@ -201,13 +201,13 @@ The speed/angle attributes are there to improve performance for simple bullets. 
 
 A full list of available methods is in the JavaDoc: `nl.weeaboo.dt.object.ISprite`
 
-=== TextDrawable ===
+=== !TextDrawable ===
 
 A special kind of drawable that renders a paragraph of text.
 
 A full list of available methods is in the JavaDoc: `nl.weeaboo.dt.object.ITextDrawable`
 
-=== ColMatrix ===
+=== !ColMatrix ===
 
 ColMatrix defines a collision matrix that limits the number of collision checks required. There are usually multiple 'kinds' of objects like players, items or enemies that don't care about every possible collision. For example:
 
@@ -234,7 +234,7 @@ gameColField:setColMatrix(colMatrix)
 
 We've only activated collisions in one direction, so in this case when the player and an enemy collide only the player will be notified of the collision. To also have the enemy be notified, add a line `colMatrix:setColliding(enemyColType, playerColType)` or use `colMatrix:setColliding2(playerColType, enemyColType)` to set both at once.
 
-=== CircleColNode ===
+=== !CircleColNode ===
 
 Creates a circular colnode with the specified radius.
 
@@ -244,7 +244,7 @@ Creates a circular colnode with the specified radius.
 player:setColNode(0, playerColType, CircleColNode.new(2.0))
 }}}
 
-=== LineSegColNode ===
+=== !LineSegColNode ===
 
 Creates a line segment colnode with a given thickness. The coordinates are relative to the sprite you attach it to, and it rotates along with the sprite's draw angle.
 
@@ -254,7 +254,7 @@ Creates a line segment colnode with a given thickness. The coordinates are relat
 player:setColNode(0, playerColType, LineSegColNode.new(0, -12, 0, 12, 4))
 }}}
 
-=== RectColNode ===
+=== !RectColNode ===
 
 Creates a rectangular colnode that doesn't rotate together with the sprite. The x and y coordinates are relative to the sprite's position.
 
@@ -361,7 +361,7 @@ yield(300)
 soundEngine:stopBGM()
 }}}
 
-=== BlendMode ===
+=== !BlendMode ===
 
 A table containing the following values:
 
@@ -370,7 +370,7 @@ A table containing the following values:
 
 `NORMAL` is the default blend mode of OpenGL. `ADD` is the ever popular brightness-increasing blend where drawing multiple objects on top of each other increases the brightness each time.
 
-=== FontStyle ===
+=== !FontStyle ===
 
 A table containing the following values:
 
