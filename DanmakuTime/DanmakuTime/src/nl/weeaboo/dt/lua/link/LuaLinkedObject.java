@@ -10,4 +10,6 @@ public interface LuaLinkedObject {
 
 	public void init(LuaRunState rs, LuaState vm, LUserData udata) throws LuaException;
 		
+	public LUserData getLuaObject();
+	
 }

@@ -27,6 +27,8 @@ package nl.weeaboo.dt.lua.platform;
 import java.util.HashMap;
 import java.util.Map;
 
+import nl.weeaboo.dt.lua.link.LuaLinkedObject;
+
 import org.luaj.vm.LBoolean;
 import org.luaj.vm.LDouble;
 import org.luaj.vm.LInteger;
@@ -88,6 +90,11 @@ public class CoerceJavaToLua {
 			//A specialized coercion was found, use it
 			return c.coerce(o);
 		}
+		
+		if (o instanceof LuaLinkedObject) {
+			//Object already contains a Lua converted version of itself
+			return ((LuaLinkedObject)o).getLuaObject();
+		}		
 		
 		//Use the general Java Object -> Lua conversion
 		return LuajavaLib.toUserdata(o, clazz);
