@@ -34,7 +34,7 @@ public class ColGrid {
 	public void processCollisions(IColNode node) {
 		IDrawable owner0 = node.getHost().getOwner();
 		int t0 = node.getType();
-		double r0 = node.getBoundingRectangleRadius();		
+		double r0 = node.getBoundingCircleRadius();		
 		if (owner0 == null || owner0.isDestroyed()) {
 			return;
 		}
@@ -147,7 +147,7 @@ public class ColGrid {
 				int cellY = toGridCoordY(node.getCenterY());
 				
 				GridCell cell;
-				if (node.getBoundingRectangleRadius() > maxObjectRadius
+				if (node.getBoundingCircleRadius() > maxObjectRadius
 						|| cellX < 0 || cellY < 0 || cellX >= cellsW || cellY >= cellsH)
 				{
 					cell = fallbackCells[t];

@@ -76,9 +76,7 @@ public class TextDrawable extends Drawable implements ITextDrawable {
 
 	@Override
 	public void setFont(String fn, FontStyle fs, double sz) {
-		setFontName(fn);
-		setFontStyle(fs);
-		setFontSize(sz);
+		textStyle.setFont(fn, fs, sz);
 	}
 	
 	@Override

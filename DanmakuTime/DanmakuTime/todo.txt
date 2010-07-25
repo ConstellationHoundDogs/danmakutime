@@ -24,14 +24,17 @@ Feature requests:
 
 [ ] A damage flash on enemies? Implement by spawning a thread (to avoid
     hindering game creators from overriding either update or animate)?
-[ ] Document the collision interfaces
-[ ] Try to print a Lua stack trace in case of Lua errors
+[x] Document the collision interfaces
 [ ] Write documentation on the wiki
 [ ] Document how to change build settings / Config settings
 [ ] Document how to change between the sound engines
 
+[ ] Upload the Javadoc as a download on the google code page
+[ ] Upload the final build as a download on google code
+
 ==============================================================================
 
+[ ] Try to print a Lua stack trace in case of Lua errors
 [ ] Replays
 [ ] Key config    
 [ ] Joypad support

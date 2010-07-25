@@ -10,6 +10,10 @@ import nl.weeaboo.ogg.StreamUtil;
 import nl.weeaboo.ogg.player.AudioSink;
 import nl.weeaboo.ogg.vorbis.VorbisDecoder;
 
+/**
+ * {@link ISoundEngine} implementation that favors perfect gameplaye &lt;-&gt;
+ * music sync over gapless music playback.
+ */
 public class HardSyncSoundEngine extends AbstractSoundEngine {
 
 	private OggReader bgmReader;

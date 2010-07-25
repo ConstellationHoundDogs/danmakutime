@@ -137,6 +137,16 @@ public class Sprite extends Drawable implements ISprite, LuaLinkedObject,
 		return visualBounds;
 	}
 	
+	@Override
+	public boolean isDrawAngleAuto() {
+		return drawAngleAuto;
+	}
+
+	@Override
+	public boolean getOutOfBoundsDeath() {
+		return outOfBoundsDeath;
+	}
+	
 	//Setters
 	@Override
 	public void setAngle(double a) {

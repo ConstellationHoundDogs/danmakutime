@@ -93,6 +93,13 @@ public class TextStyle implements ITextStyle {
 	}
 
 	@Override
+	public void setFont(String fn, FontStyle fs, double sz) {
+		setFontName(fn);
+		setFontStyle(fs);
+		setFontSize(sz);
+	}
+
+	@Override
 	public void setOutlineColor(double r, double g, double b) {
 		int ri = Math.max(0, Math.min(255, (int)Math.round(r * 255.0)));
 		int gi = Math.max(0, Math.min(255, (int)Math.round(g * 255.0)));

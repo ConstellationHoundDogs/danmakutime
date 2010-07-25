@@ -114,7 +114,8 @@ public class DTLog extends nl.weeaboo.game.Log {
 	//Verbose
 	
 	/**
-	 * Debug messages are disabled when <code>{@link Game#debug} == false</code>
+	 * Debug messages are disabled when
+	 * <code>{@link Game#isDebug()} == false</code>
 	 */
 	public static void debug(String s) {
 		getInstance().onVerbose(s);

@@ -45,7 +45,7 @@ public class RectColNode extends AbstractColNode {
 	}
 	
 	@Override
-	public double getBoundingRectangleRadius() {
+	public double getBoundingCircleRadius() {
 		return .5 * Math.max(rect.width, rect.height);
 	}
 	
