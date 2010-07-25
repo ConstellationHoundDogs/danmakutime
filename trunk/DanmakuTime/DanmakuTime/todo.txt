@@ -25,8 +25,8 @@ Feature requests:
 [x] Document the collision interfaces
 [x] Document how to change build settings / Config settings
 [x] Document how to change between the sound engines
-[ ] Documemt Drawable.update/animate
-[ ] Write documentation on the wiki
+[x] Documemt Drawable.update/animate
+[x] Write documentation on the wiki
 
 [ ] Upload the Javadoc as a download on the google code page
 [ ] Upload the final build as a download on google code
