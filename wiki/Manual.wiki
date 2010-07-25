@@ -144,15 +144,15 @@ When a drawable is created, it gets added to something called a field. There can
 Sprites are a kind of drawable, and add some additional functionality. A sprite can have a number of colnode objects attached to it. These colnodes are used by the collision detection system to detect collisions between different colnodes and report those back to the sprites.
 
 == Java objects creatable from Lua ==
-  * [#Drawable]
-  * [#TextDrawable]
-  * [#Sprite]
-  * [#ColMatrix]
-  * [#CircleColNode]
-  * [#LineSegColNode]
-  * [#RectColNode]
-  * [#Thread]
-  * [#Field]
+  * [Drawable]
+  * [TextDrawable]
+  * [Sprite]
+  * [ColMatrix]
+  * [CircleColNode]
+  * [LineSegColNode]
+  * [RectColNode]
+  * [Thread]
+  * [Field]
 
 === Drawable ===
 
