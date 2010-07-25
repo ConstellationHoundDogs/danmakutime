@@ -2,15 +2,6 @@
 function buildLevel()
 	--Create background
 	scrollingBackground(texStore:get("bgscroll.png"), .01, 2)
-
-	--Create some text
-	local text = TextDrawable.new(overlayField)
-	text:setText("Danmaku Time\nDay 6")
-	text:setBlockAnchor(7)
-	text:setFontName("DejaVuSans") --fontname is the file name without extension
-	--text:setFontStyle(FontStyle.BOLD)
-	text:setFontSize(14)
-	text:setPos(0, -2)
 	
 	--Create player
 	player = THPlayer.new()
