@@ -253,7 +253,7 @@ public class Game extends GameBase {
 		//Install globalReset function
 		vm._G.put("globalReset", new LFunction() {
 			public int invoke(LuaState vm) {
-				String funcName = vm.tostring(1);
+				String funcName = (vm.isstring(1) ? vm.tostring(1) : "main");
 				vm.resettop();
 				
 				restart(funcName);
@@ -411,7 +411,7 @@ public class Game extends GameBase {
 		ParagraphRenderer pr = super.createParagraphRenderer(layouter);
 		
 		MutableTextStyle mts = pr.getDefaultStyle().mutableCopy();
-		mts.setFontName("DejaVuSans");
+		mts.setFontName(getConfig().game.getDefaultFont());
 		mts.setFontSize(16);
 		pr.setDefaultStyle(mts.immutableCopy());
 		
@@ -434,7 +434,7 @@ public class Game extends GameBase {
 			int blurMagnitude)
 	{
 		DelayedScreenshot ss;
-		if (blurMagnitude > 0) {
+		if (blurMagnitude > 1) {
 			ss = new BlurringScreenshot(this, x, y, w, h, blurMagnitude);
 		} else {
 			ss = new DelayedScreenshot(this, x, y, w, h);

@@ -36,7 +36,10 @@ public class Config extends ConfigBase {
 			super(store);
 
 			setProperty("gameName", "Danmaku Time");
+			setProperty("defaultFont", "DejaVuSans");
 		}
+		
+		public String getDefaultFont() { return (String)getProperty("defaultFont"); }
 	}
 
 	public static class GraphicsView extends nl.weeaboo.game.ConfigBase.GraphicsView {

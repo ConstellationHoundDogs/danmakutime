@@ -22,18 +22,24 @@ Feature requests:
 
 === Day 7 ====================================================================    
 
-[ ] A damage flash on enemies? Implement by spawning a thread (to avoid
-    hindering game creators from overriding either update or animate)?
 [x] Document the collision interfaces
+[x] Document how to change build settings / Config settings
+[x] Document how to change between the sound engines
+[ ] Documemt Drawable.update/animate
 [ ] Write documentation on the wiki
-[ ] Document how to change build settings / Config settings
-[ ] Document how to change between the sound engines
 
 [ ] Upload the Javadoc as a download on the google code page
 [ ] Upload the final build as a download on google code
 
 ==============================================================================
 
+[ ] A damage flash on enemies? Implement by spawning a thread (to avoid
+    hindering game creators from overriding either update or animate)?
+    ^ Give sprites their own thread pool?
+[ ] Add a second global preferencestore for use by the Lua scripts to store
+    highscores, unlocks, etc.
+[ ] Give the Lua scripts a way to read/write files.
+[ ] The # operator doesn't return the length of a Java array.
 [ ] Try to print a Lua stack trace in case of Lua errors
 [ ] Replays
 [ ] Key config    
