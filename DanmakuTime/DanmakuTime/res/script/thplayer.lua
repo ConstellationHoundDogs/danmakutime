@@ -19,6 +19,8 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
+playerZ = 1000
+
 THPlayer = {
 	--stats
 	speed=3,
@@ -31,9 +33,9 @@ THPlayer = {
 	maxShotPower=100,
 	autoCollectY=nil,
 	magnetAttrRadius=32,
-	magnetAttrSpeed=10,
 	
 	--state
+    controls=nil,
 	lives=3,
 	bombs=2,
 	shotPower=0,
@@ -47,6 +49,16 @@ THPlayer = {
 	focusSprites=nil
 	}
 
+THPlayerDefaultControls = {
+    up=Keys.UP,
+    down=Keys.DOWN,
+    left=Keys.LEFT,
+    right=Keys.RIGHT,
+    fire=Keys.Z,
+    bomb=Keys.X,
+    focus=Keys.SHIFT
+    }
+    
 function THPlayer.new(self)
 	self = extend(THPlayer, self or {})
 	self = THSprite.new(self)
@@ -58,7 +70,7 @@ function THPlayer.new(self)
 	self:setColNode(3, playerItemMagnetColType, CircleColNode.new(0))
 
 	self:setPos(levelWidth/2, levelHeight - 32)
-	self:setZ(1000)	
+	self:setZ(playerZ)	
 	
 	self.autoCollectY = self.autoCollectY or levelHeight/4
 	
@@ -66,6 +78,8 @@ function THPlayer.new(self)
 	self.focusSprites[1] = FocusSprite.new(self, texStore:get("focus.png#upper"), -10, {fadeSpeed=.1})
 	self.focusSprites[2] = FocusSprite.new(self, texStore:get("focus.png#lower"), 10, {fadeSpeed=.05})
 	
+    self.controls = extend(THPlayerDefaultControls, self.controls or {})
+    
 	return self
 end
 
@@ -76,7 +90,7 @@ function THPlayer:onCollision(other, myColNode, otherColNode)
 
 	local t0 = myColNode:getType()
 	if t0 == playerItemMagnetColType then
-		self:onItemMagnet(other)
+		other.magnetTarget = self
 		return
 	elseif self.invincible > 0 then
 		return
@@ -92,10 +106,6 @@ end
 
 function THPlayer:onGrazed(other)
 	self.grazeCounter = self.grazeCounter + 1
-end
-
-function THPlayer:onCollectItem(other)
-	--Do whatever the 
 end
 
 function THPlayer:update()
@@ -145,7 +155,7 @@ function THPlayer:updateDeathTime()
 end
 
 function THPlayer:updateFocus()
-	self.focus = input:isKeyHeld(Keys.SHIFT)
+	self.focus = input:isKeyHeld(self.controls.focus)
 end
 
 function THPlayer:updatePos()
@@ -157,19 +167,19 @@ function THPlayer:updatePos()
 		spd = self.focusSpeed
 	end	
 		
-	if input:isKeyHeld(Keys.LEFT) then
+	if input:isKeyHeld(self.controls.left) then
 		self.dx = -spd
 		x = x - spd
-	elseif input:isKeyHeld(Keys.RIGHT) then
+	elseif input:isKeyHeld(self.controls.right) then
 		self.dx = spd
 	    x = x + spd
 	else
 		self.dx = 0
 	end
 	
-	if input:isKeyHeld(Keys.UP) then
+	if input:isKeyHeld(self.controls.up) then
 		y = y - spd
-	elseif input:isKeyHeld(Keys.DOWN) then
+	elseif input:isKeyHeld(self.controls.down) then
 	    y = y + spd
 	end
 	
@@ -184,7 +194,7 @@ function THPlayer:updatePos()
 end
 
 function THPlayer:updateBomb()
-	if self.bombs > 0 and input:consumeKey(Keys.X) then
+	if self.bombs > 0 and input:consumeKey(self.controls.bomb) then
 		self.bombs = self.bombs - 1		
 		self:bomb()
 		return true
@@ -200,7 +210,7 @@ function THPlayer:updateFire()
 	if self.fireCooldown > 0 then
 		self.fireCooldown = self.fireCooldown - 1
 	else
-		if input:isKeyHeld(Keys.Z) then
+		if input:isKeyHeld(self.controls.fire) then
 			self.fireCooldown = self.fireDelay
 			self:fire()
 		end
@@ -233,18 +243,6 @@ function THPlayer:updateItemCollect()
 	else
 		self:setColNode(3, playerItemMagnetColType, CircleColNode.new(self.magnetAttrRadius))
 	end
-end
-
-function THPlayer:onItemMagnet(item)
-	local ix = item:getX()
-	local iy = item:getY()
-	
-	local angle = math.atan2(self:getY()-iy, self:getX()-ix)
-	
-	local dx = self.magnetAttrSpeed * math.sin(angle)
-	local dy = self.magnetAttrSpeed * -math.cos(angle)
-	
-	item:setPos(ix+dx, iy+dy)
 end
 
 function THPlayer:animate()

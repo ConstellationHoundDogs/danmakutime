@@ -15,6 +15,7 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -31,6 +32,7 @@ import nl.weeaboo.dt.audio.ISoundEngine;
 import nl.weeaboo.dt.audio.SoftSyncSoundEngine;
 import nl.weeaboo.dt.field.Field;
 import nl.weeaboo.dt.field.IField;
+import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.input.Input;
 import nl.weeaboo.dt.lua.LuaException;
 import nl.weeaboo.dt.lua.LuaRunState;
@@ -71,8 +73,11 @@ public class Game extends GameBase {
 	private boolean paused, pauseRequest;
 	private LuaLink pauseThread;
 	
+	private List<IInput> inputBuffer;
+	private int inputLag = 0;
+	
 	public Game(Config c, ResourceManager rm, GameFrame gf) {
-		super(c, rm, gf);
+		super(c, rm, gf);		
 	}
 	
 	//Functions
@@ -158,6 +163,8 @@ public class Game extends GameBase {
 		paused = pauseRequest = false;
 		pauseThread = null;
 		pendingScreenshots = new ArrayList<DelayedScreenshot>();
+		
+		inputBuffer = new LinkedList<IInput>();
 		
 		ResourceManager rm = getResourceManager();
 		int width = getWidth();
@@ -285,18 +292,25 @@ public class Game extends GameBase {
 		notifier.update(Math.round(1000f * dt));
 		
 		soundEngine.update(paused ? 0 : 1);
+
+		inputBuffer.add(new Input(input.copy()));
 		
 		if (error) {
 			return;
 		}
 
 		LuaState vm = getLuaState();
-		Input ii = new Input(input);
 
 		//global IInput input
+		IInput ii;
+		if (inputBuffer.size() > inputLag) {
+			ii = inputBuffer.remove(0);
+		} else {
+			ii = new Input();
+		}
 		vm.pushlvalue(LuajavaLib.toUserdata(ii, ii.getClass()));
 		vm.setglobal("input");
-
+		
 		if (ii.consumeKey(KeyEvent.VK_F7)) {
 			//Screen capture activation key
 			pendingScreenshots.add(new DelayedScreenshot(this, 0, 0, getWidth(), getHeight()) {

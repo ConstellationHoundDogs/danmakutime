@@ -253,8 +253,13 @@ function pauseMenu()
 	local menu = MenuGroup.new()
 	local exit = false
 	local confirm = false
-		
-	if player.lives > 0 then
+	
+    local playerLives = 0
+    for _,v in ipairs(players) do
+        playerLives = playerLives + v.lives
+    end
+    
+	if playerLives > 0 then
 		local resumeItem = MenuOption.new(999, screenWidth/2, screenHeight/2 - 25,
 			{ label="Resume", blockAnchor=5,
 			select=function(self)

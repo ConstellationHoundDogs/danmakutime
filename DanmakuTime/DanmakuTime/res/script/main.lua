@@ -1,7 +1,7 @@
 
 function main()	
-	returnTitle0()
-	--restart0()
+	--returnTitle0()
+	restart0()
 end
 
 function returnTitle()
@@ -79,16 +79,16 @@ function start()
 				Thread.new(createBoss01)
 			elseif input:consumeKey(Keys.D) then
 				Thread.new(dialogTest)
-			elseif input:consumeKey(Keys.L) then
+			elseif #players < 2 and input:consumeKey(Keys.L) then
 				Thread.new(fireLaser)
 			end
 			yield()
 		end
 	end)
 	
-	--Thread.new(stressTest, 50, 200)
+	Thread.new(stressTest, 50, 200)
 	
-	Thread.new(stressTest, 25, 20)		
+	--Thread.new(stressTest, 25, 20)		
 end
 
 function dialogTest()
