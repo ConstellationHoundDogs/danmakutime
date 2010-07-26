@@ -84,13 +84,17 @@ function Dialog:update()
 		end
 	
 		while not input:consumeKey(Keys.Z) do
-			player.fireCooldown = 1
+			for _,v in ipairs(players) do
+                v.fireCooldown = 1
+            end
 			yield()
 		end
 		
 		self.curpage = self.curpage + 1
 	end
-	player.fireCooldown = 1
+    for _,v in ipairs(players) do
+        v.fireCooldown = 1
+    end
 	
 	self:destroy()
 end

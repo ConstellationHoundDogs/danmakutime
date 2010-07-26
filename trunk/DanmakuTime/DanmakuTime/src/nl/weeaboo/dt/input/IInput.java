@@ -3,6 +3,11 @@ package nl.weeaboo.dt.input;
 public interface IInput {
 
 	/**
+	 * @return A copy of this object
+	 */
+	public IInput clone();
+	
+	/**
 	 * @param keycode The key to check the state of
 	 * @return If the specified key is currently pressed
 	 */

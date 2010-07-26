@@ -28,16 +28,20 @@ Feature requests:
 [x] Documemt Drawable.update/animate
 [x] Write documentation on the wiki
 
-[ ] Upload the Javadoc as a download on the google code page
-[ ] Upload the final build as a download on google code
+[x] Upload the Javadoc as a download on the google code page
+[x] Upload the final build as a download on google code
 
 ==============================================================================
 
+[x] When the player is above the item get line, don't move the items for one
+    frame at a time. They need to be magnetized until the player dies.
 [ ] A damage flash on enemies? Implement by spawning a thread (to avoid
     hindering game creators from overriding either update or animate)?
     ^ Give sprites their own thread pool?
 [ ] Add a second global preferencestore for use by the Lua scripts to store
     highscores, unlocks, etc.
+[ ] Add an EdgeRule enum {CLAMP, WRAP} to allow the colfield to be use for tube
+    shooters?     
 [ ] Give the Lua scripts a way to read/write files.
 [ ] The # operator doesn't return the length of a Java array.
 [ ] Try to print a Lua stack trace in case of Lua errors

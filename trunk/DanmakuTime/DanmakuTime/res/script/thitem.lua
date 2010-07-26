@@ -6,8 +6,7 @@
 -- External dependencies:
 --
 -- THSprite
--- THPlayer
--- player
+-- playerZ
 -- itemColType
 -- playerItemColType
 -- 
@@ -18,7 +17,9 @@
 THItem = {
 	gravity=1,
 	dx=nil,
-	dy=nil
+	dy=nil,
+    magnetTarget=nil,
+    magnetAttrSpeed=10
 	}
 
 function THItem.new(x, y, self)
@@ -27,7 +28,7 @@ function THItem.new(x, y, self)
 	
 	self:setColNode(0, itemColType, RectColNode.new(-8, -8, 16, 16))
 	self:setPos(x or levelWidth/2, y or levelHeight/2)
-	self:setZ(player:getZ() + 50)
+	self:setZ(playerZ + 50)
 	self:setDrawAngleAuto(false)
 	self:setAngle(256)
 	self:setSpeed(self.gravity)
@@ -53,6 +54,26 @@ function THItem:update()
 		
 		yield()
 	end
+    
+    while true do
+        local target = self.magnetTarget
+        if target ~= nil then
+            if (target.deathTime or 0) > 0 then
+                self.magnetTarget = nil
+            else
+                local ix = self:getX()
+                local iy = self:getY()
+                local angle = math.atan2(target:getY()-iy, target:getX()-ix)
+                
+                local dx = self.magnetAttrSpeed * math.sin(angle)
+                local dy = self.magnetAttrSpeed * -math.cos(angle)
+                
+                self:setPos(ix+dx, iy+dy)
+            end        
+        end
+        
+        yield()
+    end
 end
 
 function THItem:onCollision(other, myNode, otherNode)
