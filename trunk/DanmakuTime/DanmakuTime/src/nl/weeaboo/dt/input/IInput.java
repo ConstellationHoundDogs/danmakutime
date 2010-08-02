@@ -1,6 +1,6 @@
 package nl.weeaboo.dt.input;
 
-public interface IInput {
+public interface IInput extends Cloneable {
 
 	/**
 	 * @return A copy of this object
@@ -30,5 +30,38 @@ public interface IInput {
 	 * Clears all pressed key states.
 	 */
 	public void clear();
+	
+	/**
+	 * @return An array containing all keycodes of keys that were pressed this
+	 *         frame.
+	 */
+	public int[] getKeysPressed();
+
+	/**
+	 * @return An array containing all keycodes of keys that were currently
+	 *         pressed this frame.
+	 */
+	public int[] getKeysHeld();
+	
+	/**
+	 * Sets the key state for the specified key to pressed
+	 * 
+	 * @param keycode The keycode of the key
+	 */
+	public void setKeyPressed(int keycode);
+	
+	/**
+	 * Sets the key state for the specified key to held
+	 * 
+	 * @param keycode The keycode of the key
+	 */
+	public void setKeyHeld(int keycode);
+	
+	/**
+	 * Clears the key state for the specified key
+	 * 
+	 * @param keycode The keycode of the key
+	 */
+	public void setKeyReleased(int keycode);
 	
 }

@@ -4,27 +4,9 @@
 -------------------------------------------------------------------------------
 
 MenuOption = {
-	label=nil,
 	selected=false,
 	visible=true
 	}
-
-function MenuOption.new(field, x, y, self)
-	self = extend(MenuOption, self or {})		
-	self = TextDrawable.new(field, self)
-		
-	self:setPos(x or 0, y or 0)
-	self:setZ(-100)
-	self:setBlockAnchor(self.blockAnchor or 7)
-	self:setFontName("DejaVuSans") --fontname is the file name without extension
-	self:setFontStyle(FontStyle.BOLD)
-	self:setFontSize(24)
-	self:setOutlineColor(.1, .1, .1)
-	self:setOutlineSize(4)
-	self:setText(self.label or "---")
-	
-	return self
-end
 
 function MenuOption:update()
 	while true do
@@ -51,6 +33,31 @@ end
 --function MenuOption:select()
 --	print("You forgot to override the select() function of a menu option, now selecting it does nothing!")
 --end
+
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+TextMenuOption = {
+	label=nil
+    }
+
+function TextMenuOption.new(field, x, y, self)
+	self = extend(MenuOption, TextMenuOption, self or {})		
+	self = TextDrawable.new(field, self)
+		
+	self:setPos(x or 0, y or 0)
+	self:setZ(-100)
+	self:setBlockAnchor(self.blockAnchor or 7)
+	self:setFontName("DejaVuSans") --fontname is the file name without extension
+	self:setFontStyle(FontStyle.BOLD)
+	self:setFontSize(24)
+	self:setOutlineColor(.1, .1, .1)
+	self:setOutlineSize(4)
+	self:setText(self.label or "---")
+	
+	return self
+end
 
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
@@ -150,14 +157,14 @@ function mainMenu()
 	--Create menu
 	local menu = MenuGroup.new()
 		
-	local startItem = MenuOption.new(0, screenWidth - 200, 100,
+	local startItem = TextMenuOption.new(0, screenWidth - 200, 100,
 		{label="Start Game"})
 	startItem.select = function(self)
 		started = true
 	end
 	menu:add(startItem)
 
-	local exitItem = MenuOption.new(0, screenWidth - 200, 130,
+	local exitItem = TextMenuOption.new(0, screenWidth - 200, 130,
 		{label="Quit"})
 	exitItem.select = function(self)
 		quit()
@@ -214,7 +221,7 @@ function confirmMenu()
 	question:setOutlineSize(4)
 	question:setText("Are you sure?")
 		
-	local yesItem = MenuOption.new(999, screenWidth/2, screenHeight/2 + 0,
+	local yesItem = TextMenuOption.new(999, screenWidth/2, screenHeight/2 + 0,
 		{ label="Yes", blockAnchor=5,
 		select=function(self)
 			result = true
@@ -222,7 +229,7 @@ function confirmMenu()
 	})
 	menu:add(yesItem)
 
-	local noItem = MenuOption.new(999, screenWidth/2, screenHeight/2 + 25,
+	local noItem = TextMenuOption.new(999, screenWidth/2, screenHeight/2 + 25,
 		{ label="No", blockAnchor=5,
 		select=function(self)
 			result = false
@@ -260,7 +267,7 @@ function pauseMenu()
     end
     
 	if playerLives > 0 then
-		local resumeItem = MenuOption.new(999, screenWidth/2, screenHeight/2 - 25,
+		local resumeItem = TextMenuOption.new(999, screenWidth/2, screenHeight/2 - 25,
 			{ label="Resume", blockAnchor=5,
 			select=function(self)
 				exit = true
@@ -269,7 +276,7 @@ function pauseMenu()
 		menu:add(resumeItem)
 	end
 
-	local restartItem = MenuOption.new(999, screenWidth/2, screenHeight/2 + 0,
+	local restartItem = TextMenuOption.new(999, screenWidth/2, screenHeight/2 + 0,
 		{ label="Restart Game", blockAnchor=5,
 		select=function(self)
 			menu:setVisible(false)
@@ -283,7 +290,7 @@ function pauseMenu()
 	})
 	menu:add(restartItem)
 
-	local titleItem = MenuOption.new(999, screenWidth/2, screenHeight/2 + 25,
+	local titleItem = TextMenuOption.new(999, screenWidth/2, screenHeight/2 + 25,
 		{ label="Quit Game", blockAnchor=5,
 		select=function(self)
 			menu:setVisible(false)

@@ -2,24 +2,6 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
---
--- External dependencies:
--- 
--- THSprite
--- THItem
--- Timer
--- playerColType
--- playerGrazeColType
--- playerShotColType
--- levelWidth
--- levelHeight
--- doPause()
---
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
-
-playerZ = 1000
 
 THPlayer = {
 	--stats
@@ -29,12 +11,16 @@ THPlayer = {
 	deathBombTime=20,
 	deathInvincibleTime=150,
 	maxLives=99,
+    minBombsNewLife=2,
 	maxBombs=99,
 	maxShotPower=100,
 	autoCollectY=nil,
 	magnetAttrRadius=32,
+    levelPadH=16,
+    levelPadV=24,
 	
 	--state
+    playerId=1,
     controls=nil,
 	lives=3,
 	bombs=2,
@@ -46,31 +32,22 @@ THPlayer = {
 	deathTime=0,
 	invincible=0,
 	dx=0,
-	focusSprites=nil
+	focusSprites=nil,
+    texture=nil
 	}
-
-THPlayerDefaultControls = {
-    up=Keys.UP,
-    down=Keys.DOWN,
-    left=Keys.LEFT,
-    right=Keys.RIGHT,
-    fire=Keys.Z,
-    bomb=Keys.X,
-    focus=Keys.SHIFT
-    }
     
-function THPlayer.new(self)
+function THPlayer.new(playerId, self)
 	self = extend(THPlayer, self or {})
 	self = THSprite.new(self)
 	
-	self:setTexture(texStore:get("player.png#idle0"));
+	self:setTexture(texStore:get(self.texture .. "#idle0"));
 	self:setColNode(0, playerColType, CircleColNode.new(2.0))
 	self:setColNode(1, playerGrazeColType, CircleColNode.new(10.0))
 	self:setColNode(2, playerItemColType, RectColNode.new(-9, -18, 18, 34))
 	self:setColNode(3, playerItemMagnetColType, CircleColNode.new(0))
 
 	self:setPos(levelWidth/2, levelHeight - 32)
-	self:setZ(playerZ)	
+	self:setZ(1000 + 100 * playerId)	
 	
 	self.autoCollectY = self.autoCollectY or levelHeight/4
 	
@@ -78,7 +55,17 @@ function THPlayer.new(self)
 	self.focusSprites[1] = FocusSprite.new(self, texStore:get("focus.png#upper"), -10, {fadeSpeed=.1})
 	self.focusSprites[2] = FocusSprite.new(self, texStore:get("focus.png#lower"), 10, {fadeSpeed=.05})
 	
-    self.controls = extend(THPlayerDefaultControls, self.controls or {})
+    if self.controls == nil then
+        self.controls = {
+            up=vkeys[playerId].UP,
+            down=vkeys[playerId].DOWN,
+            left=vkeys[playerId].LEFT,
+            right=vkeys[playerId].RIGHT,
+            fire=vkeys[playerId].BUTTON1,
+            bomb=vkeys[playerId].BUTTON2,
+            focus=vkeys[playerId].BUTTON3
+        }            
+    end
     
 	return self
 end
@@ -187,22 +174,26 @@ function THPlayer:updatePos()
 		self:setAngle(self:getDrawAngle() + 2)
 	end
 	
-	x = math.max(16, math.min(levelWidth-16, x))
-	y = math.max(24, math.min(levelHeight-24, y))
+    local padH = self.levelPadH
+    local padV = self.levelPadV
+	x = math.max(padH, math.min(levelWidth-padH, x))
+	y = math.max(padV, math.min(levelHeight-padV, y))
 	
 	self:setPos(x, y)
 end
 
 function THPlayer:updateBomb()
-	if self.bombs > 0 and input:consumeKey(self.controls.bomb) then
-		self.bombs = self.bombs - 1		
-		self:bomb()
-		return true
+	if self.bombs > 0 and self.invincible <= 0 then
+        if input:consumeKey(self.controls.bomb) then
+            self.bombs = self.bombs - 1		
+            self:bomb(self.deathTime > 0)
+            return true
+        end
 	end
 	return false
 end
 
-function THPlayer:bomb()
+function THPlayer:bomb(isDeathBomb)
 	print("boom")
 end
 
@@ -220,18 +211,13 @@ end
 function THPlayer:fire()
 	local x = self:getX()
 	local y = self:getY()
-	local z = self:getZ() + 100
+	local z = self:getZ() + 25
 	local angle = self:getAngle()
 
 	for n=0,4 do
-		local s = THSprite.new{hp=1, power=1}
+		local s = THPlayerShot.new(self, {power=1})
 		s:setTexture(texStore:get("test.png#g0"));
 		s:setColNode(0, playerShotColType, CircleColNode.new(7))
-		s.onCollision = function(self, other, myColNode, otherColNode)
-			self:destroy()
-		end
-		s:setPos(x, y)
-		s:setZ(z)
 		s:setAngle(angle - 32 + 16 * n)
 		s:setSpeed(10)
 	end
@@ -264,7 +250,7 @@ function THPlayer:animate()
 			end
 		end
 	
-		self:setTexture(texStore:get("player.png#" .. animPrefix[anim] .. frame))
+		self:setTexture(texStore:get(self.texture .. "#" .. animPrefix[anim] .. frame))
 		
 		frame = frame + 1
 		if frame >= 8 then
@@ -292,7 +278,8 @@ function THPlayer:onDestroy()
 	end
 	
 	self.shotPower = math.max(0, self.shotPower - 20)
-	
+	self.bombs = math.max(self.bombs, self.minBombsNewLife)
+    
 	return false
 end
 
@@ -358,6 +345,29 @@ function FocusSprite:animate()
 	end
 end
 
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+-------------------------------------------------------------------------------
+
+THPlayerShot = {
+    }
+
+function THPlayerShot.new(owner, self)
+    self = extend(THPlayerShot, self or {})
+    self = THShot.new(owner, self)
+    
+    self:setZ(1500)
+    
+    return self
+end
+    
+function THPlayerShot:onCollision(other, myNode, otherNode)
+    if self.owner ~= nil and self.owner.points ~= nil and other.points ~= nil then
+        self.owner.points = self.owner.points + other.points
+    end
+    self:destroy()
+end
+    
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------

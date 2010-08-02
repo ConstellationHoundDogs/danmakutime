@@ -1,21 +1,23 @@
 package nl.weeaboo.dt;
 
-import java.awt.Dimension;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
 import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.math.BigInteger;
+import java.net.InetAddress;
+import java.nio.ByteBuffer;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
@@ -26,14 +28,25 @@ import javax.imageio.ImageIO;
 import javax.media.opengl.GL;
 import javax.media.opengl.GL2ES1;
 
+import net.java.games.input.Controller;
 import nl.weeaboo.common.GraphicsUtil;
+import nl.weeaboo.common.StringUtil;
 import nl.weeaboo.dt.audio.HardSyncSoundEngine;
 import nl.weeaboo.dt.audio.ISoundEngine;
 import nl.weeaboo.dt.audio.SoftSyncSoundEngine;
 import nl.weeaboo.dt.field.Field;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
+import nl.weeaboo.dt.input.IKeyConfig;
 import nl.weeaboo.dt.input.Input;
+import nl.weeaboo.dt.input.InputBuffer;
+import nl.weeaboo.dt.input.JoyInput;
+import nl.weeaboo.dt.input.KeyConfig;
+import nl.weeaboo.dt.input.Keys;
+import nl.weeaboo.dt.io.HashUtil;
+import nl.weeaboo.dt.io.IPersistentStorage;
+import nl.weeaboo.dt.io.IPersistentStorageFactory;
+import nl.weeaboo.dt.io.PersistentStorageFactory;
 import nl.weeaboo.dt.lua.LuaException;
 import nl.weeaboo.dt.lua.LuaRunState;
 import nl.weeaboo.dt.lua.LuaThreadPool;
@@ -42,13 +55,14 @@ import nl.weeaboo.dt.lua.link.LuaFunctionLink;
 import nl.weeaboo.dt.lua.link.LuaLink;
 import nl.weeaboo.dt.lua.platform.LuaPlatform;
 import nl.weeaboo.dt.lua.platform.LuajavaLib;
+import nl.weeaboo.dt.netplay.ClientNetworkState;
+import nl.weeaboo.dt.netplay.ServerNetworkState;
 import nl.weeaboo.dt.renderer.ITextureStore;
 import nl.weeaboo.dt.renderer.Renderer;
 import nl.weeaboo.dt.renderer.TextureStore;
 import nl.weeaboo.game.GameBase;
 import nl.weeaboo.game.ResourceManager;
 import nl.weeaboo.game.gl.GLManager;
-import nl.weeaboo.game.gl.GLVideoCapture;
 import nl.weeaboo.game.gl.Screenshot;
 import nl.weeaboo.game.input.UserInput;
 import nl.weeaboo.game.text.MutableTextStyle;
@@ -60,12 +74,16 @@ import org.luaj.vm.LValue;
 import org.luaj.vm.LuaState;
 
 public class Game extends GameBase {
-
+	
 	private boolean error;
-	private GLVideoCapture videoCapture;
 	private Notifier notifier;
+	private GameVideoCapture videoCapture;
 	private List<DelayedScreenshot> pendingScreenshots;
 	
+	private Keys keys;
+	private List<JoyInput> joyInputs;
+	private IKeyConfig keyConfig;
+	private IPersistentStorageFactory storageFactory;
 	private ITextureStore texStore;	
 	private ISoundEngine soundEngine;
 	
@@ -73,16 +91,50 @@ public class Game extends GameBase {
 	private boolean paused, pauseRequest;
 	private LuaLink pauseThread;
 	
-	private List<IInput> inputBuffer;
-	private int inputLag = 0;
+	private long frame;
+	private InputBuffer inputBuffer;
+	private int inputLag = 6;
+	private final int maxInputLag = 15;
+	private ClientNetworkState networkState;
+	private ServerNetworkState server;
 	
 	public Game(Config c, ResourceManager rm, GameFrame gf) {
-		super(c, rm, gf);		
+		super(c, rm, gf);
+		
+		videoCapture = new GameVideoCapture(this);
+		inputBuffer = new InputBuffer(maxInputLag);
+		storageFactory = new PersistentStorageFactory(this);
 	}
 	
 	//Functions
+	public void hostNetGame(int tcpPort) throws IOException {
+		inputBuffer.clear();
+		
+		IPersistentStorage ps = storageFactory.createPersistentStorage();
+		ByteArrayOutputStream bout = new ByteArrayOutputStream();
+		ps.save(bout);
+		
+		byte hash[] = HashUtil.calculateResourcesHash(this);
+		System.out.println("Resources Hash: " + new BigInteger(hash).toString(16));
+		
+		server = new ServerNetworkState(hash, 2);
+		server.host(tcpPort, ByteBuffer.wrap(bout.toByteArray()));
+	}
+
+	public void joinNetGame(InetAddress targetAddress, int targetTCPPort,
+			int localUDPPort) throws IOException
+	{
+		inputBuffer.clear();
+		
+		byte hash[] = HashUtil.calculateResourcesHash(this);
+		System.out.println("Resources Hash: " + new BigInteger(hash).toString(16));
+		
+		networkState = new ClientNetworkState(hash, inputBuffer, maxInputLag);
+		networkState.join(targetAddress, targetTCPPort, localUDPPort);
+	}
+	
 	public static void loadConfig(Config config, ResourceManager rm) throws IOException {
-		String configFilename = "prefs.xml";
+		String configFilename = "save/prefs.xml";
 
 		config.load(rm.getInputStream("prefs.default.xml"));
 		if (rm.getFileExists(configFilename)) {
@@ -95,43 +147,7 @@ public class Game extends GameBase {
 			}
 		}
 	}
-	
-	public void startRecordingVideo(String filename) throws IOException {
-		stopRecordingVideo();
 		
-		Config config = getConfig();
-		
-		int rw = getWidth();
-		int rh = getHeight();
-		int scw = config.capture.getWidth();
-		int sch = config.capture.getHeight();
-		
-		if (scw <= 0) scw = rw;
-		if (sch <= 0) sch = rh;
-		
-		Dimension d = GraphicsUtil.getProportionalScale(rw, rh, scw, sch);
-		
-		int captureFPS = config.graphics.getFPS();
-		//while (captureFPS > 30) captureFPS /= 2;
-		
-		videoCapture = new GLVideoCapture(this, filename, config.capture.getX264CRF(),
-				captureFPS, rw, rh, d.width, d.height, true);
-		
-		try {
-			videoCapture.start();
-		} catch (IOException ioe) {
-			videoCapture = null;
-			throw ioe;
-		}
-	}
-	
-	public void stopRecordingVideo() {
-		if (videoCapture != null) {
-			videoCapture.stop();
-			videoCapture = null;
-		}		
-	}
-	
 	public void loadResources() {
 		super.loadResources();
 						
@@ -141,38 +157,75 @@ public class Game extends GameBase {
 		
 		OutputStream err = null;
 		try {
-			rm.getOutputStream("err.txt");
+			rm.getOutputStream("save/err.txt");
 		} catch (IOException e) {
 			DTLog.warning(e);
 		}
 		
 		DTLog.getInstance().start(isDebug(), notifier, err);
 			
-		restart("main");
+		keys = new Keys(KeyEvent.class);
+		joyInputs = new ArrayList<JoyInput>();
+		for (Controller con : JoyInput.getControllers()) {
+			joyInputs.add(new JoyInput(joyInputs.size()+1, con));
+		}
+		
+		reset();
 	}
 	
 	public void unloadResources() {
-		stopRecordingVideo();
+		videoCapture.stop();
 		
 		super.unloadResources();
 	}
 	
-	public void restart(String mainFuncName) {
-		error = false;
+	private void reset() {
+		if (luaRunState != null) {
+			luaRunState.dispose();
+			luaRunState = null;
+		}
+		if (soundEngine != null) {
+			soundEngine.stopAll();
+		}
 
+		if (networkState == null) {
+			inputLag = 0;			
+		}
+		
+		error = false;
 		paused = pauseRequest = false;
 		pauseThread = null;
-		pendingScreenshots = new ArrayList<DelayedScreenshot>();
-		
-		inputBuffer = new LinkedList<IInput>();
+		pendingScreenshots = new ArrayList<DelayedScreenshot>();		
+		keyConfig = null;
+		texStore = null;
+		soundEngine = null;		
+	}
+	
+	public void restart(String mainFuncName) {
+		reset();
 		
 		ResourceManager rm = getResourceManager();
 		int width = getWidth();
 		int height = getHeight();
 		
+		keyConfig = createKeyConfig(keys);
 		texStore = createTextureStore();
 		soundEngine = createSoundEngine();
-				
+
+		IPersistentStorage storage;
+		if (networkState != null && networkState.isGameStarted()) {
+			if (!isHostingNetworkGame()) {
+				//We received the other player's save file. Use a special subclass to
+				//avoid overwriting any of our own save files with theirs.
+				storage = storageFactory.createNonPersistentStorage(networkState.getPersistentStorage());
+			} else {
+				//We've received our own save file. We can just use that...
+				storage = storageFactory.createPersistentStorage(networkState.getPersistentStorage());
+			}
+		} else {
+			storage = storageFactory.createPersistentStorage();
+		}
+		
 		Map<Integer, IField> fieldMap = new HashMap<Integer, IField>();
 		fieldMap.put(0, new Field(0, 0, width, height, 0)); //Full-screen field (0)
 		fieldMap.put(1, new Field(0, 0, width, height, 0)); //Game field (1)
@@ -187,11 +240,12 @@ public class Game extends GameBase {
 		};
 		LuaThreadPool threadPool = new LuaThreadPool();
 		
-		luaRunState = new LuaRunState(System.nanoTime(), platform, threadPool,
-				fieldMap, texStore, soundEngine);
+		long randomSeed = (networkState != null ? networkState.getRandomSeed() : System.nanoTime());
+		luaRunState = new LuaRunState(randomSeed, platform, keys,
+				threadPool, fieldMap, texStore, soundEngine, storage);
 		
 		LuaState vm = getLuaState();
-				
+		
 		//Compile code
 		SortedSet<String> scripts = new TreeSet<String>(new Comparator<String>() {
 			Collator c = Collator.getInstance(Locale.ROOT);
@@ -219,62 +273,11 @@ public class Game extends GameBase {
 			}
 		}
 
-		//Install pause function
-		vm._G.put("pause", new LFunction() {
-			public int invoke(LuaState vm) {
-				LFunction func = vm.checkfunction(1);
-				LValue args[] = new LValue[vm.gettop()-1];
-				for (int n = 0; n < args.length; n++) {
-					args[n] = vm.topointer(2+n);
-				}
-				
-				pause();
-				
-				pauseThread = new LuaFunctionLink(luaRunState, luaRunState.vm, func, args);
-				
-				vm.resettop();
-				return 0;
-			}
-		});
-		
-		//Install screenshot function
-		vm._G.put("screenshot", new LFunction() {
-			public int invoke(LuaState vm) {
-				int x = (vm.isnumber(1) ? vm.tointeger(1) : 0);
-				int y = (vm.isnumber(2) ? vm.tointeger(2) : 0);
-				int w = (vm.isnumber(3) ? vm.tointeger(3) : getWidth());
-				int h = (vm.isnumber(4) ? vm.tointeger(4) : getHeight());
-				
-				int blurMagnitude = 4;
-				if (vm.isnumber(5)) {
-					blurMagnitude = vm.tointeger(5);
-				}
-				
-				vm.resettop();
-				DelayedScreenshot ds = screenshot(x, y, w, h, blurMagnitude);
-				vm.pushlvalue(LuajavaLib.toUserdata(ds, ds.getClass()));
-				return 1;
-			}
-		});
-		
-		//Install globalReset function
-		vm._G.put("globalReset", new LFunction() {
-			public int invoke(LuaState vm) {
-				String funcName = (vm.isstring(1) ? vm.tostring(1) : "main");
-				vm.resettop();
-				
-				restart(funcName);
-				return 0;
-			}
-		});
-
-		//Install quit function
-		vm._G.put("quit", new LFunction() {
-			public int invoke(LuaState vm) {
-				dispose();
-				return 0;
-			}
-		});
+		//Install default functions
+		vm._G.put("pause", luaPauseFunc());
+		vm._G.put("screenshot", luaScreenshotFunc());
+		vm._G.put("globalReset", luaResetFunc());
+		vm._G.put("quit", luaQuitFunc());
 		
 		//Start main thread
 		threadPool.add(new LuaFunctionLink(luaRunState, vm, mainFuncName));
@@ -282,35 +285,104 @@ public class Game extends GameBase {
 		error = false;
 	}
 	
-	public void update(UserInput input, float dt) {
-		//Update paused state
-		paused = pauseRequest;
-		if (!paused) pauseThread = null;
+	public void update(UserInput gameInput, float dt) {
 		
-		super.update(input, dt);
-				
+		super.update(gameInput, dt);
+
 		notifier.update(Math.round(1000f * dt));
 		
-		soundEngine.update(paused ? 0 : 1);
+		networkReceive();
+		
+		if (server != null && !server.isGameStarted()) {
+			return;
+		}
 
-		inputBuffer.add(new Input(input.copy()));
+		if (networkState == null) {
+			if (frame == 0) {
+				restart("main");
+			}			
+		} else {
+			//Control input laf
+			if (gameInput.consumeKey(KeyEvent.VK_PAGE_UP)) {
+				inputLag++;
+			} else if (gameInput.consumeKey(KeyEvent.VK_PAGE_DOWN)) {
+				inputLag--;
+			}
+			inputLag = Math.max(1, Math.min(maxInputLag, inputLag));
+			
+			//Check if network ready
+			if (!networkState.isGameStarted()) {
+				return;
+			} else if (frame == 0) {
+				restart("main");				
+			}
+			
+			//Make sure the input is available
+			final long newInputReadFrame = frame - inputLag + 1;
+			if (newInputReadFrame > 0 && !inputBuffer.hasReceived(newInputReadFrame)) {
+				long frameTime = 1000000000L / getConfig().graphics.getFPS();
+				long t0 = System.nanoTime();
+				try {
+					networkSend();
+
+					do {
+						networkReceive();
+						Thread.sleep(1);
+						
+						if (System.nanoTime()-t0 >= frameTime) {
+							//Wait up to frametime at once
+							break;
+						}
+					} while (!inputBuffer.hasReceived(newInputReadFrame)); 
+				} catch (InterruptedException e) {				
+				}				
+					
+				if (!inputBuffer.hasReceived(newInputReadFrame)) {
+					return;
+				}
+			}
+		}	
+				
+		frame++;
+		inputBuffer.setLocalFrame(frame);
+
+		//Update paused state
+		paused = pauseRequest;
+		if (!paused) {
+			pauseThread = null;
+		}
+
+		soundEngine.update(paused ? 0 : 1);
+		
+		//Update input
+		IInput futureInput = new Input(gameInput.copy());
+		for (JoyInput joypadInput : joyInputs) {
+			joypadInput.update(futureInput);
+		}
+		
+		int futureKeysPressed[] = futureInput.getKeysPressed();
+		int futureKeysHeld[] = futureInput.getKeysHeld();
+		int futureVKeysPressed[] = keyConfig.getVKeysPressed(futureInput);
+		int futureVKeysHeld[] = keyConfig.getVKeysHeld(futureInput);
+		
+		if (networkState == null) {
+			//If non-networked, set the virtual keys in the input object
+			for (int key : futureVKeysPressed) futureInput.setKeyPressed(key);
+			for (int key : futureVKeysHeld) futureInput.setKeyHeld(key);
+
+			inputBuffer.addKeys(frame, 0, futureInput);
+		} else {
+			networkState.buffer(frame, futureKeysPressed, futureKeysHeld,
+					futureVKeysPressed, futureVKeysHeld);			
+			networkSend();
+		}
 		
 		if (error) {
 			return;
 		}
-
-		LuaState vm = getLuaState();
-
-		//global IInput input
-		IInput ii;
-		if (inputBuffer.size() > inputLag) {
-			ii = inputBuffer.remove(0);
-		} else {
-			ii = new Input();
-		}
-		vm.pushlvalue(LuajavaLib.toUserdata(ii, ii.getClass()));
-		vm.setglobal("input");
 		
+		IInput ii = (frame-inputLag > 1 ? inputBuffer.get(frame-inputLag) : new Input());
+				
 		if (ii.consumeKey(KeyEvent.VK_F7)) {
 			//Screen capture activation key
 			pendingScreenshots.add(new DelayedScreenshot(this, 0, 0, getWidth(), getHeight()) {
@@ -324,20 +396,19 @@ public class Game extends GameBase {
 					}					
 				}
 			});
-		} else if (ii.consumeKey(KeyEvent.VK_F8)) {
-			//Video capture activation key
-			if (isRecordingVideo()) {
-				stopRecordingVideo();
-			} else {			
-				try {
-					startRecordingVideo("capture.mkv");
-					DTLog.message("Starting video recording");
-				} catch (IOException e) {
-					DTLog.showError(e);
-				}
-			}
+		} else if (ii.consumeKey(KeyEvent.VK_F5)) {
+			restart("main");
+			return;
 		}
 		
+		videoCapture.update(ii);
+		
+		LuaState vm = getLuaState();
+
+		//global IInput input
+		vm.pushlvalue(LuajavaLib.toUserdata(ii, ii.getClass()));
+		vm.setglobal("input");
+				
 		luaRunState.update(ii, paused);
 		
 		if (paused) {
@@ -361,7 +432,9 @@ public class Game extends GameBase {
 		int rh = getRealHeight();
 				
 		Renderer r = new Renderer(glm, createParagraphRenderer(), w, h, rw, rh);
-		luaRunState.draw(r);
+		if (luaRunState != null) {
+			luaRunState.draw(r);
+		}
 		r.flush();
 				
 		//Take screen capture
@@ -383,7 +456,7 @@ public class Game extends GameBase {
 		}
 									
 		//Draw HUD
-		if (isDebug()) {
+		if (isDebug() && luaRunState != null) {
 			ParagraphRenderer pr = createParagraphRenderer();
 			pr.setBounds(2, -2, w-6, h-4);
 			
@@ -393,20 +466,34 @@ public class Game extends GameBase {
 			
 			String hudText = String.format("%.2f FPS\n%d Objects\n",
 					getFPS(), luaRunState.getObjectCount());
-			pr.drawText(glm, hudText);
+			pr.drawText(glm, hudText);			
+		}
+		
+		//Draw lag
+		if (networkState != null) {
+			StringBuilder sb = new StringBuilder("[netplay]\n");
+			sb.append("delay: " + inputLag + " / " + maxInputLag + "\n");
+			sb.append(inputBuffer.getDelayString() + "\n");
+			
+			ParagraphRenderer pr = createParagraphRenderer();
+			pr.setBounds(2, h-12*3, w, 0);
+			MutableTextStyle mts = pr.getDefaultStyle().mutableCopy();
+			mts.setFontSize(10);
+			pr.setDefaultStyle(mts.immutableCopy());
+			
+			pr.drawText(glm, sb.toString());
+		}
+		
+		//Draw connecting
+		if ((server != null && !server.isGameStarted())
+				|| (networkState != null && !networkState.isGameStarted()))
+		{
+			ParagraphRenderer pr = createParagraphRenderer();
+			pr.setBounds(10, h-100, w-20, 25);
+			pr.drawText(glm, "Waiting for players" + StringUtil.repeatString(".", (int)(System.currentTimeMillis()/1000)%4));			
 		}
 
-		//Video capture
-		if (videoCapture != null) {
-			try {
-				videoCapture.update(glm, rw, rh);
-			} catch (IOException e) {
-				DTLog.showError(e);
-				videoCapture = null;
-			}
-		}
-				
-		//Draw notifier
+		videoCapture.updateGL(glm);
 		notifier.draw(glm, w, h);
 		
 		super.draw(glm);
@@ -421,6 +508,35 @@ public class Game extends GameBase {
 		}
 	}
 	
+	protected void networkReceive() {
+		if (server != null) {
+			try {
+				server.update();
+			} catch (IOException e) {
+				DTLog.error(e);
+				server.stop();
+				server = null;
+				error = true;
+			}
+		}
+		if (networkState != null) {
+			try {
+				networkState.receive();
+			} catch (IOException e) {
+				DTLog.error(e);
+				networkState.stop();
+				networkState = null;
+				error = true;
+			}
+		}
+	}
+			
+	protected void networkSend() {
+		if (networkState != null) {
+			networkState.send();
+		}
+	}
+	
 	public ParagraphRenderer createParagraphRenderer(ParagraphLayouter layouter) {	
 		ParagraphRenderer pr = super.createParagraphRenderer(layouter);
 		
@@ -431,6 +547,48 @@ public class Game extends GameBase {
 		
 		return pr;
 	}	
+	
+	protected IKeyConfig createKeyConfig(Keys k) {
+		KeyConfig conf = null;
+		
+		InputStream in = null;
+		try {
+			if (getFileExists("save/keyconfig.ini")) {
+				in = new BufferedInputStream(getInputStream("save/keyconfig.ini"));
+			} else if (getFileExists("keyconfig.ini")) {
+				in = new BufferedInputStream(getInputStream("keyconfig.ini"));
+			}
+			
+			if (in != null) {
+				conf = KeyConfig.load(k, in);
+			}
+		} catch (IOException e) {
+			DTLog.warning(e);
+		} finally {
+			try {
+				if (in != null) in.close();
+			} catch (IOException e) { }
+		}
+		
+		if (conf == null) {
+			conf = new KeyConfig(k);
+		}
+		
+
+		if (!getFileExists("save/keyconfig.ini")) {
+			//Write user-modifiable keyconfig to save folder if there was no
+			//keyconfig file there already
+			try {
+				OutputStream out = getOutputStream("save/keyconfig.ini");
+				conf.save(out);
+				out.close();
+			} catch (IOException e) {
+				DTLog.warning(e);
+			}
+		}
+		
+		return conf;
+	}
 	
 	protected ITextureStore createTextureStore() {
 		return new TextureStore(getImageStore());		
@@ -443,7 +601,7 @@ public class Game extends GameBase {
 			return new SoftSyncSoundEngine(getSoundManager(), getConfig().graphics.getFPS());
 		}
 	}
-	
+			
 	public DelayedScreenshot screenshot(double x, double y, double w, double h,
 			int blurMagnitude)
 	{
@@ -457,6 +615,67 @@ public class Game extends GameBase {
 		return ss;
 	}
 	
+	protected LFunction luaPauseFunc() {
+		return new LFunction() {
+			public int invoke(LuaState vm) {
+				LFunction func = vm.checkfunction(1);
+				LValue args[] = new LValue[vm.gettop()-1];
+				for (int n = 0; n < args.length; n++) {
+					args[n] = vm.topointer(2+n);
+				}
+				
+				pause();
+				
+				pauseThread = new LuaFunctionLink(luaRunState, luaRunState.vm, func, args);
+				
+				vm.resettop();
+				return 0;
+			}
+		};		
+	}
+	
+	protected LFunction luaScreenshotFunc() {
+		return new LFunction() {
+			public int invoke(LuaState vm) {
+				int x = (vm.isnumber(1) ? vm.tointeger(1) : 0);
+				int y = (vm.isnumber(2) ? vm.tointeger(2) : 0);
+				int w = (vm.isnumber(3) ? vm.tointeger(3) : getWidth());
+				int h = (vm.isnumber(4) ? vm.tointeger(4) : getHeight());
+				
+				int blurMagnitude = 4;
+				if (vm.isnumber(5)) {
+					blurMagnitude = vm.tointeger(5);
+				}
+				
+				vm.resettop();
+				DelayedScreenshot ds = screenshot(x, y, w, h, blurMagnitude);
+				vm.pushlvalue(LuajavaLib.toUserdata(ds, ds.getClass()));
+				return 1;
+			}
+		};		
+	}
+	
+	protected LFunction luaResetFunc() {
+		return new LFunction() {
+			public int invoke(LuaState vm) {
+				String funcName = (vm.isstring(1) ? vm.tostring(1) : "main");
+				vm.resettop();
+				
+				restart(funcName);
+				return 0;
+			}
+		};		
+	}
+	
+	protected LFunction luaQuitFunc() {
+		return new LFunction() {
+			public int invoke(LuaState vm) {
+				dispose();
+				return 0;
+			}
+		};		
+	}
+	
 	public void pause() {
 		pauseRequest = true;
 	}
@@ -464,8 +683,11 @@ public class Game extends GameBase {
 	public void unpause() {
 		pauseRequest = false;
 	}
-	
+		
 	//Getters
+	protected boolean isHostingNetworkGame() {
+		return server != null;
+	}
 	public Config getConfig() {
 		return (Config)super.getConfig();
 	}
@@ -478,9 +700,6 @@ public class Game extends GameBase {
 	public float getFPS() {
 		return getGameFrame().getCurrentFPS();
 	}	
-	public boolean isRecordingVideo() {
-		return videoCapture != null;
-	}
 	
 	//Setters
 	

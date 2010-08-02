@@ -23,6 +23,11 @@ public abstract class AbstractSoundEngine implements ISoundEngine {
 	}
 		
 	@Override
+	public void stopAll() {
+		sm.stopAll();
+	}
+	
+	@Override
 	public SoundEffect playSound(String filename) {
 		return playSound(filename, 1);
 	}

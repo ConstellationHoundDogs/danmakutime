@@ -1,6 +1,5 @@
 package nl.weeaboo.dt.lua;
 
-import java.awt.event.KeyEvent;
 import java.util.Map;
 import java.util.Random;
 import java.util.Map.Entry;
@@ -14,6 +13,8 @@ import nl.weeaboo.dt.collision.RectColNode;
 import nl.weeaboo.dt.field.Field;
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
+import nl.weeaboo.dt.input.Keys;
+import nl.weeaboo.dt.io.IPersistentStorage;
 import nl.weeaboo.dt.lua.link.LuaLink;
 import nl.weeaboo.dt.lua.platform.LuaPlatform;
 import nl.weeaboo.dt.lua.platform.LuajavaLib;
@@ -33,14 +34,16 @@ public class LuaRunState {
 
 	public LuaState vm;
 		
+	private boolean disposed;
 	private Random random;
 	private LuaThreadPool threadPool;
 	private Map<Integer, IField> fieldMap;
-
+	
 	private LuaLink current;
 	
-	public LuaRunState(long seed, LuaPlatform platform, LuaThreadPool tp,
-			Map<Integer, IField> fm, ITextureStore ts, ISoundEngine se)
+	public LuaRunState(long seed, LuaPlatform platform, Keys keys, LuaThreadPool tp,
+			Map<Integer, IField> fm, ITextureStore ts, ISoundEngine se,
+			IPersistentStorage ps)
 	{
 		random = new Random(seed);
 		threadPool = tp;
@@ -68,7 +71,7 @@ public class LuaRunState {
 		
 		LuaUtil.registerEnum(vm, BlendMode.class);
 		LuaUtil.registerEnum(vm, FontStyle.class);
-		LuaUtil.registerKeyCodes(vm, KeyEvent.class);
+		LuaUtil.registerKeyCodes(vm, keys);
 		
 		LuaUtil.registerThreadLib(this, vm);
 		LuaUtil.registerFieldLib(this, vm);
@@ -80,9 +83,20 @@ public class LuaRunState {
 		//global ISoundEngine soundEngine
 		vm.pushlvalue(LuajavaLib.toUserdata(se, se.getClass()));
 		vm.setglobal("soundEngine");
+
+		//global IPersistentStorage storage
+		vm.pushlvalue(LuajavaLib.toUserdata(ps, ps.getClass()));
+		vm.setglobal("storage");
 	}
 	
 	//Functions
+	public void dispose() {
+		if (!disposed) {
+			disposed = true;
+			threadPool.dispose();
+		}
+	}
+	
 	public IField createField(int x, int y, int w, int h, int pad) {
 		int id = fieldMap.size();
 		while (fieldMap.containsKey(id)) {
@@ -112,6 +126,8 @@ public class LuaRunState {
 		//Update fields
 		int pauseFieldId = 999;
 		for (Entry<Integer, IField> entry : fieldMap.entrySet()) {
+			if (isDisposed()) return;
+			
 			if (entry.getKey().intValue() == pauseFieldId || !paused) {
 				entry.getValue().update(input);
 			}
@@ -125,6 +141,9 @@ public class LuaRunState {
 	}
 	
 	//Getters
+	public boolean isDisposed() {
+		return disposed;
+	}
 	public LuaLink getCurrentLink() {
 		return current;
 	}

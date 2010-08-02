@@ -111,6 +111,12 @@ public interface IDrawable {
 	 */
 	public BlendMode getBlendMode();
 	
+	/**
+	 * @return <code>true</code> if the visibility is set to visible (ignoring
+	 *         alpha and texture).
+	 */
+	public boolean isVisible();
+	
 	// === Setters =============================================================
 
 	/**
@@ -199,4 +205,13 @@ public interface IDrawable {
 	 */	
 	public void setScaleY(double sy);
 	
+	/**
+	 * Changes the width and height scale factors in one call
+	 */
+	public void setScale(double sx, double sy);
+	
+	/**
+	 * Toggles visibility on/off
+	 */
+	public void setVisible(boolean v);
 }

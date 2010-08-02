@@ -29,6 +29,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	private short z;
 	private double drawAngle;
 	protected boolean clip;
+	private boolean visible;
 	private int color;
 	private BlendMode blendMode;
 	private double scaleX, scaleY;
@@ -36,8 +37,9 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	public Drawable() {
 		color = 0xFFFFFFFF;
 		clip = true;
+		visible = true;
 		blendMode = BlendMode.NORMAL;
-		scaleX = scaleY = 1.0;
+		scaleX = scaleY = 1.0;		
 	}
 	
 	//Functions
@@ -117,6 +119,8 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	
 	@Override
 	public final void draw(IRenderer renderer) {
+		if (!visible) return;
+		
 		boolean oldClip = renderer.isClipEnabled();
 		int oldColor = renderer.getColor();
 		BlendMode oldBlendMode = renderer.getBlendMode();
@@ -215,6 +219,11 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 		return scaleY;
 	}
 	
+	@Override
+	public boolean isVisible() {
+		return visible;
+	}
+	
 	//Setters
 	@Override
 	public void setField(IField f) {
@@ -290,6 +299,17 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	@Override
 	public void setScaleY(double sy) {
 		scaleY = sy;
+	}
+	
+	@Override
+	public void setScale(double sx, double sy) {
+		setScaleX(sx);
+		setScaleY(sy);
+	}
+	
+	@Override
+	public void setVisible(boolean v) {
+		visible = v;
 	}
 		
 }

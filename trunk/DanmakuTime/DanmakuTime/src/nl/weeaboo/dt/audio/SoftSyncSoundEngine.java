@@ -24,7 +24,7 @@ public class SoftSyncSoundEngine extends AbstractSoundEngine {
 		
 		if (bgm != null) {			
 			if (frameInc <= 0) {
-				if (!bgm.isPaused()) bgm.pause();
+				if (!bgm.isPaused()) bgm.pauseFast();
 			} else {
 				if (bgm.isPaused()) bgm.unpause();
 			}

@@ -34,12 +34,22 @@ public class Input implements IInput {
 	//Getters
 	@Override
 	public boolean isKeyHeld(int keycode) {
-		return input.isKeyDown(keycode);
+		return input.isKeyHeld(keycode);
 	}
 
 	@Override
 	public boolean isKeyPressed(int keycode) {
 		return input.isKeyPressed(keycode);
+	}
+	
+	@Override
+	public int[] getKeysPressed() {
+		return input.getKeysPressed();
+	}
+	
+	@Override
+	public int[] getKeysHeld() {
+		return input.getKeysHeld();
 	}
 
 	@Override
@@ -48,5 +58,23 @@ public class Input implements IInput {
 	}
 	
 	//Setters
+	@Override
+	public void setKeyPressed(int keycode) {
+		if (!isKeyPressed(keycode)) {
+			input.onKeyPressed(keycode);
+		}
+	}
+	
+	@Override
+	public void setKeyHeld(int keycode) {
+		if (!isKeyHeld(keycode)) {
+			input.onKeyPressed(keycode);
+			input.consumeKey(keycode);
+		}
+	}
+	@Override
+	public void setKeyReleased(int keycode) {
+		input.onKeyReleased(keycode);
+	}
 	
 }
