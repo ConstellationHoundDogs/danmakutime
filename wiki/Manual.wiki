@@ -4,6 +4,22 @@
 
 Danmaku Time (DT) uses [http://www.lua.org/manual/5.1/manual.html Lua] as its scripting language. Familiarize yourself with Lua first before continuing.
 
+= Internet Multiplayer =
+
+To create a new networked game, start the program with:
+{{{
+DanmakuTime.exe -host <externalIP> <port>
+}}}
+
+Replacing `<externalIP>` with your [http://www.whatsmyip.org/ public-facing IP address] and `<tcpPort>` with the TCP/UDP port you want clients to connect to you on (port can be any [http://en.wikipedia.org/wiki/Well_known_ports free] number between 1025 and 65535). If other players can't seem to connect with you, check out [http://portforward.com/] for detailed instructions on how to make yourself reachable to others on the internet.
+
+To join a networked game:
+{{{
+DanmakuTime.exe -join <address> <port> <myPort>
+}}}
+
+Where `<address>` and `<port>` match the `<externalIP>` and `<port>` parameters used by the one hosting the game. `<myPort>` changes the UDP port used for sending/receiving (can be any [http://en.wikipedia.org/wiki/Well_known_ports free] number between 1025 and 65535).
+
 = Resources =
 
 Resources are stored in the `res` subfolder. When building a distribution of your game, all resources in `res` are automatically packaged into a `res.zip` file.
@@ -16,8 +32,7 @@ The `res` folder has the following structure:
       + script - *.lua
       - icon.ico
       - icon.png
-      - img.xml
-      - snd.xml
+      - keyconfig.ini
       - prefs.default.xml
 }}}
 
@@ -42,7 +57,7 @@ Images are stored in the `img` folder and its subfolders. You can define subrect
   </image>
 }}}
 
-The XML is fairly straightforward. The filename, width and height attributes must match the relative path and size of an image. The subrect elements define named subrectangles inside the image.
+The XML is fairly straightforward. The filename, width and height attributes must match the relative path and size of an image. The subrect elements define named subrectangles inside the image. You can put additional `img.xml` files in subfolders, the filenames in image elements are then relative to the location of `img.xml`
 
 To reference a subrectangle, use the image path followed by a '#' and the subrect id (`"explosion.png#e0"`).
 
@@ -81,6 +96,24 @@ The preferences are loaded from `prefs.default.xml` and accessible from the `Con
   * *audio.hardSync*: When `true`, syncs the music to the gameplay at the cost of stuttering music during slowdown. When `false`, prefers lighter resource usage and gapless playback over perfect synchronization.
 
 To change the window icon, replace `icon.ico` and `icon.png` with your own images.
+
+== Key Config ==
+
+The `keyconfig.ini` file contains simple key/value pairs defining the default controls.
+
+{{{
+p1.UP=UP|JOY1_UP
+p1.DOWN=DOWN|JOY1_DOWN
+p1.LEFT=LEFT|JOY1_LEFT
+p1.RIGHT=RIGHT|JOY1_RIGHT
+p1.BUTTON1=Z|JOY1_BUTTON1
+p1.BUTTON2=X|JOY1_BUTTON3
+p1.BUTTON3=SHIFT|JOY1_BUTTON2
+}}}
+
+In this example, `p1.BUTTON1` is the first button of the first player. It's considered pressed if the `Z` key is pressed, or the first button of the first connected gamepad is pressed.
+
+Gamepad support is not available in applet-mode.
 
 = Distribution =
 
@@ -288,8 +321,10 @@ The following globals are made available to Lua by default:
   * [#globalReset globalReset(funcName)]
   * [#quit quit()]
   * [#input input]
+  * [#vkeys vkeys]
   * [#texStore texStore]
   * [#soundEngine soundEngine]
+  * [#Persistent_Storage storage]
   * [#BlendMode BlendMode]
   * [#FontStyle FontStyle]
   * [#Keys Keys]
@@ -341,6 +376,16 @@ if input:consumeKey(Keys.Z) then
 end
 }}}
 
+=== vkeys ===
+
+A table containing the key codes for the player controls (the same keys as defined in the key config). Example:
+
+{{{
+if input:consumeKey(vkeys[playerId].BUTTON1) then
+    print("player 1 button 1 pressed")
+end
+}}}
+
 === texStore ===
 
 Makes available a Java object implementing `nl.weeaboo.dt.renderer.ITextureStore`. Use the `get` method to retrieve textures by name. Example:
@@ -359,6 +404,17 @@ soundEngine:setBGM("bgm/bgm01.ogg")
 soundEngine:playSound("test.ogg")
 yield(300)
 soundEngine:stopBGM()
+}}}
+
+=== Persistent Storage ===
+
+A hashtable containing primitives (number/boolean/string) that can be saved to disk. It can be used to store high-scores, cleared-states, etc.
+
+Example use:
+{{{
+storage:set("property name", 1337)
+print("value=" .. property:get("property name"))
+storage:save() --Save changes to disk, this is -not- done automatically.
 }}}
 
 === !BlendMode ===
@@ -382,3 +438,21 @@ A table containing the following values:
 === Keys ===
 
 A table containing the key codes for all keys on a normal keyboard. The naming of the fields is the same as those in `java.awt.event.KeyEvent`, but without the `VK_` prefix.
+
+= Built-in Functions =
+
+== Restart ==
+
+Pressing F5 restarts the game and reloads everything. This saves you the trouble of having to close->reopen the program everytime you change a script.
+
+== Screenshot ==
+
+Press F7 to take a screenshot and store it as a PNG file in the Danmaku Time folder.
+
+== Screen Capture (Video) ==
+
+Press F8 to toggle the screen capture feature. The screen capture records everything that gets displayed (no audio) and stores it as a video file in your Danmaku Time folder. Use of the screen capture requires that you have a working x264 executable in the program folder or some other folder that's in your default executable search path.
+
+== View Textures ==
+
+Press F12 to view all currently loaded textures (F12 toggles it on/off).
