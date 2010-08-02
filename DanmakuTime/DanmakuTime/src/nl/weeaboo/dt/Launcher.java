@@ -2,6 +2,7 @@ package nl.weeaboo.dt;
 
 import java.awt.Container;
 import java.io.File;
+import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -18,6 +19,9 @@ public class Launcher {
 
 	private URI rootURI;
 	private boolean debug;
+	
+	private HostConfig hostConfig;
+	private JoinConfig joinConfig;
 	
 	public Launcher() {
 		try {
@@ -43,6 +47,8 @@ public class Launcher {
 		System.err.println("Usage: java -jar DanmakuTime.jar [options] <sourceFolder>"
 				+ "\n\toptions:"
 				+ "\n\t\t-debug\t\t\tRun program in debug mode"
+				+ "\n\t\t-host <externalAddress> <port>\t\t\tHost a networked game"
+				+ "\n\t\t-join <address> <port> <localUDPPort>\t\t\tJoin a networked game"
 				);
 	}
 	
@@ -52,6 +58,7 @@ public class Launcher {
 		try {
 			launcher.processArgs(args);
 		} catch (RuntimeException re) {
+			System.err.println(re.toString());
 			printUsage();
 			return;
 		}
@@ -65,10 +72,15 @@ public class Launcher {
 			try {
 				if (args[n].startsWith("-debug")) {
 					setDebug(true);
+				} else if (args[n].startsWith("-host")) {
+					hostConfig = new HostConfig(args[++n], Integer.parseInt(args[++n]));
+				} else if (args[n].startsWith("-join")) {
+					joinConfig = new JoinConfig(args[++n], Integer.parseInt(args[++n]),
+							Integer.parseInt(args[++n]));
 				} else if (!args[n].startsWith("-")) {
 					setRootURI(new File(args[n]).toURI());
 				} else {
-					throw new IllegalArgumentException("Invalid arg: " + args[n]);
+					throw new IllegalArgumentException("Unrecognized commandline option");
 				}
 			} catch (Exception e) {
 				throw new IllegalArgumentException("Invalid arg: " + args[n] + " " + e);				
@@ -113,6 +125,21 @@ public class Launcher {
 					config.getUseTrueFullscreen(), config.isDebug());
 			
 			Game game = new Game(config, rm, frame);
+			if (hostConfig != null) {
+				game.hostNetGame(hostConfig.tcpPort);
+				InetAddress targetAddr = InetAddress.getLocalHost();
+				if (!hostConfig.externalIP.equalsIgnoreCase("localhost")) {
+					targetAddr = InetAddress.getByName(hostConfig.externalIP);
+				}
+				game.joinNetGame(targetAddr, hostConfig.tcpPort, hostConfig.tcpPort);
+			} else if (joinConfig != null) {
+				InetAddress targetAddr = InetAddress.getLocalHost();
+				if (!joinConfig.targetIP.equalsIgnoreCase("localhost")) {
+					targetAddr = InetAddress.getByName(joinConfig.targetIP);
+				}
+				game.joinNetGame(targetAddr, joinConfig.targetTCPPort,
+						joinConfig.localUDPPort);
+			}			
 			game.start(gameId, container);
 			
 			inited = true;
@@ -135,5 +162,28 @@ public class Launcher {
 	//Setters	
 	public void setRootURI(URI rootURI) { this.rootURI = rootURI; }
 	public void setDebug(boolean debug) { this.debug = debug; }
+		
+	//Inner Classes
+	private static class HostConfig {
+		public final String externalIP;
+		public final int tcpPort;
+		
+		public HostConfig(String externalIP, int tcpPort) {
+			this.externalIP = externalIP;
+			this.tcpPort = tcpPort;
+		}
+	}
+
+	private static class JoinConfig {
+		public final String targetIP;
+		public final int targetTCPPort;
+		public final int localUDPPort;
+		
+		public JoinConfig(String targetIP, int targetTCPPort, int localUDPPort) {
+			this.targetIP = targetIP;
+			this.targetTCPPort = targetTCPPort;
+			this.localUDPPort = localUDPPort;
+		}
+	}
 	
 }

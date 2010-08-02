@@ -7,10 +7,11 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
+import java.util.Map.Entry;
 
-import nl.weeaboo.dt.DTLog;
 import nl.weeaboo.dt.field.IField;
+import nl.weeaboo.dt.input.Keys;
+import nl.weeaboo.dt.input.VKey;
 import nl.weeaboo.dt.lua.link.LuaFunctionLink;
 import nl.weeaboo.dt.lua.link.LuaLink;
 import nl.weeaboo.dt.lua.link.LuaLinkedObject;
@@ -177,35 +178,31 @@ public class LuaUtil {
 	}
 
 	/**
-	 * Creates a table "Keys" in Lua containing all the <code>VK_???</code>
-	 * static fields from <code>c</code>. The fields in Lua have the same name,
-	 * just without the <code>VK_</code> prefix.
+	 * Registers key constants as a Lua table
 	 * 
 	 * @param vm The LuaState to install the new bindings in
-	 * @param c The class that contains the static fields with the key codes
-	 *        (AWT or JavaFX KeyEvents)
+	 * @param keys A class containing the full set of keycode constants
 	 */
-	public static void registerKeyCodes(LuaState vm, Class<?> c) {
+	public static void registerKeyCodes(LuaState vm, Keys keys) {
 		LTable table = new LTable();
-		for (Field field : c.getFields()) {
-			String fname = field.getName();
-			if (fname.startsWith("VK_")) {
-				try {
-					int intval = field.getInt(null);
-					table.put(fname.substring(3), intval);
-				} catch (IllegalArgumentException e) {
-					DTLog.warning(e);
-					break;
-				} catch (IllegalAccessException e) {
-					DTLog.warning(e);
-					break;
-				}
-			}
+		for (Entry<String, Integer> entry : keys) {
+			table.put(entry.getKey(), entry.getValue());
 		}
 		vm.pushlvalue(table);
 		vm.setglobal("Keys");
+		
+		LTable vkeys = new LTable();
+		for (int player = 1; player <= VKey.MAX_PLAYERS; player++) {
+			LTable t = new LTable();
+			for (VKey k : VKey.values()) {
+				t.put(k.name(), k.toKeyCode(player));
+			}
+			vkeys.put(player, t);
+		}
+		vm.pushlvalue(vkeys);
+		vm.setglobal("vkeys");
 	}
-	
+		
 	/**
 	 * Registers the Thread.* functions
 	 * 

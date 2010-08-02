@@ -2,17 +2,6 @@
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
--- 
--- External dependencies:
---
--- THSprite
--- playerZ
--- itemColType
--- playerItemColType
--- 
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
--------------------------------------------------------------------------------
 
 THItem = {
 	gravity=1,
@@ -28,7 +17,7 @@ function THItem.new(x, y, self)
 	
 	self:setColNode(0, itemColType, RectColNode.new(-8, -8, 16, 16))
 	self:setPos(x or levelWidth/2, y or levelHeight/2)
-	self:setZ(playerZ + 50)
+	self:setZ(2000)
 	self:setDrawAngleAuto(false)
 	self:setAngle(256)
 	self:setSpeed(self.gravity)

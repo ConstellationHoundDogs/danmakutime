@@ -3,47 +3,24 @@ function buildLevel()
 	--Create background
 	scrollingBackground(texStore:get("bgscroll.png"), .01, 2)
 	
-    players = {}
-    
 	--Create player(s)
-	players[1] = THPlayer.new()
-	--players[1]:setColNode(999, playerGrazeColType, LineSegColNode.new(0, 0, 0, -100, 1))
-    
-    local p2controls = {
-        up=Keys.I, down=Keys.K, left=Keys.J, right=Keys.L,
-        fire=Keys.G, bomb=Keys.H, focus=Keys.F
-    }
-	players[2] = THPlayer.new{controls=p2controls}
-    
-    local p3controls = {
-        up=Keys.NUMPAD5, down=Keys.NUMPAD2, left=Keys.NUMPAD1, right=Keys.NUMPAD3,
-        fire=Keys.NUMPAD4, bomb=Keys.NUMPAD0, focus=Keys.NUMPAD7
-    }
-	players[3] = THPlayer.new{controls=p3controls}
-    
-    local p4controls = {
-        up=Keys.HOME, down=Keys.END, left=Keys.DELETE, right=Keys.PAGE_DOWN,
-        fire=Keys.INSERT, bomb=Keys.PAGE_UP, focus=Keys.BACK_SPACE
-    }
-	players[4] = THPlayer.new{controls=p4controls}
+    players = {}    
+    for playerId,charaId in ipairs(selectedPlayers) do
+        if charaId > 0 then
+            charaId = math.max(1, math.min(#charaConfigs, charaId))
+            local config = charaConfigs[charaId]
+            players[playerId] = config.new(playerId, config)
+        end
+    end
 
 	--Create OSD
 	local paramX = gameField:getX() + gameField:getWidth() + 10
 	local paramY = gameField:getY() + 10 + 20
 	local ww = screenWidth - paramX - 20
 	
-    paramY = createPlayerStatsDisplay(paramX, paramY, ww, 7, players[1])
-    if #players >= 2 then
+    for n=1,#players do
+        paramY = createPlayerStatsDisplay(paramX, paramY, ww, 7, players[n])
         paramY = paramY + 30
-        paramY = createPlayerStatsDisplay(paramX, paramY, ww, 7, players[2])
-        if #players >= 3 then
-            paramY = paramY + 30
-            paramY = createPlayerStatsDisplay(paramX, paramY, ww, 7, players[3])
-            if #players >= 4 then
-                paramY = paramY + 30
-                paramY = createPlayerStatsDisplay(paramX, paramY, ww, 7, players[3])
-            end
-        end
     end
 end
 

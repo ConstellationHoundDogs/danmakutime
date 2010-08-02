@@ -1,7 +1,7 @@
 
 function main()	
-	--returnTitle0()
-	restart0()
+	returnTitle0()
+	--restart0()
 end
 
 function returnTitle()
@@ -34,6 +34,7 @@ function initFields()
 	playerItemColType = colMatrix:newColType()	
 	playerItemMagnetColType = colMatrix:newColType()	
 	playerShotColType = colMatrix:newColType()
+	playerBombColType = colMatrix:newColType()	
 	itemColType = colMatrix:newColType()	
 	enemyColType = colMatrix:newColType()	
 	enemyShotColType = colMatrix:newColType()	
@@ -43,7 +44,9 @@ function initFields()
 	colMatrix:setColliding(playerGrazeColType, enemyShotColType)
 	colMatrix:setColliding(itemColType, playerItemColType)
 	colMatrix:setColliding(playerItemMagnetColType, itemColType)
-	colMatrix:setColliding2(playerShotColType, enemyColType)
+	colMatrix:setColliding2(playerShotColType, enemyColType)    
+	colMatrix:setColliding2(playerBombColType, enemyColType)
+	colMatrix:setColliding2(playerBombColType, enemyShotColType)
 
 	--Create the background area (id=0)
 	backgroundField = Field.new(0, 0, 0, screenWidth, screenHeight, 0)
@@ -61,7 +64,9 @@ function initFields()
 end
 
 function start()
-	--soundEngine:setBGM("bgm/bgm01.ogg");
+    charaSelectMenu(4)
+    
+	soundEngine:setBGM("bgm/bgm01.ogg");
 
 	setBackground("screen-border.png", 30)
 	buildLevel()
@@ -79,16 +84,16 @@ function start()
 				Thread.new(createBoss01)
 			elseif input:consumeKey(Keys.D) then
 				Thread.new(dialogTest)
-			elseif #players < 2 and input:consumeKey(Keys.L) then
+			elseif input:consumeKey(Keys.L) then
 				Thread.new(fireLaser)
 			end
 			yield()
 		end
 	end)
 	
-	Thread.new(stressTest, 50, 200)
+	--Thread.new(stressTest, 50, 200)
 	
-	--Thread.new(stressTest, 25, 20)		
+	Thread.new(stressTest, 25, 20)		
 end
 
 function dialogTest()
@@ -120,7 +125,7 @@ end
 function stressTest(a, b)
 	for group=1,a do
 		for n=1,b do
-			local s = THSprite.new{hp=1, power=1}
+			local s = THSprite.new{hp=1, power=1, points=1}
 			s:setColNode(0, enemyColType, CircleColNode.new(7))
 			s.dropItems = function(self)
 				dropPointItems(self:getX(), self:getY(), math.random(0, 3), math.random(0, 1))
@@ -151,7 +156,7 @@ function fireLaser()
 	while true do
 		local r = 8
 	
-		local s = THSprite.new{hp=1, power=1}
+		local s = THShot.new(nil, {hp=1, power=1})
 		--s:setColNode(0, enemyShotColType, LineSegColNode.new(0, -8+r, 0, 8-r, r))
 		--lineseg will have length==0, which is the same as this circle col node:
 		s:setColNode(0, enemyShotColType, CircleColNode.new(r))

@@ -35,7 +35,6 @@ function THBoss.new(self)
 	
 	self:setColNode(0, enemyColType, RectColNode.new(-16, -16, 32, 32))
 	self:setPos(levelWidth/2, -self:getHeight())
-	self:setZ(playerZ + 25)
 	
 	self.lifebar = LifeBar.new(self)
 	

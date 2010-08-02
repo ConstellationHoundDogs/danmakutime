@@ -19,6 +19,11 @@ public interface ISoundEngine {
 	public void stopBGM();
 
 	/**
+	 * Stops all music and sound effects.
+	 */
+	public void stopAll();
+	
+	/**
 	 * @see #playSound(String, int) 
 	 */
 	public SoundEffect playSound(String filename);
