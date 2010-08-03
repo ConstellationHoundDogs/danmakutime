@@ -1,0 +1,11 @@
+<root>
+  <property name="game.gameName" type="string">Danmaku Time v1.1.0</property>
+  <property name="game.defaultFont" type="string">DejaVuSans</property>
+
+  <property name="graphics.fps" type="int">60</property>
+  <property name="graphics.width" type="int">640</property>
+  <property name="graphics.height" type="int">480</property>
+  <property name="graphics.vsyncEnabled" type="boolean">true</property>
+
+  <property name="audio.hardSync" type="boolean">false</property> 
+</root>
