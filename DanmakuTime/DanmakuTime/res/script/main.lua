@@ -134,6 +134,7 @@ function dialogTest()
 end
 
 function createBoss01()
+--[[
 	local spellcard = Spellcard.new{time=30, hp=100}
 	spellcard.update = function(boss)
 		while true do
@@ -145,6 +146,7 @@ function createBoss01()
 	local boss = THBoss.new()
 	boss:setTexture(texStore:get("test.png#g0"))	
 	boss:addSpellcard(spellcard)
+]]--    
 end
 
 function stressTest(a, b)
