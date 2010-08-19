@@ -316,10 +316,15 @@ The above creates a new field with `id=1` (the default field id for new sprites)
 
 The following globals are made available to Lua by default:
 
-  * [#pause pause(func, ...)]
-  * [#screenshot screenshot(x, y, w, h, blurMagnitude)]
+  * [#startGame startGame(funcName)]
   * [#globalReset globalReset(funcName)]
   * [#quit quit()]
+  * [#pause pause(func, ...)]
+  * [#screenshot screenshot(x, y, w, h, blurMagnitude)]
+  * [#saveReplay saveReplay(filename)]
+  * [#startReplay startReplay(filename)]
+  * [#hostNetGame hostNetGame(numPlayers, externalIP, localTCPUDPPort)]
+  * [#joinNetGame joinNetGame(targetIP, targetTCPPort, localUDPPort)]
   * [#input input]
   * [#vkeys vkeys]
   * [#texStore texStore]
@@ -328,6 +333,26 @@ The following globals are made available to Lua by default:
   * [#BlendMode BlendMode]
   * [#FontStyle FontStyle]
   * [#Keys Keys]
+
+=== startGame ===
+
+Resets _everything_, then restarts the game calling the global function with the supplied name (if no name is specified, "main" is used). Example:
+{{{
+startGame("restart0")
+}}}
+
+`startGame` is similar to `globalReset`, but `startGame` also starts recording a replay.
+
+=== globalReset ===
+
+Resets _everything_, then restarts the game calling the global function with the supplied name (if no name is specified, "main" is used). Example:
+{{{
+globalReset("returnTitle0")
+}}}
+
+=== quit ===
+
+Exits the game and closes its window.
 
 === pause ===
 
@@ -354,16 +379,41 @@ Here, the `blurMagnitude` is set to `4`. If the blur magnitude is supplied and i
 
 Anyway, the screenshot command is called and the function waits until `isAvailable` returns `true`. Once it does, the screenshot is available and it can be turned into a texture through `asTexture`.
 
-=== globalReset ===
+=== saveReplay ===
 
-Resets _everything_, then restarts the game calling the global function with the supplied name (if no name is specified, "main" is used). Example:
+`saveReplay` saves the replay currently recording to a file. This does not stop the recording; you may save multiple times during the same recording.
+
 {{{
-globalReset("returnTitle0")
+if saveReplay("r01") then
+    print("Replay successfully saved")
+end
 }}}
 
-=== quit ===
+=== startReplay ===
 
-Exits the game and closes its window.
+`startReplay` starts playback of a previously saved replay. Playing back replays recorded on different versions of the program or with different scripts is undefined. Change the replay speed with `PAGE_UP` and `PAGE_DOWN`. Use `ESC` to end playback of the recorded replay.
+
+{{{
+if startReplay("r01") then
+    print("Replay successfully loaded")
+end
+}}}
+
+=== hostNetGame ===
+
+{{{
+hostNetGame(numPlayers, externalIP, localTCPUDPPort)
+}}}
+
+see: [#Internet_Multiplayer Internet multiplayer]
+
+=== joinNetGame ===
+
+{{{
+joinNetGame joinNetGame(targetIP, targetTCPPort, localUDPPort)
+}}}
+
+see: [#Internet_Multiplayer Internet multiplayer]
 
 === input ===
 
