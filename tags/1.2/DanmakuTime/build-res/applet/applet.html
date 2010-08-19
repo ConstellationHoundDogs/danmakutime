@@ -1,0 +1,130 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+  <head>
+    <title>${project-name}</title>
+    <link rel="shortcut icon" type="image/x-icon" href="favicon.ico" />
+    <script src="codemirror/js/codemirror.js" type="text/javascript"></script>
+    <style type="text/css">
+      .CodeMirror-line-numbers {
+        width: 2.2em;
+        color: #aaa;
+        background-color: #eee;
+        text-align: right;
+        padding: .4em;
+      }
+      
+      .CodeMirror-line-numbers, #editor {
+        margin: 0;
+        font-family: monospace;
+        font-size: 10pt;
+      }
+    </style>
+  </head>
+
+  <body style="font-family: arial, sans-serif;">
+    <div>
+      <div style="float: left; padding-right: 10px; margin: 1px;">
+        <applet
+          id="applet"
+          code="org.jdesktop.applet.util.JNLPAppletLauncher"
+          width="${applet-width}" height="${applet-height}"
+          archive="http://download.java.net/media/applet-launcher/applet-launcher.jar,
+                   http://download.java.net/media/jogl/jsr-231-2.x-webstart/nativewindow.all.jar,
+                   http://download.java.net/media/jogl/jsr-231-2.x-webstart/jogl.all.jar,
+                   http://download.java.net/media/gluegen/webstart-2.x/gluegen-rt.jar,
+                   ${project-name}.jar">
+          <param name="cache_archive" value="${project-name}.jar" />
+          <param name="codebase_lookup" value="false" />
+          <param name="separate_jvm" value="true" />
+
+          <param name="subapplet.classname" value="nl.weeaboo.dt.AppletLauncher" />
+          <param name="subapplet.displayname" value="${project-name}" />
+          <param name="noddraw.check" value="true" />
+          <param name="progressbar" value="true" />
+          <param name="jnlpNumExtensions" value="1" />
+          <param name="jnlpExtension1"
+                 value="http://download.java.net/media/jogl/jsr-231-2.x-webstart/jogl-core.jnlp" />
+          <param name="jnlp_href" value="applet.jnlp" />
+             
+          <param name="java_arguments" value="${jvm-args} -Djnlp.packEnabled=true" />
+          <param name="gameId" value="${project-name}" />
+          <param name="args" value="${program-args}" />
+        </applet>
+      
+        <div style="padding: 10px;">
+          <span>
+            scale: 
+            <a href="javascript:scale(50)">small</a>
+            <a href="javascript:scale(75)">medium</a>
+            <a href="javascript:scale(100)">full</a>
+          </span>
+          <span style="padding-left: 100px; color: #666666; size: .8em;">
+            <!-- Any important messages to the user go here -->
+          </span>
+        </div>
+      
+      </div>
+    
+      <form id="editorForm" style="float: left; height: ${applet-height};">
+        <div style="border: 1px solid black; padding: 0px;">
+          <textarea id="editor" name="editor">function appletMain()
+  resetSelectedCharacters()
+	initFields()
+	start()
+end
+
+function start()
+  setBackground("screen-border.png", 30)
+  buildLevel()
+  
+  --Code goes here 
+  for i=0,8 do
+    local s = THSprite.new{hp=50}
+    s:setTexture(texStore:get("test.png#g0"))
+    s:setColNode(0, enemyColType, CircleColNode.new(4))
+    s:setPos(levelWidth/2, 64)
+    s:setAngle(128 + 32 * i)
+    s:setSpeed(2)
+  end
+  --Code goes here
+  
+end
+</textarea>
+          
+          <script type="text/javascript">
+            var editor = CodeMirror.fromTextArea('editor', {
+                width: "375px",
+                height: "${applet-height}px",
+                tabMode: "spaces",
+                disableSpellcheck: true,
+                lineNumbers: true,
+                textWrapping: false,
+                parserfile: "../contrib/lua/js/parselua.js",
+                stylesheet: "codemirror/contrib/lua/css/luacolors.css",
+                path: "codemirror/js/"
+            });
+            
+            function setScript() {
+                //var code = document.getElementById("editorForm").editor.value;
+                var code = editor.getCode();
+                var applet = document.getElementById("applet");
+                applet.setScript(code);
+            }        
+          </script>
+          
+        </div>      
+        <br/>
+        <input type="button" value="Run Script" onclick="setScript();" />
+      </form>
+    </div>
+    
+    <script type="text/javascript">        
+        function scale(pct) {
+            var applet = document.getElementById("applet");
+            applet.width  = ${applet-width}  * pct / 100;
+            applet.height = ${applet-height} * pct / 100;
+        }
+    </script>
+      
+  </body>
+</html>
