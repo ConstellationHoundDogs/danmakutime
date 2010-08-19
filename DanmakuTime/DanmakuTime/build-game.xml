@@ -8,6 +8,9 @@
 
   <property name="build.sysclasspath" value="ignore"/>
   <property name="gamedata.dir" value="." />
+  <condition property="gamedata-nonlocal">
+    <not><equals arg1="${gamedata.dir}" arg2="."/></not>
+  </condition>
   
   <property name="src.dir" value="src" />
   <property name="bin.dir" value="bin" />
@@ -19,7 +22,7 @@
   <property name="dist.dir" value="${gamedata.dir}/dist" />
   
   <property file="${build-res.dir}/build.properties"/>
-
+  
   <fail>
     <condition>
 	  <or>
@@ -146,7 +149,7 @@
 	  <copy todir="tools" file="../Installer/MakeInstaller.jar" />
   </target>
 
-  <target name="compile" depends="init, compile-common">  
+  <target name="compile" depends="init, compile-common" unless="${gamedata-nonlocal}">  
     <mkdir dir="${bin.dir}"/>
         
     <javac srcdir="${src.dir}" destdir="${bin.dir}" encoding="UTF-8" debug="true">
@@ -160,7 +163,7 @@
   </target>
 
   <!-- Do a clean compile and generate the main jar -->
-  <target name="jar" depends="compile">
+  <target name="jar" depends="compile" unless="${gamedata-nonlocal}">
     <jar destfile="${gamedata.dir}/${project-name}.jar"
     	basedir="${bin.dir}" includes="**">
     	

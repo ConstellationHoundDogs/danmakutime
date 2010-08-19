@@ -1,29 +1,23 @@
 package nl.weeaboo.dt.netplay;
 
+import java.io.IOException;
 import java.net.InetAddress;
 import java.nio.ByteBuffer;
+
+import nl.weeaboo.common.io.ByteBufferInputStream;
+import nl.weeaboo.dt.GameEnv;
 
 public final class GameStartMessage extends NetworkMessage {
 
 	public GameStartMessage(int playerIds[], InetAddress addrs[], int ports[],
-			long randomSeed, ByteBuffer resHash, ByteBuffer persistentData)
+			ByteBuffer genv)
 	{
-		super(Type.GAME_START, 8
-				+ (4 + persistentData.remaining())
-				+ (4 + resHash.remaining())
-				+ (4 + playerIds.length * 12 + len(addrs)));
+		super(Type.GAME_START, 4 + genv.limit() + (4 + playerIds.length * 12 + len(addrs)));
 		
-		buf.putLong(randomSeed);
-
-		buf.putInt(persistentData.remaining());
-		int oldpos = persistentData.position();
-		buf.put(persistentData);
-		persistentData.position(oldpos);
-		
-		buf.putInt(resHash.remaining());
-		oldpos = resHash.position();
-		buf.put(resHash);
-		resHash.position(oldpos);
+		buf.putInt(genv.limit());
+		int oldpos = genv.position();
+		buf.put(genv);
+		genv.position(oldpos);
 		
 		buf.putInt(playerIds.length);
 		for (int n = 0; n < playerIds.length; n++) {
@@ -54,38 +48,15 @@ public final class GameStartMessage extends NetworkMessage {
 		return super.isValid() && getPlayerCount() >= 0;
 	}
 	
-	public long getRandomSeed() {
-		return buf.getLong(getHeaderSize() + 0);
-	}
-
-	protected int getPersistentDataBytesOffset() {
-		return 8;
-	}
-	public int getPersistentDataBytes() {
-		return buf.getInt(getHeaderSize() + getPersistentDataBytesOffset());
-	}
-	public ByteBuffer getPersistentData() {
+	public GameEnv getGameEnv() throws IOException {
 		ByteBuffer buf = getPayLoad();
-		buf.position(buf.position() + getPersistentDataBytesOffset() + 4);
-		buf.limit(buf.position() + getPersistentDataBytes());
-		return buf;
-	}
-	
-	protected int getResourcesHashOffset() {
-		return getPersistentDataBytesOffset() + 4 + getPersistentDataBytes();
-	}
-	public int getResourcesHashBytes() {
-		return buf.getInt(getHeaderSize() + getResourcesHashOffset());
-	}
-	public ByteBuffer getResourcesHash() {
-		ByteBuffer buf = getPayLoad();
-		buf.position(buf.position() + getResourcesHashOffset() + 4);
-		buf.limit(buf.position() + getResourcesHashBytes());
-		return buf;
+		int length = buf.getInt();
+		buf.limit(buf.position() + length);
+		return GameEnv.fromInput(new ByteBufferInputStream(buf));
 	}
 	
 	protected int getPlayerCountOffset() {
-		return getResourcesHashOffset() + 4 + getResourcesHashBytes();
+		return buf.getInt(getHeaderSize() + 0) + 4;
 	}
 	public int getPlayerCount() {
 		return buf.getInt(getHeaderSize() + getPlayerCountOffset());

@@ -1,21 +1,26 @@
 
 function main()	
 	returnTitle0()
-	--restart0()
+    
+    --resetSelectedCharacters()
+	--restart()
 end
 
 function returnTitle()
+    storage:save()
 	globalReset("returnTitle0")
 end
 
 function returnTitle0()
 	initFields()
 	mainMenu()
-	start()
+    charaSelectMenu(4)
+	restart()
 end
 
 function restart()
-	globalReset("restart0")
+    storage:save()
+	startGame("restart0")
 end
 
 function restart0()
@@ -38,6 +43,8 @@ function initFields()
 	itemColType = colMatrix:newColType()	
 	enemyColType = colMatrix:newColType()	
 	enemyShotColType = colMatrix:newColType()	
+	enemyDetectorColType = colMatrix:newColType()	
+	enemyShotDetectorColType = colMatrix:newColType()	
 	colMatrix:setColliding(playerColType, enemyColType)
 	colMatrix:setColliding(playerColType, enemyShotColType)
 	colMatrix:setColliding(playerGrazeColType, enemyColType)
@@ -47,6 +54,8 @@ function initFields()
 	colMatrix:setColliding2(playerShotColType, enemyColType)    
 	colMatrix:setColliding2(playerBombColType, enemyColType)
 	colMatrix:setColliding2(playerBombColType, enemyShotColType)
+	colMatrix:setColliding(enemyDetectorColType, enemyShotColType)
+	colMatrix:setColliding(enemyShotDetectorColType, enemyShotColType)
 
 	--Create the background area (id=0)
 	backgroundField = Field.new(0, 0, 0, screenWidth, screenHeight, 0)
@@ -63,14 +72,15 @@ function initFields()
 	overlayField = Field.new(2, 0, 0, screenWidth, screenHeight, 0)	
 end
 
-function start()
-    charaSelectMenu(4)
-    
+function start()    
 	soundEngine:setBGM("bgm/bgm01.ogg");
 
 	setBackground("screen-border.png", 30)
 	buildLevel()
 
+	--Create background
+	scrollingBackground(texStore:get("bgscroll.png"), .01, 2)
+    
 	Thread.new(pauseListener)
 
 	Thread.new(function()
@@ -86,6 +96,19 @@ function start()
 				Thread.new(dialogTest)
 			elseif input:consumeKey(Keys.L) then
 				Thread.new(fireLaser)
+			elseif input:consumeKey(Keys.F1) then
+				if saveReplay("r01") then
+                    print("Replay saved")
+                end
+			elseif input:consumeKey(Keys.F3) then
+				if startReplay("r01") then
+                    print("Replay loaded")
+                end
+            elseif input:consumeKey(Keys.F9) then
+                local numPlayers = 3
+                hostNetGame(numPlayers, "localhost", 28282)
+            elseif input:consumeKey(Keys.F10) then
+                joinNetGame("localhost", 28282, 28285)
 			end
 			yield()
 		end
@@ -93,7 +116,9 @@ function start()
 	
 	--Thread.new(stressTest, 50, 200)
 	
-	Thread.new(stressTest, 25, 20)		
+	--Thread.new(stressTest, 25, 20)		
+    
+    teststage1()        
 end
 
 function dialogTest()
@@ -110,7 +135,7 @@ end
 
 function createBoss01()
 	local spellcard = Spellcard.new{time=30, hp=100}
-	spellcard.update = function(self, boss)
+	spellcard.update = function(boss)
 		while true do
 			boss:setPos(math.random(0, levelWidth), math.random(0, levelHeight/2))
 			yield(30)

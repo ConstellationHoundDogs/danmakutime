@@ -88,11 +88,29 @@ end
 -------------------------------------------------------------------------------
 -------------------------------------------------------------------------------
 
-selectedPlayers = { 1, 2, 3, 4 }
+function resetSelectedCharacters()
+    for i=1,8 do
+        storage:remove("selected.p" .. i)
+    end
+    storage:set("selected.p1", 1)
+end
+
+function getSelectedCharacter(playerId)
+    if playerId == nil then
+        return 0
+    end
+    local res = storage:get("selected.p" .. playerId)
+    if res == nil then
+        return 0
+    end
+    return res
+end
 
 function charaSelectMenu(maxPlayers, numPlayers)
 	setBackground("chara-select.png", 30)
 
+    resetSelectedCharacters()
+    
     numPlayers = numPlayers or 1
     maxPlayers = maxPlayers or 4
 		            
@@ -100,7 +118,7 @@ function charaSelectMenu(maxPlayers, numPlayers)
     for i=1,maxPlayers do
         selectors[i] = CharaSelector.new(0, i, {options=charaConfigs})
         if i <= numPlayers then
-            selectors[i]:setIndex(selectedPlayers[i] or 1)
+            selectors[i]:setIndex(storage:get("selected.p" .. i) or i)
         end
     end
 	
@@ -132,7 +150,7 @@ function charaSelectMenu(maxPlayers, numPlayers)
 	
     selectedPlayers = {}
     for i,v in ipairs(selectors) do
-        selectedPlayers[i] = v.index
+        storage:set("selected.p" .. i, v.index)
         v:destroy()
     end
 end

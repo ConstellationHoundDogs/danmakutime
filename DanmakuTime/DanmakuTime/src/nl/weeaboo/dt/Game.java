@@ -3,17 +3,14 @@ package nl.weeaboo.dt;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.event.KeyEvent;
-import java.awt.geom.Rectangle2D;
 import java.awt.image.BufferedImage;
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.math.BigInteger;
 import java.net.InetAddress;
-import java.nio.ByteBuffer;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -43,7 +40,6 @@ import nl.weeaboo.dt.input.InputBuffer;
 import nl.weeaboo.dt.input.JoyInput;
 import nl.weeaboo.dt.input.KeyConfig;
 import nl.weeaboo.dt.input.Keys;
-import nl.weeaboo.dt.io.HashUtil;
 import nl.weeaboo.dt.io.IPersistentStorage;
 import nl.weeaboo.dt.io.IPersistentStorageFactory;
 import nl.weeaboo.dt.io.PersistentStorageFactory;
@@ -57,13 +53,19 @@ import nl.weeaboo.dt.lua.platform.LuaPlatform;
 import nl.weeaboo.dt.lua.platform.LuajavaLib;
 import nl.weeaboo.dt.netplay.ClientNetworkState;
 import nl.weeaboo.dt.netplay.ServerNetworkState;
+import nl.weeaboo.dt.renderer.IRenderer;
 import nl.weeaboo.dt.renderer.ITextureStore;
 import nl.weeaboo.dt.renderer.Renderer;
 import nl.weeaboo.dt.renderer.TextureStore;
+import nl.weeaboo.dt.replay.IReplay;
+import nl.weeaboo.dt.replay.IReplayPlayback;
+import nl.weeaboo.dt.replay.Replay;
+import nl.weeaboo.dt.replay.ReplayPlayback;
 import nl.weeaboo.game.GameBase;
 import nl.weeaboo.game.ResourceManager;
 import nl.weeaboo.game.gl.GLManager;
 import nl.weeaboo.game.gl.Screenshot;
+import nl.weeaboo.game.gl.ScreenshotManager;
 import nl.weeaboo.game.input.UserInput;
 import nl.weeaboo.game.text.MutableTextStyle;
 import nl.weeaboo.game.text.ParagraphRenderer;
@@ -75,15 +77,19 @@ import org.luaj.vm.LuaState;
 
 public class Game extends GameBase {
 	
+	private boolean runtimeScriptsChanged;
 	private boolean error;
 	private Notifier notifier;
 	private GameVideoCapture videoCapture;
-	private List<DelayedScreenshot> pendingScreenshots;
+	private ScreenshotManager screenshotManager;
 	
 	private Keys keys;
 	private List<JoyInput> joyInputs;
 	private IKeyConfig keyConfig;
 	private IPersistentStorageFactory storageFactory;
+	private IPersistentStorage storage;
+	private IReplayPlayback replayPlayback;
+	private IReplay replay;
 	private ITextureStore texStore;	
 	private ISoundEngine soundEngine;
 	
@@ -91,7 +97,9 @@ public class Game extends GameBase {
 	private boolean paused, pauseRequest;
 	private LuaLink pauseThread;
 	
+	private long randomSeed;
 	private long frame;
+	private int framesPerDraw;
 	private InputBuffer inputBuffer;
 	private int inputLag = 6;
 	private final int maxInputLag = 15;
@@ -107,30 +115,38 @@ public class Game extends GameBase {
 	}
 	
 	//Functions
-	public void hostNetGame(int tcpPort) throws IOException {
-		inputBuffer.clear();
+	public void stopNetGame() {
+		if (server != null) {
+			server.stop();
+			server = null;
+		}
+		if (networkState != null) {
+			networkState.stop();
+			networkState = null;
+		}
+	}
+	
+	public void hostNetGame(int numPlayers, int tcpPort) throws IOException {
+		if (runtimeScriptsChanged) throw new IOException("Scripts changed at runtime => netplay disallowed");
 		
-		IPersistentStorage ps = storageFactory.createPersistentStorage();
-		ByteArrayOutputStream bout = new ByteArrayOutputStream();
-		ps.save(bout);
-		
-		byte hash[] = HashUtil.calculateResourcesHash(this);
-		System.out.println("Resources Hash: " + new BigInteger(hash).toString(16));
-		
-		server = new ServerNetworkState(hash, 2);
-		server.host(tcpPort, ByteBuffer.wrap(bout.toByteArray()));
+		GameEnv genv = GameEnv.fromGame(this);		
+		server = new ServerNetworkState(genv, numPlayers);
+		server.host(tcpPort);
 	}
 
-	public void joinNetGame(InetAddress targetAddress, int targetTCPPort,
+	public void joinNetGame(String targetAddress, int targetTCPPort,
 			int localUDPPort) throws IOException
 	{
-		inputBuffer.clear();
+		if (runtimeScriptsChanged) throw new IOException("Scripts changed at runtime => netplay disallowed");
+
+		InetAddress addr = InetAddress.getLocalHost();
+		if (!targetAddress.equals("localhost")) {
+			addr = InetAddress.getByName(targetAddress);
+		}
 		
-		byte hash[] = HashUtil.calculateResourcesHash(this);
-		System.out.println("Resources Hash: " + new BigInteger(hash).toString(16));
-		
-		networkState = new ClientNetworkState(hash, inputBuffer, maxInputLag);
-		networkState.join(targetAddress, targetTCPPort, localUDPPort);
+		GameEnv genv = GameEnv.fromGame(this);		
+		networkState = new ClientNetworkState(genv, inputBuffer, maxInputLag);
+		networkState.join(addr, targetTCPPort, localUDPPort);
 	}
 	
 	public static void loadConfig(Config config, ResourceManager rm) throws IOException {
@@ -152,7 +168,7 @@ public class Game extends GameBase {
 		super.loadResources();
 						
 		ResourceManager rm = getResourceManager();
-		
+		screenshotManager = new ScreenshotManager(this);
 		notifier = new Notifier(createParagraphRenderer());
 		
 		OutputStream err = null;
@@ -170,13 +186,33 @@ public class Game extends GameBase {
 			joyInputs.add(new JoyInput(joyInputs.size()+1, con));
 		}
 		
+		randomSeed = System.nanoTime();
+		storage = storageFactory.createPersistentStorage();
+		
 		reset();
+		
+		saveConfig();
 	}
 	
 	public void unloadResources() {
 		videoCapture.stop();
+		saveConfig();
 		
 		super.unloadResources();
+	}
+	
+	protected void saveConfig() {
+		OutputStream out = null;
+		try {
+			out = getOutputStream("save/prefs.xml");
+			getConfig().save(out);
+		} catch (IOException e) {
+			e.printStackTrace();
+		} finally {
+			try {
+				if (out != null) out.close();
+			} catch (IOException ioe) { }
+		}		
 	}
 	
 	private void reset() {
@@ -192,39 +228,67 @@ public class Game extends GameBase {
 			inputLag = 0;			
 		}
 		
+		runtimeScriptsChanged = false;
 		error = false;
 		paused = pauseRequest = false;
 		pauseThread = null;
-		pendingScreenshots = new ArrayList<DelayedScreenshot>();		
+		screenshotManager.clear();
 		keyConfig = null;
 		texStore = null;
-		soundEngine = null;		
+		soundEngine = null;
+		replayPlayback = null;
+		framesPerDraw = 1;
 	}
 	
-	public void restart(String mainFuncName) {
+	public void startGame(String mainFuncName) {
+		restart(mainFuncName);
+		
+		if (replayPlayback == null && !runtimeScriptsChanged) {
+			try {
+				replay = startReplay(GameEnv.fromGame(this), mainFuncName);
+			} catch (IOException e) {
+				DTLog.warning(e);
+			}
+		}
+	}
+	
+	public void startGameReplay(String path) throws IOException {
 		reset();
 		
+		if (!runtimeScriptsChanged) {
+			IReplay replay = loadReplay(path);
+			
+			replayPlayback = new ReplayPlayback(storageFactory);
+			replayPlayback.start(replay);
+			
+			GameEnv genv = replayPlayback.getGameEnv();
+			randomSeed = genv.getRandomSeed();
+			
+			restart0(replayPlayback.getMainFuncName());
+		} else {
+			restart0("main");
+		}
+	}
+	
+	public LuaLink restart(String mainFuncName) {
+		reset();
+		
+		return restart0(mainFuncName);
+	}
+	
+	protected LuaLink restart0(String mainFuncName) {		
 		ResourceManager rm = getResourceManager();
 		int width = getWidth();
 		int height = getHeight();
 		
+		IPersistentStorage ps = storage;
+		if (replayPlayback != null) {
+			ps = replayPlayback.getStorage();
+		}
+		
 		keyConfig = createKeyConfig(keys);
 		texStore = createTextureStore();
 		soundEngine = createSoundEngine();
-
-		IPersistentStorage storage;
-		if (networkState != null && networkState.isGameStarted()) {
-			if (!isHostingNetworkGame()) {
-				//We received the other player's save file. Use a special subclass to
-				//avoid overwriting any of our own save files with theirs.
-				storage = storageFactory.createNonPersistentStorage(networkState.getPersistentStorage());
-			} else {
-				//We've received our own save file. We can just use that...
-				storage = storageFactory.createPersistentStorage(networkState.getPersistentStorage());
-			}
-		} else {
-			storage = storageFactory.createPersistentStorage();
-		}
 		
 		Map<Integer, IField> fieldMap = new HashMap<Integer, IField>();
 		fieldMap.put(0, new Field(0, 0, width, height, 0)); //Full-screen field (0)
@@ -240,9 +304,8 @@ public class Game extends GameBase {
 		};
 		LuaThreadPool threadPool = new LuaThreadPool();
 		
-		long randomSeed = (networkState != null ? networkState.getRandomSeed() : System.nanoTime());
 		luaRunState = new LuaRunState(randomSeed, platform, keys,
-				threadPool, fieldMap, texStore, soundEngine, storage);
+				threadPool, fieldMap, texStore, soundEngine, ps);
 		
 		LuaState vm = getLuaState();
 		
@@ -265,7 +328,7 @@ public class Game extends GameBase {
 			} catch (Exception e) {
 				DTLog.showError(e);
 				error = true;
-				return;
+				return null;
 			} finally {
 				try {
 					if (in != null) in.close();
@@ -276,21 +339,86 @@ public class Game extends GameBase {
 		//Install default functions
 		vm._G.put("pause", luaPauseFunc());
 		vm._G.put("screenshot", luaScreenshotFunc());
+		vm._G.put("saveReplay", luaSaveReplayFunc());
 		vm._G.put("globalReset", luaResetFunc());
+		vm._G.put("startGame", luaStartGameFunc());
+		vm._G.put("joinNetGame", luaJoinNetGameFunc());
+		vm._G.put("hostNetGame", luaHostNetGameFunc());
+		vm._G.put("startReplay", luaStartReplayFunc());
 		vm._G.put("quit", luaQuitFunc());
 		
 		//Start main thread
-		threadPool.add(new LuaFunctionLink(luaRunState, vm, mainFuncName));
+		LuaLink mainThread = new LuaFunctionLink(luaRunState, vm, mainFuncName);
+		threadPool.add(mainThread);
 				
 		error = false;
+		return mainThread;
 	}
 	
-	public void update(UserInput gameInput, float dt) {
+	void addRuntimeScript(String scriptFilename, String script)
+		throws LuaException, IOException
+	{
+		stopNetGame();
+		if (replay != null) replay = null;
+		if (replayPlayback != null) replayPlayback = null;
+		runtimeScriptsChanged = true;
 		
+		LuaState vm = luaRunState.vm;
+		InputStream in = null;
+		try {
+			in = new ByteArrayInputStream(script.getBytes("UTF-8"));
+			LuaUtil.loadModule(vm, scriptFilename, in);
+			LuaUtil.initModule(vm, scriptFilename);
+		} finally {
+			if (in != null) in.close();
+		}
+	}
+	
+	public void update(UserInput gameInput, float dt) {		
 		super.update(gameInput, dt);
 
 		notifier.update(Math.round(1000f * dt));
+
+		if (replayPlayback != null) {
+			//Control replay speed
+			if (gameInput.consumeKey(KeyEvent.VK_PAGE_UP)) {
+				framesPerDraw++;
+			} else if (gameInput.consumeKey(KeyEvent.VK_PAGE_DOWN)) {
+				framesPerDraw--;
+			}
+			
+			if (gameInput.consumeKey(KeyEvent.VK_ESCAPE)) {
+				restart("main");
+				return;
+			}
+			
+			framesPerDraw = Math.max(0, Math.min(30, framesPerDraw));			
+		} else if (networkState != null) {
+			//Control input lag
+			if (gameInput.consumeKey(KeyEvent.VK_PAGE_UP)) {
+				inputLag++;
+			} else if (gameInput.consumeKey(KeyEvent.VK_PAGE_DOWN)) {
+				inputLag--;
+			}
+			inputLag = Math.max(1, Math.min(maxInputLag, inputLag));					
+		}
 		
+		for (int n = 0; n < framesPerDraw; n++) {
+			IInput futureInput;		
+			if (replayPlayback != null && replayPlayback.hasNextFrame()) {
+				futureInput = replayPlayback.nextFrame();
+			} else {				
+				futureInput = new Input(gameInput.copy());
+				for (JoyInput joypadInput : joyInputs) {
+					joypadInput.update(futureInput);
+				}
+			}
+			
+			updateFrame(futureInput);
+		}
+	}
+	
+	protected void updateFrame(IInput futureInput) {
 		networkReceive();
 		
 		if (server != null && !server.isGameStarted()) {
@@ -301,19 +429,21 @@ public class Game extends GameBase {
 			if (frame == 0) {
 				restart("main");
 			}			
-		} else {
-			//Control input laf
-			if (gameInput.consumeKey(KeyEvent.VK_PAGE_UP)) {
-				inputLag++;
-			} else if (gameInput.consumeKey(KeyEvent.VK_PAGE_DOWN)) {
-				inputLag--;
-			}
-			inputLag = Math.max(1, Math.min(maxInputLag, inputLag));
-			
+		} else {			
 			//Check if network ready
 			if (!networkState.isGameStarted()) {
 				return;
 			} else if (frame == 0) {
+				if (!isHostingNetworkGame()) {
+					//We received the other player's save file. Use a special subclass to
+					//avoid overwriting any of our own save files with theirs.
+					storage = storageFactory.createNonPersistentStorage(networkState.getPersistentStorage());
+				} else {
+					//We've received our own save file. We can just use that...
+					storage = storageFactory.createPersistentStorage(networkState.getPersistentStorage());
+				}
+				randomSeed = networkState.getRandomSeed();
+
 				restart("main");				
 			}
 			
@@ -341,7 +471,7 @@ public class Game extends GameBase {
 					return;
 				}
 			}
-		}	
+		}
 				
 		frame++;
 		inputBuffer.setLocalFrame(frame);
@@ -354,12 +484,7 @@ public class Game extends GameBase {
 
 		soundEngine.update(paused ? 0 : 1);
 		
-		//Update input
-		IInput futureInput = new Input(gameInput.copy());
-		for (JoyInput joypadInput : joyInputs) {
-			joypadInput.update(futureInput);
-		}
-		
+		//Update input		
 		int futureKeysPressed[] = futureInput.getKeysPressed();
 		int futureKeysHeld[] = futureInput.getKeysHeld();
 		int futureVKeysPressed[] = keyConfig.getVKeysPressed(futureInput);
@@ -377,15 +502,17 @@ public class Game extends GameBase {
 			networkSend();
 		}
 		
-		if (error) {
-			return;
-		}
-		
 		IInput ii = (frame-inputLag > 1 ? inputBuffer.get(frame-inputLag) : new Input());
-				
+		if (replay != null) {
+			replay.addFrame(ii);
+		}
+		if (ii.consumeKey(KeyEvent.VK_F5)) {
+			restart("main");
+			return;
+		}								
 		if (ii.consumeKey(KeyEvent.VK_F7)) {
 			//Screen capture activation key
-			pendingScreenshots.add(new DelayedScreenshot(this, 0, 0, getWidth(), getHeight()) {
+			screenshotManager.add(new Screenshot(0, 0, getWidth(), getHeight()) {
 				public void set(int argb[], int w, int h) {
 					try {
 						BufferedImage img = GraphicsUtil.createBufferedImage(w, h, argb);
@@ -396,13 +523,18 @@ public class Game extends GameBase {
 					}					
 				}
 			});
-		} else if (ii.consumeKey(KeyEvent.VK_F5)) {
-			restart("main");
-			return;
 		}
 		
 		videoCapture.update(ii);
 		
+		//Early out
+		if (replayPlayback != null && !replayPlayback.hasNextFrame()) {
+			return;
+		}		
+		if (error) {
+			return;
+		}
+
 		LuaState vm = getLuaState();
 
 		//global IInput input
@@ -425,35 +557,17 @@ public class Game extends GameBase {
 		}
 	}
 	
-	public void draw(GLManager glm) {		
+	public void draw(GLManager glm) {	
 		int w = getWidth();
 		int h = getHeight();
-		int rw = getRealWidth();
-		int rh = getRealHeight();
-				
-		Renderer r = new Renderer(glm, createParagraphRenderer(), w, h, rw, rh);
+		
+		Renderer r = (Renderer)createRenderer(glm);
 		if (luaRunState != null) {
 			luaRunState.draw(r);
 		}
 		r.flush();
 				
-		//Take screen capture
-		if (!pendingScreenshots.isEmpty()) {
-			Screenshot ss = Screenshot.screenshot(glm, w, h, rw, rh);
-			
-			int argb[] = ss.getARGB();
-			for (DelayedScreenshot ds : pendingScreenshots) {
-				Rectangle2D cr = ds.getCaptureRect();
-				Point p0 = new Point(r.virtualToReal(cr.getX(), cr.getY()));
-				Point p1 = new Point(r.virtualToReal(cr.getX()+cr.getWidth(), cr.getY()+cr.getHeight()));
-				Rectangle take = new Rectangle(Math.min(p0.x, p1.x), Math.min(p0.y, p1.y),
-						Math.abs(p1.x-p0.x), Math.abs(p1.y-p0.y));
-				
-				int pixels[] = DelayedScreenshot.copyRect(argb, ss.width, ss.height, take);				
-				ds.set(pixels, take.width, take.height);
-			}
-			pendingScreenshots.clear();
-		}
+		screenshotManager.update(glm);
 									
 		//Draw HUD
 		if (isDebug() && luaRunState != null) {
@@ -602,6 +716,46 @@ public class Game extends GameBase {
 		}
 	}
 			
+	protected IRenderer createRenderer() {
+		return createRenderer(null);
+	}
+	protected IRenderer createRenderer(GLManager glm) {
+		int w = getWidth();
+		int h = getHeight();
+		int rw = getRealWidth();
+		int rh = getRealHeight();
+				
+		Renderer r = new Renderer(glm, createParagraphRenderer(), w, h, rw, rh);
+		return r;
+	}
+	
+	protected IReplay startReplay(GameEnv genv, String mainFuncName) {
+		return new Replay(genv, mainFuncName);
+	}
+	
+	public IReplay loadReplay(String path) throws IOException {
+		return Replay.fromInputStream(getInputStream("save/replay/" + path + ".rpy"));
+	}
+	
+	public boolean saveReplay(String path) {
+		if (replay == null) return false;
+		
+		OutputStream out = null;
+		try {
+			out = getOutputStream("save/replay/" + path + ".rpy");
+			replay.save(out);
+		} catch (IOException ioe) {
+			DTLog.warning(ioe);
+			return false;
+		} finally {
+			try {
+				if (out != null) out.close();
+			} catch (IOException ioe2) { }
+		}
+
+		return true;
+	}
+	
 	public DelayedScreenshot screenshot(double x, double y, double w, double h,
 			int blurMagnitude)
 	{
@@ -611,7 +765,7 @@ public class Game extends GameBase {
 		} else {
 			ss = new DelayedScreenshot(this, x, y, w, h);
 		}
-		pendingScreenshots.add(ss);
+		screenshotManager.add(ss);
 		return ss;
 	}
 	
@@ -647,8 +801,16 @@ public class Game extends GameBase {
 					blurMagnitude = vm.tointeger(5);
 				}
 				
+				IRenderer r = createRenderer();
+				Point p0 = new Point(r.virtualToReal(x, y));
+				Point p1 = new Point(r.virtualToReal(x + w, y + h));
+				Rectangle take = new Rectangle(
+						Math.min(p0.x, p1.x), Math.min(p0.y, p1.y),
+						Math.abs(p1.x - p0.x), Math.abs(p1.y - p0.y));
+				
 				vm.resettop();
-				DelayedScreenshot ds = screenshot(x, y, w, h, blurMagnitude);
+				DelayedScreenshot ds = screenshot(take.x, take.y,
+						take.width, take.height, blurMagnitude);
 				vm.pushlvalue(LuajavaLib.toUserdata(ds, ds.getClass()));
 				return 1;
 			}
@@ -667,11 +829,103 @@ public class Game extends GameBase {
 		};		
 	}
 	
+	protected LFunction luaStartGameFunc() {
+		return new LFunction() {
+			public int invoke(LuaState vm) {
+				String funcName = (vm.isstring(1) ? vm.tostring(1) : "start");
+				vm.resettop();
+				
+				startGame(funcName);
+				return 0;
+			}
+		};		
+	}
+	
+	protected LFunction luaStartReplayFunc() {
+		return new LFunction() {
+			public int invoke(LuaState vm) {
+				boolean res = false;
+				if (vm.isstring(1)) {
+					try {
+						startGameReplay(vm.tostring(1));
+						res = true;
+					} catch (IOException e) {
+						DTLog.warning(e);
+					}
+				}
+				vm.resettop();
+				vm.pushboolean(res);
+				return 1;
+			}
+		};		
+	}
+	
 	protected LFunction luaQuitFunc() {
 		return new LFunction() {
 			public int invoke(LuaState vm) {
 				dispose();
 				return 0;
+			}
+		};		
+	}
+
+	protected LFunction luaSaveReplayFunc() {
+		return new LFunction() {
+			public int invoke(LuaState vm) {
+				boolean res = false;
+				if (vm.isstring(1)) {
+					res = saveReplay(vm.tostring(1));
+				}				
+				vm.resettop();
+				vm.pushboolean(res);
+				return 1;
+			}
+		};		
+	}
+
+	protected LFunction luaJoinNetGameFunc() {
+		return new LFunction() {
+			public int invoke(LuaState vm) {
+				String addr = vm.tostring(1);
+				int targetTCPPort = vm.tointeger(2);
+				int localUDPPort = vm.tointeger(3);
+				vm.resettop();
+				try {
+					stopNetGame();					
+					inputBuffer.clear();
+					frame = 0;
+
+					joinNetGame(addr, targetTCPPort, localUDPPort);
+					return 0;
+				} catch (IOException ioe) {
+					DTLog.warning(ioe);
+					vm.pushstring(ioe.toString());
+					return 1;
+				}
+			}
+		};		
+	}
+
+	protected LFunction luaHostNetGameFunc() {
+		return new LFunction() {
+			public int invoke(LuaState vm) {
+				int numPlayers = vm.tointeger(1);
+				String addr = vm.tostring(2);
+				int port = vm.tointeger(3);
+				vm.resettop();
+				try {
+					stopNetGame();
+					inputBuffer.clear();
+					frame = 0;
+					
+					hostNetGame(numPlayers, port);
+					joinNetGame(addr, port, port);
+					return 0;
+				} catch (IOException ioe) {
+					DTLog.warning(ioe);
+					vm.pushstring(ioe.toString());
+					return 1;					
+				}
 			}
 		};		
 	}
@@ -700,6 +954,9 @@ public class Game extends GameBase {
 	public float getFPS() {
 		return getGameFrame().getCurrentFPS();
 	}	
+	public IPersistentStorageFactory getPersistentStorageFactory() {
+		return storageFactory;
+	}
 	
 	//Setters
 	

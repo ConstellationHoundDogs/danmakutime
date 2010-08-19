@@ -140,6 +140,12 @@ public class LuaRunState {
 		}
 	}
 	
+	public long reseed() {
+		long seed = random.nextLong();
+		random.setSeed(seed);
+		return seed;
+	}
+	
 	//Getters
 	public boolean isDisposed() {
 		return disposed;

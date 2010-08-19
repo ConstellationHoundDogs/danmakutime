@@ -24,6 +24,7 @@
 
 package nl.weeaboo.dt.lua.platform;
 
+import java.lang.reflect.Array;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -34,6 +35,7 @@ import org.luaj.vm.LDouble;
 import org.luaj.vm.LInteger;
 import org.luaj.vm.LNil;
 import org.luaj.vm.LString;
+import org.luaj.vm.LUserData;
 import org.luaj.vm.LValue;
 
 public class CoerceJavaToLua {
@@ -91,10 +93,20 @@ public class CoerceJavaToLua {
 			return c.coerce(o);
 		}
 		
+		if (clazz.isArray()) {
+			//Return a special LUserData object that supports luaLength()
+			ClassInfo info = LuajavaLib.getClassInfo(clazz);
+			return new LUserData(o, info.getMetaTable()) {
+				public int luaLength() {
+					return Array.getLength(toJavaInstance());
+				}
+			};
+		}
+		
 		if (o instanceof LuaLinkedObject) {
 			//Object already contains a Lua converted version of itself
 			return ((LuaLinkedObject)o).getLuaObject();
-		}		
+		}
 		
 		//Use the general Java Object -> Lua conversion
 		return LuajavaLib.toUserdata(o, clazz);

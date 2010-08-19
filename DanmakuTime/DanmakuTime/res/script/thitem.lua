@@ -99,7 +99,7 @@ function dropPointItems(x, y, small, large)
 		self:destroy()
 	end
 	
-	local t0 = dropItems(x, y, 0, "items.png#pointSmall", smallFunc, small or 0) 
+	local t0 = dropItems(x, y, 0, "items.png#pointSmall", smallFunc, small or 1) 
 	local t1 = dropItems(x, y, -1, "items.png#pointLarge", largeFunc, large or 0)
 	
 	return append(t0, t1)
@@ -119,7 +119,7 @@ function dropPowerItems(x, y, small, large)
 		self:destroy()
 	end
 	
-	local t0 = dropItems(x, y, 0, "items.png#powerSmall", smallFunc, small or 0) 
+	local t0 = dropItems(x, y, 0, "items.png#powerSmall", smallFunc, small or 1) 
 	local t1 = dropItems(x, y, -1, "items.png#powerLarge", largeFunc, large or 0)
 
 	return result
@@ -133,7 +133,7 @@ function dropLifeItems(x, y, num)
 		self:destroy()
 	end
 	
-	return dropItems(x, y, -5, "items.png#life", func, num or 0)
+	return dropItems(x, y, -5, "items.png#life", func, num or 1)
 end
 
 function dropBombItems(x, y, num)
@@ -144,7 +144,7 @@ function dropBombItems(x, y, num)
 		self:destroy()
 	end
 	
-	return dropItems(x, y, -3, "items.png#bomb", func, num or 0)
+	return dropItems(x, y, -3, "items.png#bomb", func, num or 1)
 end
 
 function dropFullRestoreItems(x, y, num)
@@ -155,7 +155,25 @@ function dropFullRestoreItems(x, y, num)
 		self:destroy()
 	end
 	
-	return dropItems(x, y, -3, "items.png#fullRestore", func, num or 0)
+	return dropItems(x, y, -3, "items.png#fullRestore", func, num or 1)
+end
+
+function dropMagnetItems(x, y, num)
+	local func = function(self, other, myNode, otherNode)
+		if otherNode:getType() == playerItemColType then
+			other.points = other.points + 1
+		end
+		self:destroy()
+	end
+	
+	local items = dropItems(x, y, -3, "items.png#magnet", func, num or 1)
+    for _,item in ipairs(items) do
+        local p = getClosestPlayer(item:getX(), item:getY())
+        if p ~= nil then
+            item.magnetTarget = p
+        end
+    end
+    return items
 end
 
 -------------------------------------------------------------------------------

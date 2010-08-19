@@ -11,6 +11,7 @@ import nl.weeaboo.dt.lua.link.LuaLink;
 public class LuaThreadPool {
 
 	private boolean disposed;
+	
 	private List<LuaLink> threads;
 	private List<LuaLink> standbyList;
 	

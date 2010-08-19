@@ -4,7 +4,6 @@ import nl.weeaboo.dt.lua.LuaException;
 import nl.weeaboo.dt.lua.LuaRunState;
 
 import org.luaj.vm.LFunction;
-import org.luaj.vm.LThread;
 import org.luaj.vm.LValue;
 import org.luaj.vm.LuaState;
 
@@ -32,17 +31,17 @@ public class LuaFunctionLink extends LuaLink {
 	@Override
 	protected void init() throws LuaException {
 		if (func != null) {
-			if (thread == null) {
-				thread = new LThread(func, rootVM._G);
-				vm = thread.vm;
-			} else {
-				vm.pushlvalue(func);
+			pushFunc(func);
+			
+			if (args != null) {
+				for (Object arg : args) {
+					vm.pushlvalue((LValue)arg);
+				}
 			}
-			for (Object arg : args) {
-				vm.pushlvalue((LValue)arg);
-			}
-		} else {
+		} else if (funcName != null) {
 			pushCall(funcName, args);
+		} else {
+			throw new LuaException("Attempting to call a nil value");
 		}
 	}
 	

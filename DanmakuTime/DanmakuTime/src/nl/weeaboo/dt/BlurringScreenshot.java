@@ -2,7 +2,7 @@ package nl.weeaboo.dt;
 
 import java.awt.Dimension;
 
-import nl.weeaboo.dt.renderer.Blur;
+import nl.weeaboo.game.image.Blur;
 
 public class BlurringScreenshot extends DelayedScreenshot {
 

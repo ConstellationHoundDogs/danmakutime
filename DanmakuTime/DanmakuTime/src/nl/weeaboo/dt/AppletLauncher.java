@@ -1,13 +1,17 @@
 package nl.weeaboo.dt;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.URISyntaxException;
 
 import javax.jnlp.PersistenceService;
 import javax.swing.JApplet;
 
 import nl.weeaboo.common.SystemUtil;
+import nl.weeaboo.common.io.FileUtil;
 import nl.weeaboo.common.jnlp.JnlpUtil;
+import nl.weeaboo.dt.lua.LuaException;
+import nl.weeaboo.dt.lua.link.LuaLink;
 
 @SuppressWarnings("serial")
 public class AppletLauncher extends JApplet {
@@ -91,7 +95,41 @@ public class AppletLauncher extends JApplet {
 	}
 	
 	//Getters
+	public String[] getScriptNames() {
+		synchronized (game) {
+			return game.getFolderContents("script").toArray(new String[0]);
+		}
+	}
+	public String getScript(String name) {
+		InputStream in = null;
+		try {
+			synchronized (game) {
+				in = game.getInputStream(name);
+				return FileUtil.read(in);
+			}
+		} catch (IOException ioe) {
+			DTLog.warning(ioe);
+			return ioe.toString();
+		} finally {
+			try {
+				if (in != null) in.close();
+			} catch (IOException ioe) { }
+		}
+	}
 	
 	//Setters
+	public void setScript(String script) {
+		synchronized (game) {
+			LuaLink mainThread = game.restart("main");
+			try {
+				game.addRuntimeScript("_applet_.lua", script);
+				mainThread.call(false, "appletMain");
+			} catch (LuaException e) {
+				DTLog.error(e);
+			} catch (IOException e) {
+				DTLog.error(e);
+			}
+		}		
+	}
 	
 }

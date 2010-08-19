@@ -1,11 +1,9 @@
 
-function buildLevel()
-	--Create background
-	scrollingBackground(texStore:get("bgscroll.png"), .01, 2)
-	
+function buildLevel()	
 	--Create player(s)
     players = {}    
-    for playerId,charaId in ipairs(selectedPlayers) do
+    for playerId=1,8 do
+        local charaId = getSelectedCharacter(playerId)
         if charaId > 0 then
             charaId = math.max(1, math.min(#charaConfigs, charaId))
             local config = charaConfigs[charaId]

@@ -54,7 +54,7 @@ public class ConstructorFunction<T extends LuaLinkedObject> extends LFunction {
 			meta.put(LValue.TM_NEWINDEX, new MetaIndexFunction(table, metaNewIndex, false));		
 			
 			LUserData udata = new LUserData(javaInstance, meta);
-			udata.luaSetTable(vm, LString.valueOf("super"), udata);
+			udata.luaSetTable(vm, LString.valueOf("javaObject"), sharedUserData);
 			
 			javaInstance.init(runState, vm, udata);
 			

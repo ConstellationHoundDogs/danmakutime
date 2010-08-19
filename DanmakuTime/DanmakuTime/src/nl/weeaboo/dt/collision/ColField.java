@@ -17,6 +17,7 @@ public class ColField implements IColField {
 	
 	protected IColMatrix colMatrix;
 	protected Rectangle bounds;
+	private List<IColNode> waitList;
 	protected List<List<IColNode>> nodes;
 	protected ColAlgorithm colAlgorithm = ColAlgorithm.UNIFORM_GRID;
 	
@@ -29,17 +30,28 @@ public class ColField implements IColField {
 
 	public ColField(int x, int y, int w, int h) {
 		bounds = new Rectangle(x, y, w, h);
+		waitList = new ArrayList<IColNode>();
 	}
 	
 	//Functions	
 	@Override
 	public void add(IColNode c) {
-		Collection<IColNode> list = nodes.get(c.getType());
-		list.add(c);
+		waitList.add(c);
 	}
 
+	protected void flushWaitList() {
+		IColNode waitListArray[] = waitList.toArray(new IColNode[waitList.size()]);
+		waitList.clear();
+		for (IColNode c : waitListArray) {
+			Collection<IColNode> list = nodes.get(c.getType());
+			list.add(c);
+		}
+	}
+	
 	@Override
 	public void remove(IColNode c) {
+		waitList.remove(c);
+		
 		Collection<IColNode> list = nodes.get(c.getType());
 		list.remove(c);
 	}
@@ -53,6 +65,8 @@ public class ColField implements IColField {
 		if (benchmark) {
 			Benchmark.tick();
 		}
+		
+		flushWaitList();
 		
 		if (colAlgorithm == ColAlgorithm.NAIVE) {
 			//Straightforward comparison of all col nodes

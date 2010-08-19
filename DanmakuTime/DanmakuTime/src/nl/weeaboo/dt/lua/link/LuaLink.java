@@ -13,13 +13,13 @@ import org.luaj.vm.LuaState;
 
 public abstract class LuaLink {
 
-	protected final LuaRunState runState;
-	protected final LuaState rootVM;
+	public final LuaRunState runState;
+	public final LuaState rootVM;
 	protected LThread thread;
 	protected LuaState vm;
 	
 	protected int wait;
-	protected boolean inited;
+	private boolean inited;
 	protected boolean finished;
 	
 	public LuaLink(LuaRunState runState, LuaState vm) {
@@ -28,12 +28,19 @@ public abstract class LuaLink {
 	}
 	
 	//Functions
-	protected int pushMethod(String methodName) {
-		LFunction func = getMethod(methodName);
+	public void destroy() {
+		finished = true;
+	}
+	
+	protected int pushFunc(String methodName) {
+		LFunction func = getFunc(methodName);
 		if (func == null) {
 			return 0;
-		}
-		
+		}		
+		return pushFunc(func);
+	}
+	
+	protected int pushFunc(LFunction func) {
 		if (thread == null) {
 			thread = new LThread(func, rootVM._G);
 			vm = thread.vm;
@@ -43,7 +50,7 @@ public abstract class LuaLink {
 		return 1;
 	}
 	
-	protected LFunction getMethod(String methodName) {
+	protected LFunction getFunc(String methodName) {
 		rootVM.getglobal(methodName);
 		if (!rootVM.isfunction(-1)) {
 			rootVM.pop(1);
@@ -53,24 +60,26 @@ public abstract class LuaLink {
 	}
 
 	protected int pushCall(String methodName, Object... args) throws LuaException {		
-		int methodPushed = pushMethod(methodName);
+		int methodPushed = pushFunc(methodName);
 		if (methodPushed <= 0) {
 			if (vm != null) {
-				vm.pop(-pushMethod(methodName));
+				vm.pop(-pushFunc(methodName));
 			}
 			//throw new LuaException(String.format("function \"%s\" not found", methodName));
 			return 0;
 		}
 
-		for (Object arg : args) {
-			if (arg instanceof LValue) {
-				vm.pushlvalue((LValue)arg);
-			} else {
-				vm.pushlvalue(CoerceJavaToLua.coerce(arg));
+		if (args != null) {
+			for (Object arg : args) {
+				if (arg instanceof LValue) {
+					vm.pushlvalue((LValue)arg);
+				} else {
+					vm.pushlvalue(CoerceJavaToLua.coerce(arg));
+				}
 			}
 		}
 		
-		return (methodPushed-1) + args.length;
+		return (methodPushed-1) + (args != null ? args.length : 0);
 	}
 	
 	public LValue call(boolean ignoreMissing,
@@ -78,6 +87,7 @@ public abstract class LuaLink {
 	{
 		LValue result = LNil.NIL;
 		
+		LuaLink oldLink = runState.getCurrentLink();
 		runState.setCurrentLink(this);		
 		try {
 			int pushed = pushCall(methodName, args);
@@ -90,14 +100,15 @@ public abstract class LuaLink {
 			
 			if (ignoreMissing && e.getCause() instanceof NoSuchMethodException) {
 				//Ignore methods that don't exist
-			} else {				
+			} else {
+				e.printStackTrace();
 				throw new LuaException(e.getMessage(), e.getCause() != null ? e.getCause() : e);
 			}
 		} catch (RuntimeException e) {
 			if (vm != null) vm.pop(1);
 			throw new LuaException(e);
 		} finally {
-			runState.setCurrentLink(null);
+			runState.setCurrentLink(oldLink);
 		}
 		
 		return result;
@@ -111,10 +122,10 @@ public abstract class LuaLink {
 			init();
 		}
 		
-		if (thread == null || finished
-				|| thread.getStatusCode() == LThread.STATUS_DEAD)
-		{
-			finished = true;
+		if (finished) {
+			return;
+		} else if (thread == null || thread.getStatusCode() == LThread.STATUS_DEAD) {
+			destroy();
 			return;
 		}
 		
@@ -125,23 +136,24 @@ public abstract class LuaLink {
 			}
 		}
 		
+		LuaLink oldLink = runState.getCurrentLink();
 		runState.setCurrentLink(this);		
 		try {
 			thread.resumeFrom(vm, 0);
 		} catch (LuaErrorException e) {
-			finished = true;
+			destroy();
 			if (e.getCause() instanceof NoSuchMethodException) {
 				throw new LuaException(e.getCause().getMessage());
 			} else {
 				throw new LuaException(e.getMessage(), e.getCause() != null ? e.getCause() : e);
 			}
 		} catch (RuntimeException e) {
-			finished = true;
+			destroy();
 			throw new LuaException(e);
 		} finally {
-			runState.setCurrentLink(null);
+			runState.setCurrentLink(oldLink);
 			if (finished || thread.getStatusCode() == LThread.STATUS_RUNNING) {
-				finished = true;
+				destroy();
 				thread = null;
 			}
 		}

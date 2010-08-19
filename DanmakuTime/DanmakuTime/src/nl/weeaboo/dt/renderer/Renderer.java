@@ -182,6 +182,8 @@ public class Renderer implements IRenderer {
 					if (cur != dcmd.tex) {
 						buffered = quadFlush(gl, buffered);
 						
+						cur = dcmd.tex;
+						
 						int t = 0;
 						while (image.getTexture().getState() == TextureState.DIRTY && t < 16) {
 							image.getTexture().update(gl);

@@ -71,14 +71,16 @@ public class ColHost implements IColHost {
 
 	@Override
 	public void setColNode(int index, int type, IColNode n) {
-		IColNode old = nodes.put(index, n);
+		IColNode old = (n != null ? nodes.put(index, n) : nodes.remove(index));
 		if (old != null) {
 			field.remove(old);
 			old.onDetached();
 		}
 
-		n.onAttached(this, index, type);
-		field.add(n);
+		if (n != null) {
+			n.onAttached(this, index, type);
+			field.add(n);
+		}
 
 		if (n instanceof IRotateableColNode) {
 			hasRotateable = true;

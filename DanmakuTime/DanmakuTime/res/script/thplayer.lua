@@ -214,11 +214,16 @@ function THPlayer:fire()
 	local z = self:getZ() + 25
 	local angle = self:getAngle()
 
+    local angleScale = 1
+    if self.focus then
+        angleScale = .25
+    end
+    
 	for n=0,4 do
 		local s = THPlayerShot.new(self, {power=1})
 		s:setTexture(texStore:get("test.png#g0"));
 		s:setColNode(0, playerShotColType, CircleColNode.new(7))
-		s:setAngle(angle - 32 + 16 * n)
+		s:setAngle(angle + angleScale * (16 * n - 32))
 		s:setSpeed(10)
 	end
 end
@@ -362,8 +367,8 @@ function THPlayerShot.new(owner, self)
 end
     
 function THPlayerShot:onCollision(other, myNode, otherNode)
-    if self.owner ~= nil and self.owner.points ~= nil and other.points ~= nil then
-        self.owner.points = self.owner.points + other.points
+    if self.owner ~= nil and self.owner.points ~= nil and other.pointValue ~= nil then
+        self.owner.points = self.owner.points + other.pointValue
     end
     self:destroy()
 end

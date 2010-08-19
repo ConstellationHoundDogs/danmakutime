@@ -104,7 +104,7 @@ public final class ColUtil {
 		if (ao.isDestroyed() || bo.isDestroyed()) {
 			return;
 		}
-		
+
 		if (a.intersects(b)) {
 			if (atob) {
 				a.onCollide(b);
