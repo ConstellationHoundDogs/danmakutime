@@ -8,6 +8,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import nl.weeaboo.common.SystemUtil;
+import nl.weeaboo.dt.GameEnv;
+
 public class ServerNetworkState extends NetworkState {
 
 	private final int maxPlayers;
@@ -16,17 +19,20 @@ public class ServerNetworkState extends NetworkState {
 	private long randomSeed;
 	private boolean gameStarted;
 
-	public ServerNetworkState(byte resHash[], int maxPlayers) {
-		super(resHash);
+	public ServerNetworkState(GameEnv genv, int maxPlayers) {
+		super(genv.getResourcesHash());
+		
+		randomSeed = genv.getRandomSeed();
+		
+		storage = ByteBuffer.allocate(genv.getPersistentDataLength());
+		storage.put(genv.getPersistentData());
+		storage.rewind();
 		
 		this.maxPlayers = maxPlayers;
 	}
 
 	//Functions
-	public void host(int tcpPort, ByteBuffer persistentStorage) throws IOException {
-		storage = persistentStorage;
-		
-		randomSeed = System.nanoTime();
+	public void host(int tcpPort) throws IOException {
 		gameStarted = false;
 		
 		connectedPlayers = 0;
@@ -88,8 +94,12 @@ public class ServerNetworkState extends NetworkState {
 		}
 		
 		gameStarted = true;
+		
+		GameEnv genv = new GameEnv(randomSeed, SystemUtil.bufferToArray(storage),
+				SystemUtil.bufferToArray(resHash));
+		
 		network.sendTCP(new GameStartMessage(playerIds, addrs, ports,
-				randomSeed, resHash, storage));		
+				genv.toByteBuffer()));		
 	}
 	
 	protected int[] generatePlayerIds(int num) {

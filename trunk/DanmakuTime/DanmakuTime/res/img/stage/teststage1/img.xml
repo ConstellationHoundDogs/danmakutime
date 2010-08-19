@@ -1,0 +1,8 @@
+<images>
+  <image filename="enemy.png" width="128" height="64">
+    <subrect id="enemy0" rect=" 0, 0,32,32" />
+    <subrect id="boss0" rect="65,1,62,62" />
+    <subrect id="shotRed" rect=" 1,33,30,30" />
+    <subrect id="shotBlue" rect="33,33,30,30" />
+  </image>
+</images>

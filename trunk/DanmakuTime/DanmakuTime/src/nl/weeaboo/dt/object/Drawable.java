@@ -5,12 +5,15 @@ import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.lua.LuaException;
 import nl.weeaboo.dt.lua.LuaRunState;
+import nl.weeaboo.dt.lua.LuaThreadPool;
+import nl.weeaboo.dt.lua.link.LuaLink;
 import nl.weeaboo.dt.lua.link.LuaLinkedObject;
-import nl.weeaboo.dt.lua.link.LuaObjectLink;
+import nl.weeaboo.dt.lua.link.LuaMethodLink;
 import nl.weeaboo.dt.renderer.BlendMode;
 import nl.weeaboo.dt.renderer.IRenderer;
 import nl.weeaboo.dt.renderer.ITexture;
 
+import org.luaj.vm.LFunction;
 import org.luaj.vm.LNil;
 import org.luaj.vm.LUserData;
 import org.luaj.vm.LValue;
@@ -20,9 +23,9 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 
 	private boolean destroyed;
 	
-	protected LuaObjectLink luaLink;
-	protected LuaObjectLink luaAnimateLink;
-
+	protected LuaMethodLink updateLink;
+	protected LuaThreadPool threadPool;
+	
 	protected IField field;
 	protected ITexture texture;
 	private double x, y;
@@ -66,55 +69,39 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 		}		
 		field.add(this);
 		
-		luaLink = new LuaObjectLink(runState, vm, udata);
-		
-		luaAnimateLink = new LuaObjectLink(runState, vm, udata) {
-			public void init() {
-				inited = true;
-
-				int pushed = pushMethod("animate");
-				finished = (pushed <= 0);
-			}
-		};
+		threadPool = new LuaThreadPool();
+		threadPool.add(updateLink = new LuaMethodLink(runState, vm, udata, "update"));
+		threadPool.add(new LuaMethodLink(runState, vm, udata, "animate"));
+	}
+	
+	@Override
+	public LuaLink addThread(LFunction func, LValue... args) {
+		LuaMethodLink mlink = new LuaMethodLink(updateLink.runState, updateLink.rootVM,
+				getLuaObject(), func, args);
+		threadPool.add(mlink);
+		return mlink;
 	}
 	
 	@Override
 	public boolean destroy() {
 		LValue retval = LNil.NIL;
-		if (luaLink != null) {
+		if (threadPool != null) {
 			try {
-				retval = luaLink.call(true, "onDestroy");
+				retval = updateLink.call(true, "onDestroy");
 			} catch (LuaException e) {
 				DTLog.warning(e);
 			}
 		}
 		if (retval.isNil() || retval.toJavaBoolean()) {		
 			destroyed = true;
+			threadPool.dispose();
 		}
 		return destroyed;
 	}
 	
 	@Override
 	public void update(IInput input) {
-
-		//Update Lua links
-		if (luaLink != null && !luaLink.isFinished()) {
-			try {
-				luaLink.update();
-			} catch (LuaException e) {
-				DTLog.warning(e);
-				luaLink = null;
-			}
-		}
-		
-		if (luaAnimateLink != null && !luaAnimateLink.isFinished()) {
-			try {
-				luaAnimateLink.update();
-			} catch (LuaException e) {
-				DTLog.warning(e);
-				luaAnimateLink = null;
-			}
-		}
+		threadPool.update();
 	}
 	
 	@Override
@@ -145,7 +132,7 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	//Getters
 	@Override
 	public LUserData getLuaObject() {
-		return (luaLink != null ? luaLink.self : null);
+		return updateLink.self;
 	}
 	
 	@Override
@@ -199,9 +186,23 @@ public class Drawable implements IDrawable, LuaLinkedObject {
 	}
 
 	@Override
+	public double getRed() {
+		return ((color>>16) & 0xFF) / 255.0;
+	}
+
+	@Override
+	public double getGreen() {
+		return ((color>>8) & 0xFF) / 255.0;
+	}
+
+	@Override
+	public double getBlue() {
+		return (color & 0xFF) / 255.0;
+	}
+	
+	@Override
 	public double getAlpha() {
-		int ai = (color>>24) & 0xFF;
-		return ai / 255.0;
+		return ((color>>24) & 0xFF) / 255.0;
 	}
 
 	@Override

@@ -1,6 +1,7 @@
 package nl.weeaboo.dt.netplay;
 
 import java.io.IOException;
+import java.math.BigInteger;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -14,7 +15,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import nl.weeaboo.common.SystemUtil;
 import nl.weeaboo.dt.DTLog;
+import nl.weeaboo.dt.GameEnv;
 import nl.weeaboo.dt.input.IInput;
 import nl.weeaboo.dt.input.Input;
 import nl.weeaboo.dt.input.InputBuffer;
@@ -31,8 +34,8 @@ public class ClientNetworkState extends NetworkState {
 	private final int maxLagFrames;
 	private Map<Long, NetworkMessage[]> sendBuffer;
 	
-	public ClientNetworkState(byte resHash[], InputBuffer in, int maxLag) {
-		super(resHash);
+	public ClientNetworkState(GameEnv genv, InputBuffer in, int maxLag) {
+		super(genv.getResourcesHash());
 		
 		inputBuffer = in;
 		inputBuffer.setNumPlayers(2);
@@ -166,16 +169,23 @@ public class ClientNetworkState extends NetworkState {
 		GameStartMessage gm = new GameStartMessage(msg);
 		assertMessageValid(gm);
 
-		randomSeed = gm.getRandomSeed();
+		GameEnv genv;
+		try {
+			genv = gm.getGameEnv();
+		} catch (IOException ioe) {
+			throw new RuntimeException(ioe);
+		}
 		
-		ByteBuffer pd = gm.getPersistentData();
-		storage = ByteBuffer.allocate(pd.remaining());
-		storage.put(pd);
-		storage.rewind();
+		randomSeed = genv.getRandomSeed();
+		storage = ByteBuffer.wrap(genv.getPersistentData());
 		
-		ByteBuffer rh = gm.getResourcesHash();
+		ByteBuffer rh = ByteBuffer.wrap(genv.getResourcesHash());
 		if (resHash.compareTo(rh) != 0) {
 			resHash.rewind();
+			
+			System.out.println("Resources Hash: " + new BigInteger(genv.getResourcesHash()).toString(16));
+			System.out.println("Resources Hash: " + new BigInteger(SystemUtil.bufferToArray(resHash)).toString(16));
+
 			DTLog.showError("Resources hash is different for client and host -- aborting connection attempt.");
 			stop();
 			return;

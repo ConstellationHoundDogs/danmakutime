@@ -25,7 +25,7 @@ public class Notifier {
 	
 	public Notifier(ParagraphRenderer p) {
 		pr = p;
-		pr.setDefaultStyle(new TextStyle("DejaVuSans", Font.BOLD, 18, 9));
+		pr.setDefaultStyle(new TextStyle("DejaVuSans", Font.BOLD, 14, 9));
 		
 		messages = new LinkedList<MessageInfo>();
 	}

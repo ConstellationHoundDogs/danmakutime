@@ -33,3 +33,45 @@ function signum(x)
 	end
 	return 0
 end
+
+function waitForDeath(...)
+    local t = {}
+    for _,v in ipairs(arg) do
+        if type(v) == "table" then
+            append(t, v)
+        elseif v ~= nil then
+            table.insert(t, v)
+        end
+    end
+
+    while true do        
+        local stillAlive = false
+        for _,v in ipairs(t) do
+            if not v:isDestroyed() then
+                stillAlive = true
+                break
+            end
+        end
+        if not stillAlive then
+            break
+        end
+        yield()
+    end
+end
+
+function getClosestPlayer(x, y)
+    local best = nil
+    local bestDistSq = 9999999
+    for _,p in ipairs(players) do
+        if p ~= nil and not p:isDestroyed() then
+            local dx = p:getX() - x
+            local dy = p:getY() - y
+            local distSq = (dx*dx) + (dy*dy)
+            if best == nil or distSq < bestDistSq then
+                best = p
+                bestDistSq = distSq
+            end
+        end    
+    end
+    return best
+end

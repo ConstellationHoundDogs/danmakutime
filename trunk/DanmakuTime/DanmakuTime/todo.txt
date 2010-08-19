@@ -1,48 +1,44 @@
 
-[x] When the player is above the item get line, don't move the items for one
-    frame at a time. They need to be magnetized until the player dies.
-[x] framerate limiter is more accurate
-[x] No vsync in windowed mode. vsync is already forced with Aero, and the
-    double vsync obliterates performance when multiple opengl windows are
-    active.
-[x] Allow for nested img.xml/snd.xml files that are relative to the folders
-    they're in.
-[x] Create a THShot sprite type which includes an owner and gives the owner
-    points upon collision playershot. And dies upon hit
-[x] Read initial keyconfig from a file    
-[x] Synchronize game data and persistent storage before netplay. The bytes for
-    the persistentstorage file can be sent by the server. The resulting
-    persistentstorage object should not record any changes on the clients: the
-    save method must be overridden to do nothing, as well as the default load
-    since that's supposed to be a no-op, but might not be depending on which
-    machine you run it on. The host -should- record any changes as normal.
-[x] Add a second global preferencestore for use by the Lua scripts to store
-    highscores, unlocks, etc.
-[x] Joypad support
-[x] The quit options corrupts applet mode. How do I end the applet gracefully
-[x] How to switch between the number of players? Arcade mode (press fire to
-    join)?    
-[x] Compare res.zip/res folder before allowing netplay. They must be identical.
-
--------------------------------------------------------------------------------
- Release v1.1.0        
--------------------------------------------------------------------------------
-        
-[ ] Activate the netplay through the scripting language instead of from the
+[x] Fullscreen may not work on all systems, therefore prefs.xml must be saved
+    tp the save folder so it may be edited.
+[x] The first call to yield() from a LuaFunctionLink fails.
+[x] F5 doesn't work when the Lua code contains a compile error
+[x] Activate the netplay through the scripting language instead of from the
     beginning? We'd need to take some care to resync the frame variables as
     they could be drastically different for different players. Reset the
     frame to 0 while connecting?
     Upon netplay activation, restart() is called.
-[ ] A damage flash on enemies? Implement by spawning a thread (to avoid
+[x] A damage flash on enemies? Implement by spawning a thread (to avoid
     hindering game creators from overriding either update or animate)?
-    ^ Give sprites their own thread pool?
-[ ] Add an EdgeRule enum {CLAMP, WRAP} to allow the colfield to be use for tube
-    shooters?     
-[ ] The # operator doesn't return the length of a Java array.
-[ ] Try to print a Lua stack trace in case of Lua errors
-[ ] Replays
+[x] Give sprites their own thread pool?
+[x] The # operator doesn't return the length of a Java array.
+    The luaLength operation isn't overridden for LUserData. It should forward
+    to a length method in the metatable? I already support a length operation,
+    I should use the same one for both occasions.
+[x] Replays.
+    Use GameEnv.fromGame() to store the initial state, then store the IInput
+    each frame. I can't save the Lua state, so replays may only be started
+    after calls to Game.restart()? I need to add a startGame() function that
+    works like globalReset(), but somehow allows me to pass the selected
+    players. Always store a replay of a game. The choice to save a replay is
+    up to the script. It can call saveReplay(String name) if/when it wants to
+    save.
+    
+[x] I want to be able to add threads to spellcards. 
+[x] Change all enemies/shots into point items after a spellcard ends
+    I can use a large object with enemyDetectorColType/enemyShotDetectorColType
+    col nodes filling the entire playing field.    
+[x] Add a script textbox to the applet.html file
+
+-------------------------------------------------------------------------------
+ Release v1.2
+-------------------------------------------------------------------------------
+
+[ ] Add a way to stop/control the replay playback    
 [ ] This silliness with the boundingrectradius needs to stop, a proper bounding
     rect is much more accurate. A more limited bounding rect could reduce the
     number of grid cells we sould need to check in ColGrid.
     Or I could intersect the object with the colgrid cells in some way? 
 [ ] 3D backgrounds?
+[ ] Add an EdgeRule enum {CLAMP, WRAP} to allow the colfield to be use for tube
+    shooters?

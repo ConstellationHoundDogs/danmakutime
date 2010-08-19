@@ -39,7 +39,8 @@ end
 
 function Timer:destroy()
 	self.time = 0
-	self.callback = nil
+	self.onTick = nil
+    self.onFinished = nil
 end
 
 -------------------------------------------------------------------------------

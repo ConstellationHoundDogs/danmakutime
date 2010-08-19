@@ -206,7 +206,7 @@ public class CoerceLuaToJava {
 				return o;
 			}
 		}
-		
+				
 		//Try to use a specialized coercion function if one is available
 		Coercion co = (Coercion) COERCIONS.get(c);
 		if (co != null) {
@@ -236,6 +236,11 @@ public class CoerceLuaToJava {
 			}
 		}
 
+		//The java arg is a Lua type
+		if (c.isAssignableFrom(a.getClass())) {
+			return a;
+		}
+		
 		//Special case for nil
 		if (a.isNil()) {
 			return null;

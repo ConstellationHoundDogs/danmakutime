@@ -1,17 +1,30 @@
 package nl.weeaboo.dt.object;
 
-import org.luaj.vm.LUserData;
-
 import nl.weeaboo.dt.field.IField;
 import nl.weeaboo.dt.input.IInput;
+import nl.weeaboo.dt.lua.link.LuaLink;
 import nl.weeaboo.dt.renderer.BlendMode;
 import nl.weeaboo.dt.renderer.IRenderer;
 import nl.weeaboo.dt.renderer.ITexture;
+
+import org.luaj.vm.LFunction;
+import org.luaj.vm.LUserData;
+import org.luaj.vm.LValue;
 
 public interface IDrawable {
 
 	// === Functions ===========================================================
 
+	/**
+	 * Attaches a new thread to this drawable. The thread gets resumed every
+	 * frame while this drawable is not destroyed.
+	 * 
+	 * @param func The Lua function the new thread should call upon creation
+	 * @param args The arguments for the initial call to the function named
+	 *        <code>func</code>
+	 */
+	public LuaLink addThread(LFunction func, LValue... args);
+	
 	/**
 	 * @param input User input (keyboard presses)
 	 */
@@ -99,6 +112,24 @@ public interface IDrawable {
 	 * @return The current blending color
 	 */
 	public int getColor();
+	
+	/**
+	 * @return The red component of the current blending color, between
+	 *         <code>0.0</code> and <code>1.0</code>
+	 */
+	public double getRed();
+
+	/**
+	 * @return The green component of the current blending color, between
+	 *         <code>0.0</code> and <code>1.0</code>
+	 */
+	public double getGreen();
+
+	/**
+	 * @return The blue component of the current blending color, between
+	 *         <code>0.0</code> and <code>1.0</code>
+	 */
+	public double getBlue();
 	
 	/**
 	 * @return The alpha component of the current blending color, between

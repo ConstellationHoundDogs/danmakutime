@@ -16,7 +16,7 @@ public class NonPersistentStorage extends PersistentStorage {
 		throws IOException
 	{
 		NonPersistentStorage s = new NonPersistentStorage(game);
-		s.load(in);
+		s.load0(in);
 		return s;
 	}
 	
@@ -28,6 +28,10 @@ public class NonPersistentStorage extends PersistentStorage {
 	@Override
 	public void load(InputStream in) throws IOException {
 		//Do nothing, immutable		
+	}
+	
+	private void load0(InputStream in) throws IOException {
+		super.load(in);
 	}
 	
 	@Override

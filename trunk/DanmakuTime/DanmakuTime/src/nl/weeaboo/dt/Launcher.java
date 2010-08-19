@@ -2,7 +2,6 @@ package nl.weeaboo.dt;
 
 import java.awt.Container;
 import java.io.File;
-import java.net.InetAddress;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -126,19 +125,10 @@ public class Launcher {
 			
 			Game game = new Game(config, rm, frame);
 			if (hostConfig != null) {
-				game.hostNetGame(hostConfig.tcpPort);
-				InetAddress targetAddr = InetAddress.getLocalHost();
-				if (!hostConfig.externalIP.equalsIgnoreCase("localhost")) {
-					targetAddr = InetAddress.getByName(hostConfig.externalIP);
-				}
-				game.joinNetGame(targetAddr, hostConfig.tcpPort, hostConfig.tcpPort);
+				game.hostNetGame(2, hostConfig.tcpPort);
+				game.joinNetGame(hostConfig.externalIP, hostConfig.tcpPort, hostConfig.tcpPort);
 			} else if (joinConfig != null) {
-				InetAddress targetAddr = InetAddress.getLocalHost();
-				if (!joinConfig.targetIP.equalsIgnoreCase("localhost")) {
-					targetAddr = InetAddress.getByName(joinConfig.targetIP);
-				}
-				game.joinNetGame(targetAddr, joinConfig.targetTCPPort,
-						joinConfig.localUDPPort);
+				game.joinNetGame(joinConfig.targetIP, joinConfig.targetTCPPort, joinConfig.localUDPPort);
 			}			
 			game.start(gameId, container);
 			

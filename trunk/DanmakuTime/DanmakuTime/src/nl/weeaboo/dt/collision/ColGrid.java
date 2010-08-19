@@ -39,13 +39,14 @@ public class ColGrid {
 			return;
 		}
 		
+		double halfGridSize = gridSize * .5;
 		double centerX = node.getCenterX();
 		double centerY = node.getCenterY();
-		int minX = Math.max(0, toGridCoordX(centerX - r0));
-		int maxX = Math.min(cellsW-1, toGridCoordX(centerX + r0));
-		int minY = Math.max(0, toGridCoordY(centerY - r0));
-		int maxY = Math.min(cellsH-1, toGridCoordY(centerY + r0));
-
+		int minX = Math.max(0, toGridCoordX(centerX - r0 - halfGridSize));
+		int maxX = Math.min(cellsW-1, toGridCoordX(centerX + r0 + halfGridSize));
+		int minY = Math.max(0, toGridCoordY(centerY - r0 - halfGridSize));
+		int maxY = Math.min(cellsH-1, toGridCoordY(centerY + r0 + halfGridSize));
+		
 		int cellX = toGridCoordX(centerX);
 		int cellY = toGridCoordY(centerY);
 		
@@ -74,7 +75,7 @@ public class ColGrid {
 			}
 			
 			//Large <-> Small
-			t1 = 0;			
+			t1 = 0;
 		} else {
 			//Small <-> Small
 			t1 = t0;

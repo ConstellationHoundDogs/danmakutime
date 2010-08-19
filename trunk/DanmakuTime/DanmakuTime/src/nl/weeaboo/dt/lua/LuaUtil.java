@@ -33,22 +33,25 @@ public class LuaUtil {
 		//Custom yield function taking a wait time
 		globals.put("yield", new LFunction() {
 			public int invoke(LuaState vm) {
-				LuaLink link = rs.getCurrentLink();
+				LuaLink link = rs.getCurrentLink();				
 				if (link != null && vm.gettop() >= 1) {
 					link.setWait(vm.tointeger(1));
 				}
+				
+				vm.resettop();
 				
 				LThread r = LThread.getRunning();
 				if (r == null) {
 					vm.error("main thread can't yield");
 					return 0;
 				}
-				r.yield(); 
+				r.yield();
+				
 				return -1;
 			}
 			
 			public boolean luaStackCall(LuaState vm) {
-				super.luaStackCall(vm);
+				vm.invokeJavaFunction(this);
 				return true;
 			}
 		});	

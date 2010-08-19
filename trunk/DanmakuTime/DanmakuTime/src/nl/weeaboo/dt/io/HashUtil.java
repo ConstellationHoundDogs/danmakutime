@@ -30,6 +30,11 @@ public class HashUtil {
 		
 		Set<String> files = game.getFolderContents("/");
 		for (String filename : files) {
+			if (filename.startsWith("save")) {
+				//Ignore
+				continue;
+			}
+			
 			String fext = FileUtil.getExtension(filename).toLowerCase();			
 			if (textFileExts.contains(fext)) {
 				hashContents(game, filename, md);
