@@ -262,8 +262,8 @@ function pauseMenu()
 	local confirm = false
 	
     local playerLives = 0
-    for _,v in ipairs(players) do
-        playerLives = playerLives + v.lives
+    for _,p in ipairs(players) do
+        playerLives = playerLives + math.max(0, p.lives)
     end
     
 	if playerLives > 0 then

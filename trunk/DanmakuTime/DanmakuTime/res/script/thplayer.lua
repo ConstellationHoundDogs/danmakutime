@@ -278,7 +278,13 @@ function THPlayer:onDestroy()
 	end
 	
 	if self.lives <= 0 then
-		Timer.new(1, doPause)
+        local totalLives = 0
+        for _,p in ipairs(players) do
+            totalLives = totalLives + math.max(0, p.lives)
+        end
+        if totalLives <= 0 then
+            Timer.new(1, doPause)
+        end
 		return true
 	end
 	

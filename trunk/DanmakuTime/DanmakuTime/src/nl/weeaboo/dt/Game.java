@@ -63,6 +63,7 @@ import nl.weeaboo.dt.replay.Replay;
 import nl.weeaboo.dt.replay.ReplayPlayback;
 import nl.weeaboo.game.GameBase;
 import nl.weeaboo.game.ResourceManager;
+import nl.weeaboo.game.debug.SystemInfo;
 import nl.weeaboo.game.gl.GLManager;
 import nl.weeaboo.game.gl.Screenshot;
 import nl.weeaboo.game.gl.ScreenshotManager;
@@ -93,6 +94,7 @@ public class Game extends GameBase {
 	private ITextureStore texStore;	
 	private ISoundEngine soundEngine;
 	
+	private SystemInfo sysInfo;
 	private LuaRunState luaRunState;
 	private boolean paused, pauseRequest;
 	private LuaLink pauseThread;
@@ -173,7 +175,7 @@ public class Game extends GameBase {
 		
 		OutputStream err = null;
 		try {
-			rm.getOutputStream("save/err.txt");
+			err = rm.getOutputStream("save/err.txt");
 		} catch (IOException e) {
 			DTLog.warning(e);
 		}
@@ -557,7 +559,24 @@ public class Game extends GameBase {
 		}
 	}
 	
-	public void draw(GLManager glm) {	
+	public void draw(GLManager glm) {
+		if (sysInfo == null) {
+			sysInfo = SystemInfo.getInstance();
+			sysInfo.initGLInfo(glm);
+			
+			OutputStream out = null;
+			try {
+				out = getOutputStream("save/sysinfo.txt");
+				sysInfo.write(out);
+			} catch (IOException ioe) {
+				DTLog.warning(ioe);
+			} finally {
+				try {
+					if (out != null) out.close();
+				} catch (IOException ioe) { }
+			}
+		}
+		
 		int w = getWidth();
 		int h = getHeight();
 		
