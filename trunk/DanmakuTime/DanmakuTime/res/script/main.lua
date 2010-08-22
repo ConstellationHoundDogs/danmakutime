@@ -73,7 +73,7 @@ function initFields()
 end
 
 function start()    
-	--soundEngine:setBGM("bgm/bgm01.ogg");
+	soundEngine:setBGM("bgm/bgm01.ogg");
 
 	setBackground("screen-border.png", 30)
 	buildLevel()

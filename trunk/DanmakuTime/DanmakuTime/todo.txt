@@ -37,7 +37,7 @@
 [x] Write SystemInfo results to file
 [x] Add a way to use left-control and right-control as special keys. Maybe I
     can add special cases to UserInput for Ctrl, Shift, Alt.
-[?] When any player dies, the restart screen pops up. It should only appear
+[x] When any player dies, the restart screen pops up. It should only appear
     when all players are out of lives.
 
 -------------------------------------------------------------------------------
