@@ -1,0 +1,54 @@
+
+[x] Fullscreen may not work on all systems, therefore prefs.xml must be saved
+    tp the save folder so it may be edited.
+[x] The first call to yield() from a LuaFunctionLink fails.
+[x] F5 doesn't work when the Lua code contains a compile error
+[x] Activate the netplay through the scripting language instead of from the
+    beginning? We'd need to take some care to resync the frame variables as
+    they could be drastically different for different players. Reset the
+    frame to 0 while connecting?
+    Upon netplay activation, restart() is called.
+[x] A damage flash on enemies? Implement by spawning a thread (to avoid
+    hindering game creators from overriding either update or animate)?
+[x] Give sprites their own thread pool?
+[x] The # operator doesn't return the length of a Java array.
+    The luaLength operation isn't overridden for LUserData. It should forward
+    to a length method in the metatable? I already support a length operation,
+    I should use the same one for both occasions.
+[x] Replays.
+    Use GameEnv.fromGame() to store the initial state, then store the IInput
+    each frame. I can't save the Lua state, so replays may only be started
+    after calls to Game.restart()? I need to add a startGame() function that
+    works like globalReset(), but somehow allows me to pass the selected
+    players. Always store a replay of a game. The choice to save a replay is
+    up to the script. It can call saveReplay(String name) if/when it wants to
+    save.
+    
+[x] I want to be able to add threads to spellcards. 
+[x] Change all enemies/shots into point items after a spellcard ends
+    I can use a large object with enemyDetectorColType/enemyShotDetectorColType
+    col nodes filling the entire playing field.    
+[x] Add a script textbox to the applet.html file
+
+-------------------------------------------------------------------------------
+ Release v1.2
+-------------------------------------------------------------------------------
+
+[x] Write SystemInfo results to file
+[x] Add a way to use left-control and right-control as special keys. Maybe I
+    can add special cases to UserInput for Ctrl, Shift, Alt.
+[x] When any player dies, the restart screen pops up. It should only appear
+    when all players are out of lives.
+
+-------------------------------------------------------------------------------
+ Release v1.2.1
+-------------------------------------------------------------------------------
+
+[ ] Add a way to stop/control the replay playback    
+[ ] This silliness with the boundingrectradius needs to stop, a proper bounding
+    rect is much more accurate. A more limited bounding rect could reduce the
+    number of grid cells we sould need to check in ColGrid.
+    Or I could intersect the object with the colgrid cells in some way? 
+[ ] 3D backgrounds?
+[ ] Add an EdgeRule enum {CLAMP, WRAP} to allow the colfield to be use for tube
+    shooters?

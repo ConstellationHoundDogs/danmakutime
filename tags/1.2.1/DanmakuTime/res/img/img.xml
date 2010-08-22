@@ -1,0 +1,34 @@
+<images>
+  <image filename="test.png" width="128" height="64">
+    <subrect id="g0" rect=" 8, 8,16,16" />
+    <subrect id="g1" rect="40, 8,16,16" />
+    <subrect id="laser" rect="104, 8,16,16" />
+  </image>
+  <image filename="focus.png" width="128" height="64">
+    <subrect id="upper" rect=" 0, 0,64,64" />
+    <subrect id="lower" rect="64, 0,64,64" />
+  </image>
+  <image filename="explosion.png" width="64" height="64">
+    <subrect id="e0" rect=" 0, 0, 32, 32" />
+    <subrect id="e1" rect="32, 0, 32, 32" />
+    <subrect id="e2" rect=" 0,32, 32, 32" />
+    <subrect id="e3" rect="32,32, 32, 32" />
+  </image>
+  <image filename="items.png" width="64" height="64">
+    <subrect id="null"         rect=" 0, 0,16,16" />
+    <subrect id="pointSmall"   rect="16, 0,16,16" />
+    <subrect id="pointLarge"   rect="32, 0,16,16" />
+    <subrect id="powerSmall"   rect="48, 0,16,16" />
+    <subrect id="powerLarge"   rect=" 0,16,16,16" />
+    <subrect id="specialSmall" rect="16,16,16,16" />
+    <subrect id="specialLarge" rect="32,16,16,16" />
+    <subrect id="life"         rect="48,16,16,16" />
+    <subrect id="bomb"         rect=" 0,32,16,16" />
+    <subrect id="fullRestore"  rect="16,32,16,16" />
+    <subrect id="magnet"       rect="32,32,16,16" />
+  </image>
+  <image filename="osd.png" width="256" height="256">
+    <subrect id="lifebar" rect="1,4,1,8" />
+    <subrect id="bossIndicator" rect="16,0,32,16" />
+  </image>
+</images>
