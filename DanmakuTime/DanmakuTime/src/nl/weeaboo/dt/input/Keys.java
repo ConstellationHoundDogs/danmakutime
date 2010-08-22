@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import nl.weeaboo.dt.DTLog;
+import nl.weeaboo.game.input.UserInput;
 
 public class Keys implements Iterable<Entry<String, Integer>> {
 
@@ -16,6 +17,9 @@ public class Keys implements Iterable<Entry<String, Integer>> {
 	public Keys(Class<?> c) {
 		//Add keyboard keys
 		keys = getKeyCodeConstants(KeyEvent.class);
+		
+		//Add special keys
+		keys.putAll(getKeyCodeConstants(UserInput.class));
 		
 		//Add joypad keys
 		for (int j = 1; j <= JoyKey.MAX_JOYPADS; j++) {

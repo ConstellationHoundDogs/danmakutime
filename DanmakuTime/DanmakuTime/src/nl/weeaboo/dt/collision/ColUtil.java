@@ -10,7 +10,7 @@ public final class ColUtil {
 	public static boolean intersectCircleCircle(CircleColNode c0, CircleColNode c1) {
 		double dx = c1.getCenterX() - c0.getCenterX();
 		double dy = c1.getCenterY() - c0.getCenterY();
-		double r = c0.getBoundingCircleRadius() + c1.getBoundingCircleRadius();
+		double r = c0.getRadius() + c1.getRadius();
 		
 		return (dx*dx) + (dy*dy) <= (r*r);
 	}
@@ -18,13 +18,13 @@ public final class ColUtil {
 	public static boolean intersectCircleLineSeg(CircleColNode c0, LineSegColNode c1) {
 		double distSq = Line2D.ptSegDistSq(c1.getX0(), c1.getY0(), c1.getX1(), c1.getY1(),
 				c0.getCenterX(), c0.getCenterY());
-		double r = c0.getBoundingCircleRadius() + c1.getThickness();
+		double r = c0.getRadius() + c1.getThickness();
 		return distSq <= (r*r);
 	}
 
 	public static boolean intersectCircleRect(CircleColNode c0, RectColNode c1) {
 		return intersectCircleRect(c0.getCenterX(), c0.getCenterY(),
-				c0.getBoundingCircleRadius(), c1);
+				c0.getRadius(), c1);
 	}
 	
 	private static boolean intersectCircleRect(double x, double y, double r, RectColNode c1) {

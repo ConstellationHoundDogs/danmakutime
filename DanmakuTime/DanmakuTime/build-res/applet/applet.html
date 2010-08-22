@@ -46,7 +46,7 @@
                  value="http://download.java.net/media/jogl/jsr-231-2.x-webstart/jogl-core.jnlp" />
           <param name="jnlp_href" value="applet.jnlp" />
              
-          <param name="java_arguments" value="${jvm-args} -Djnlp.packEnabled=true" />
+          <param name="java_arguments" value="-Djnlp.packEnabled=true ${jvm-args}" />
           <param name="gameId" value="${project-name}" />
           <param name="args" value="${program-args}" />
         </applet>

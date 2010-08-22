@@ -20,13 +20,16 @@ public class CircleColNode extends AbstractColNode {
 		}
 		return ColUtil.intersectUndefined(this, c);
 	}
-
-	@Override
-	public double getBoundingCircleRadius() {
+	
+	//Getters
+	public double getRadius() {
 		return radius;
 	}
 	
-	//Getters
+	@Override
+	public double getBoundingCircleRadius() {
+		return getRadius();
+	}
 	
 	//Setters
 	
