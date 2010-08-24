@@ -2,7 +2,7 @@
 
 = Introduction =
 
-Danmaku Time exposes a straightforward scripting interface to [[http://en.wikipedia.org/wiki/Lua_%28programming_language%29 Lua]]. Other engines often use custom scripting languages with sparse documentation, but Lua tutorials and examples can easily be found all over the web. Lua is also a relatively easy language to learn.
+Danmaku Time exposes a straightforward scripting interface to [http://en.wikipedia.org/wiki/Lua_%28programming_language%29 Lua]. Other engines often use custom scripting languages with sparse documentation, but Lua tutorials and examples can easily be found all over the web. Lua is also a relatively easy language to learn.
 
 The engine is packaged with a demo script taking care of common tasks (character selection, setting up collision detection, backgrounds, on-screen display) allowing scripters to start coding shot patterns immediately.
 
